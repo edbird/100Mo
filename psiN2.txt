@@ -1,0 +1,3 @@
+ The phase space integral [MeV] = 
+
+    0.314787E-46
