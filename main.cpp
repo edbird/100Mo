@@ -268,13 +268,13 @@ int main()
     TH2D *h_data_0 = new TH2D("h_data_0", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
     TH2D *h_data_1 = new TH2D("h_data_1", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
     TH2D *h_data_2 = new TH2D("h_data_2", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
-    TH2D *h_ratio = new TH2D("h_ratio", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
+    //TH2D *h_ratio = new TH2D("h_ratio", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
     //h_nEqNull->SetStats(0);
     //h_nEqTwo->SetStats(0);
     h_data_0->SetStats(0);
     h_data_1->SetStats(0);
     h_data_2->SetStats(0);
-    h_ratio->SetStats(0);
+    //h_ratio->SetStats(0);
 
     for(std::size_t i{0}; i < dimension_xy; ++ i)
     {
@@ -332,13 +332,15 @@ int main()
     c_data_2->SaveAs("c_data_2.C");
     delete c_data_2;
 
+    /*
     TCanvas *c_ratio = new TCanvas("c_ratio", "", 4000, 3000);
     h_ratio->Draw("colz");
     c_ratio->SaveAs("c_ratio.png");
     c_ratio->SaveAs("c_ratio.pdf");
     c_ratio->SaveAs("c_ratio.C");
     delete c_ratio;
-    
+    */
+
     // epsilon_31 = 0
     TH1D *h_single_electron_0 = h_data_0->ProjectionX("h_single_electron_0");
     h_single_electron_0->SetStats(0);
