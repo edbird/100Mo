@@ -94,6 +94,10 @@ void read_data(const char* buffer, std::vector<std::vector<double>>& data)
 int main()
 {
 
+    ////////////////////////////////////////////////////////////////////////////
+    // READ DATA IN FROM FILES
+    ////////////////////////////////////////////////////////////////////////////
+
     // ifstream objects
     std::ifstream ifs_nEqNull("nEqNull.dat", std::ios::ate);
     //std::ifstream ifs_nEqNull("test.dat", std::ios::ate);
@@ -162,6 +166,73 @@ int main()
     //std::cout << buf_nEqNull << std::endl;
     //std::cout << buf_nEqTwo << std::endl;
 
+    ////////////////////////////////////////////////////////////////////////////
+    // CREATE INTERMEDIATE DATA
+    ////////////////////////////////////////////////////////////////////////////
+
+    // create data array for "complete data"
+    // (with phase space factors)
+    
+    std::vector<std::vector<double>> data_0;
+    data_0.resize(data_nEqNull.size());
+    for(std::size_t i{0}; i < data_0.size(); ++ i)
+    {
+        data_0[i].resize(data_nEqNull[i].size());
+    }
+
+    std::vector<std::vector<double>> data_1;
+    data_1.resize(data_nEqNull.size());
+    for(std::size_t i{0}; i < data_1.size(); ++ i)
+    {
+        data_1[i].resize(data_nEqNull[i].size());
+    }
+
+    std::vector<std::vector<double>> data_2;
+    data_2.resize(data_nEqNull.size());
+    for(std::size_t i{0}; i < data_2.size(); ++ i)
+    {
+        data_2[i].resize(data_nEqNull[i].size());
+    }
+
+    // epsilon_31 = 0.0
+    const double epsilon_31_0{0.0};
+    for(std::size_t i{0}; i < data_0.size(); ++ i)
+    {
+        for(std::size_t j{0}; j < 2; ++ j)
+        {
+            data_0[i][j] = data_nEqNull[i][j];
+        }
+        double phase_space_factor{1.0 / (psiN0 + epsilon_31_0 * psiN2)};
+        data_0[i][2] = phase_space_factor * (data_nEqNull[i][2] + epsilon_31_0 * data_nEqTwo[i][2]);
+    }
+    
+    // epsilon_31 = 0.4
+    const double epsilon_31_1{0.4};
+    for(std::size_t i{0}; i < data_1.size(); ++ i)
+    {
+        for(std::size_t j{0}; j < 2; ++ j)
+        {
+            data_1[i][j] = data_nEqNull[i][j];
+        }
+        double phase_space_factor{1.0 / (psiN0 + epsilon_31_1 * psiN2)};
+        data_1[i][2] = phase_space_factor * (data_nEqNull[i][2] + epsilon_31_1 * data_nEqTwo[i][2]);
+    }
+
+    // epsilon_31 = 0.8
+    const double epsilon_31_2{0.8};
+    for(std::size_t i{0}; i < data_2.size(); ++ i)
+    {
+        for(std::size_t j{0}; j < 2; ++ j)
+        {
+            data_2[i][j] = data_nEqNull[i][j];
+        }
+        double phase_space_factor{1.0 / (psiN0 + epsilon_31_2 * psiN2)};
+        data_2[i][2] = phase_space_factor * (data_nEqNull[i][2] + epsilon_31_2 * data_nEqTwo[i][2]);
+    }
+
+
+    // create data array for ratio
+    /*
     std::vector<std::vector<double>> ratio;
     ratio.resize(data_nEqNull.size());
     for(std::size_t i{0}; i < ratio.size(); ++ i)
@@ -169,49 +240,62 @@ int main()
         ratio[i].resize(data_nEqNull[i].size());
     }
 
-    const double epsilon_31{0.8};
+    // epsilon_31 = 0.8
+    const double epsilon_31_2{0.8};
     for(std::size_t i{0}; i < ratio.size(); ++ i)
     {
-        for(std::size_t j{0}; j < 2 /*ratio[i].size()*/; ++ j)
+        for(std::size_t j{0}; j < 2 /*ratio[i].size()*//*; ++ j)
         {
             ratio[i][j] = data_nEqNull[i][j];
         }
-        ratio[i][2] = (data_nEqNull[i][2] + epsilon_31 * data_nEqTwo[i][2]) / data_nEqNull[i][2];
+        ratio[i][2] = (psiN0 / (psiN0 + epsilon_31 * psiN2)) * ((data_nEqNull[i][2] + epsilon_31 * data_nEqTwo[i][2]) / data_nEqNull[i][2]);
     }
     std::cout << "Finished constructing ratio" << std::endl;
+    */
+
+    std::cout << "Finished constructing intermediate data" << std::endl;
 
     //std::cout << ratio << std::endl;
 
+    ////////////////////////////////////////////////////////////////////////////
+    // CREATE OUTPUT HISTOGRAMS
+    ////////////////////////////////////////////////////////////////////////////
+
     Int_t dimension_xy{1001};
-    TH2D *h_nEqNull = new TH2D("h_nEqNull", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
-    TH2D *h_nEqTwo = new TH2D("h_nEqTwo", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
+    // don't plot raw data
+    //TH2D *h_nEqNull = new TH2D("h_nEqNull", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
+    //TH2D *h_nEqTwo = new TH2D("h_nEqTwo", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
+    TH2D *h_data_0 = new TH2D("h_data_0", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
+    TH2D *h_data_1 = new TH2D("h_data_1", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
+    TH2D *h_data_2 = new TH2D("h_data_2", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
     TH2D *h_ratio = new TH2D("h_ratio", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
+    //h_nEqNull->SetStats(0);
+    //h_nEqTwo->SetStats(0);
+    h_data_0->SetStats(0);
+    h_data_1->SetStats(0);
+    h_data_2->SetStats(0);
     h_ratio->SetStats(0);
-    h_nEqNull->SetStats(0);
-    h_nEqTwo->SetStats(0);
 
     for(std::size_t i{0}; i < dimension_xy; ++ i)
     {
         for(std::size_t j{0}; j < dimension_xy; ++ j)
         {
-            h_nEqNull->SetBinContent(i, j, data_nEqNull.at(i * dimension_xy + j)[2]);
-            h_nEqTwo->SetBinContent(i, j, data_nEqTwo.at(i * dimension_xy + j)[2]);
+            //h_nEqNull->SetBinContent(i, j, data_nEqNull.at(i * dimension_xy + j)[2]);
+            //h_nEqTwo->SetBinContent(i, j, data_nEqTwo.at(i * dimension_xy + j)[2]);
+            h_data_0->SetBinContent(i, j, data_0.at(i * dimension_xy + j)[2]);
+            h_data_1->SetBinContent(i, j, data_1.at(i * dimension_xy + j)[2]);
+            h_data_2->SetBinContent(i, j, data_2.at(i * dimension_xy + j)[2]);
             //if(i < dimension_xy - j)
             if(i + j < dimension_xy - 1)
             {
-                h_ratio->SetBinContent(i, j, ratio.at(i * dimension_xy + j)[2]);
+                // TODO: move above lines to inside this if
+                //h_ratio->SetBinContent(i, j, ratio.at(i * dimension_xy + j)[2]);
             }
         }
     }
-    std::cout << "Finished constructing histogram" << std::endl;
+    std::cout << "Finished constructing histograms" << std::endl;
 
-    TCanvas *c_ratio = new TCanvas("c_ratio", "", 4000, 3000);
-    h_ratio->Draw("colz");
-    c_ratio->SaveAs("c_ratio.png");
-    c_ratio->SaveAs("c_ratio.pdf");
-    c_ratio->SaveAs("c_ratio.C");
-    delete c_ratio;
-    
+    /*
     TCanvas *c_nEqNull = new TCanvas("c_nEqNull", "", 4000, 3000);
     h_nEqNull->Draw("colz");
     c_nEqNull->SaveAs("c_nEqNull.png");
@@ -225,6 +309,83 @@ int main()
     c_nEqTwo->SaveAs("c_nEqTwo.pdf");
     c_nEqTwo->SaveAs("c_nEqTwo.C");
     delete c_nEqTwo;
+    */
+
+    TCanvas *c_data_0 = new TCanvas("c_data_0", "", 4000, 3000);
+    h_data_0->Draw("colz");
+    c_data_0->SaveAs("c_data_0.png");
+    c_data_0->SaveAs("c_data_0.pdf");
+    c_data_0->SaveAs("c_data_0.C");
+    delete c_data_0;
+
+    TCanvas *c_data_1 = new TCanvas("c_data_1", "", 4000, 3000);
+    h_data_1->Draw("colz");
+    c_data_1->SaveAs("c_data_1.png");
+    c_data_1->SaveAs("c_data_1.pdf");
+    c_data_1->SaveAs("c_data_1.C");
+    delete c_data_1;
+
+    TCanvas *c_data_2 = new TCanvas("c_data_2", "", 4000, 3000);
+    h_data_2->Draw("colz");
+    c_data_2->SaveAs("c_data_2.png");
+    c_data_2->SaveAs("c_data_2.pdf");
+    c_data_2->SaveAs("c_data_2.C");
+    delete c_data_2;
+
+    TCanvas *c_ratio = new TCanvas("c_ratio", "", 4000, 3000);
+    h_ratio->Draw("colz");
+    c_ratio->SaveAs("c_ratio.png");
+    c_ratio->SaveAs("c_ratio.pdf");
+    c_ratio->SaveAs("c_ratio.C");
+    delete c_ratio;
+    
+    // epsilon_31 = 0
+    TH1D *h_single_electron_0 = h_data_0->ProjectionX("h_single_electron_0");
+    h_single_electron_0->SetStats(0);
+    
+    // epsilon_31 = 0.4
+    TH1D *h_single_electron_1 = h_data_1->ProjectionX("h_single_electron_1");
+    h_single_electron_1->SetStats(0);
+    
+    // epsilon_31 = 0.8
+    TH1D *h_single_electron_2 = h_data_2->ProjectionX("h_single_electron_2");
+    h_single_electron_2->SetStats(0);
+
+    /*
+    TH1D *h_single_electron_0 = new TH1D("h_single_electron_0", "", dimension_xy, 0.0, 1.0);
+    h_single_electron_0->SetStats(0);
+
+    for(Int_t i{1}; i <= h_ratio->GetNbinsX(); ++ i)
+    {
+        Double_t content{0.0};
+        for(Int_t j{1}; j <= h_ratio->GetNbinsY(); ++ j)
+        {
+            content += h_ratio->GetBinContent(i, j);
+        }
+        h_single_electron_0->SetBinContent(i, content);
+    }
+    */
+
+    TCanvas *c_single_electron_0 = new TCanvas("c_single_electron_0", "", 4000, 3000);
+    h_single_electron_0->Draw();
+    c_single_electron_0->SaveAs("c_single_electron_0.png");
+    c_single_electron_0->SaveAs("c_single_electron_0.pdf");
+    c_single_electron_0->SaveAs("c_single_electron_0.C");
+    delete c_single_electron_0;
+    
+    TCanvas *c_single_electron_1 = new TCanvas("c_single_electron_1", "", 4000, 3000);
+    h_single_electron_1->Draw();
+    c_single_electron_1->SaveAs("c_single_electron_1.png");
+    c_single_electron_1->SaveAs("c_single_electron_1.pdf");
+    c_single_electron_1->SaveAs("c_single_electron_1.C");
+    delete c_single_electron_1;
+    
+    TCanvas *c_single_electron_2 = new TCanvas("c_single_electron_2", "", 4000, 3000);
+    h_single_electron_2->Draw();
+    c_single_electron_2->SaveAs("c_single_electron_2.png");
+    c_single_electron_2->SaveAs("c_single_electron_2.pdf");
+    c_single_electron_2->SaveAs("c_single_electron_2.C");
+    delete c_single_electron_2;
 
     return 0;
 
