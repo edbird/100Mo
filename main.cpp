@@ -91,6 +91,43 @@ void read_data(const char* buffer, std::vector<std::vector<double>>& data)
 
 }
 
+// electron energies: T1, T2 (in units of Q value)
+// theory parameter: epsilon
+// data: G0, G2 (units of Q value)
+Double_t ReWeight(const Double_t T1, const Double_t T2, const Double_t epsilon,
+                  const std::vector<std::vector<double>>& data_nEqNull,
+                  const std::vector<std::vector<double>>& data_nEqTwo)
+{
+
+    /*
+    std::size_t l{data_nEqNull.size()};
+    Int_t sub_length{1001};
+
+    // "primary" index
+    Int_t index1{(Int_t)(Double_t)(sub_length) * T1}; index1 *= sub_length;
+    Int_t index3{(Int_t)(Double_t)(sub_length) * T2};
+    //Int_t index1{(Int_t)((Double_t)(sub_length * sub_length) * T1 + (Double_t)(sub_length) * T2)};
+    Int_t index2{index1 + 1};
+    //Int_t index3{index1 + sub_length};
+    //Int_t index4{index1 + sub_length + 1};
+    Int_t index4{index3 + 1};
+
+    Double_t energy1{data_nEqNull.at(index1).at(0)};
+    Double_t energy2{data_nEqNull.at(index2).at(1)};
+    Double_t energy3{data_nEqNull.at(index3).at(0)};
+    Double_t energy4{data_nEqNull.at(index4).at(1)};
+
+    Double_t probability1{data_nEqNull.at(index1).at(2)};
+    Double_t probability2{data_nEqNull.at(index2).at(2)};
+    Double_t probability3{data_nEqNull.at(index3).at(2)};
+    Double_t probability4{data_nEqNull.at(index4).at(2)};
+    */
+
+    std::cout << "T1=" << T1 << " energy1=" << energy1 << " energy2=" << energy2 << " energy3=" << energy3 << " energy4=" << energy4 << std::endl;
+    std::cout << "T1=" << T1 << " probability1=" << probability1 << " probability2=" << probability2 << " probability3=" << probability3 << " probability4=" << probability4 << std::endl;
+
+}
+
 int main()
 {
 
@@ -200,7 +237,7 @@ int main()
     {
         for(std::size_t j{0}; j < 2; ++ j)
         {
-            data_0[i][j] = data_nEqNull[i][j];
+            data_0[i][j] = data_nEqNull[i][j]; // NOTE: this is not used
         }
         double phase_space_factor{1.0 / (psiN0 + epsilon_31_0 * psiN2)};
         data_0[i][2] = phase_space_factor * (data_nEqNull[i][2] + epsilon_31_0 * data_nEqTwo[i][2]);
@@ -212,7 +249,7 @@ int main()
     {
         for(std::size_t j{0}; j < 2; ++ j)
         {
-            data_1[i][j] = data_nEqNull[i][j];
+            data_1[i][j] = data_nEqNull[i][j]; // NOTE: this is not used
         }
         double phase_space_factor{1.0 / (psiN0 + epsilon_31_1 * psiN2)};
         data_1[i][2] = phase_space_factor * (data_nEqNull[i][2] + epsilon_31_1 * data_nEqTwo[i][2]);
@@ -224,7 +261,7 @@ int main()
     {
         for(std::size_t j{0}; j < 2; ++ j)
         {
-            data_2[i][j] = data_nEqNull[i][j];
+            data_2[i][j] = data_nEqNull[i][j]; // NOTE: this is not used
         }
         double phase_space_factor{1.0 / (psiN0 + epsilon_31_2 * psiN2)};
         data_2[i][2] = phase_space_factor * (data_nEqNull[i][2] + epsilon_31_2 * data_nEqTwo[i][2]);
@@ -310,27 +347,32 @@ int main()
     c_nEqTwo->SaveAs("c_nEqTwo.C");
     delete c_nEqTwo;
     */
+    
+    #define PRINT_1D_CANVAS 0
+    #if PRINT_1D_CANVAS
 
-    TCanvas *c_data_0 = new TCanvas("c_data_0", "", 4000, 3000);
-    h_data_0->Draw("colz");
-    c_data_0->SaveAs("c_data_0.png");
-    c_data_0->SaveAs("c_data_0.pdf");
-    c_data_0->SaveAs("c_data_0.C");
-    delete c_data_0;
+        TCanvas *c_data_0 = new TCanvas("c_data_0", "", 4000, 3000);
+        h_data_0->Draw("colz");
+        c_data_0->SaveAs("c_data_0.png");
+        c_data_0->SaveAs("c_data_0.pdf");
+        c_data_0->SaveAs("c_data_0.C");
+        delete c_data_0;
 
-    TCanvas *c_data_1 = new TCanvas("c_data_1", "", 4000, 3000);
-    h_data_1->Draw("colz");
-    c_data_1->SaveAs("c_data_1.png");
-    c_data_1->SaveAs("c_data_1.pdf");
-    c_data_1->SaveAs("c_data_1.C");
-    delete c_data_1;
+        TCanvas *c_data_1 = new TCanvas("c_data_1", "", 4000, 3000);
+        h_data_1->Draw("colz");
+        c_data_1->SaveAs("c_data_1.png");
+        c_data_1->SaveAs("c_data_1.pdf");
+        c_data_1->SaveAs("c_data_1.C");
+        delete c_data_1;
 
-    TCanvas *c_data_2 = new TCanvas("c_data_2", "", 4000, 3000);
-    h_data_2->Draw("colz");
-    c_data_2->SaveAs("c_data_2.png");
-    c_data_2->SaveAs("c_data_2.pdf");
-    c_data_2->SaveAs("c_data_2.C");
-    delete c_data_2;
+        TCanvas *c_data_2 = new TCanvas("c_data_2", "", 4000, 3000);
+        h_data_2->Draw("colz");
+        c_data_2->SaveAs("c_data_2.png");
+        c_data_2->SaveAs("c_data_2.pdf");
+        c_data_2->SaveAs("c_data_2.C");
+        delete c_data_2;
+
+    #endif
 
     /*
     TCanvas *c_ratio = new TCanvas("c_ratio", "", 4000, 3000);
@@ -343,15 +385,39 @@ int main()
 
     // epsilon_31 = 0
     TH1D *h_single_electron_0 = h_data_0->ProjectionX("h_single_electron_0");
+    h_single_electron_0->Scale(1.0 / (Double_t)dimension_xy);
+    /*for(Int_t i{1}; i <= h_single_electron_0->GetNbinsX(); ++ i)
+    {
+        Double_t F{1.0 / (Double_t)dimension_xy};
+        h_single_electron_0->SetBinContent(i, F * h_single_electron_0->GetBinContent(i));
+    }*/
     h_single_electron_0->SetStats(0);
+    h_single_electron_0->SetLineColor(2);
+    h_single_electron_0->SetMarkerColor(2);
     
     // epsilon_31 = 0.4
     TH1D *h_single_electron_1 = h_data_1->ProjectionX("h_single_electron_1");
+    h_single_electron_1->Scale(1.0 / (Double_t)dimension_xy);
+    /*for(Int_t i{1}; i <= h_single_electron_1->GetNbinsX(); ++ i)
+    {
+        Double_t F{1.0 / (Double_t)dimension_xy};
+        h_single_electron_1->SetBinContent(i, F * h_single_electron_1->GetBinContent(i));
+    }*/
     h_single_electron_1->SetStats(0);
+    h_single_electron_1->SetLineColor(3);
+    h_single_electron_0->SetMarkerColor(2);
     
     // epsilon_31 = 0.8
     TH1D *h_single_electron_2 = h_data_2->ProjectionX("h_single_electron_2");
+    h_single_electron_2->Scale(1.0 / (Double_t)dimension_xy);
+    /*for(Int_t i{1}; i <= h_single_electron_2->GetNbinsX(); ++ i)
+    {
+        Double_t F{1.0 / (Double_t)dimension_xy};
+        h_single_electron_2->SetBinContent(i, F * h_single_electron_2->GetBinContent(i));
+    }*/
     h_single_electron_2->SetStats(0);
+    h_single_electron_2->SetLineColor(4);
+    h_single_electron_0->SetMarkerColor(4);
 
     /*
     TH1D *h_single_electron_0 = new TH1D("h_single_electron_0", "", dimension_xy, 0.0, 1.0);
@@ -369,25 +435,106 @@ int main()
     */
 
     TCanvas *c_single_electron_0 = new TCanvas("c_single_electron_0", "", 4000, 3000);
-    h_single_electron_0->Draw();
+    h_single_electron_0->Draw("hist");
     c_single_electron_0->SaveAs("c_single_electron_0.png");
     c_single_electron_0->SaveAs("c_single_electron_0.pdf");
     c_single_electron_0->SaveAs("c_single_electron_0.C");
     delete c_single_electron_0;
     
     TCanvas *c_single_electron_1 = new TCanvas("c_single_electron_1", "", 4000, 3000);
-    h_single_electron_1->Draw();
+    h_single_electron_1->Draw("hist");
     c_single_electron_1->SaveAs("c_single_electron_1.png");
     c_single_electron_1->SaveAs("c_single_electron_1.pdf");
     c_single_electron_1->SaveAs("c_single_electron_1.C");
     delete c_single_electron_1;
     
     TCanvas *c_single_electron_2 = new TCanvas("c_single_electron_2", "", 4000, 3000);
-    h_single_electron_2->Draw();
+    h_single_electron_2->Draw("hist");
     c_single_electron_2->SaveAs("c_single_electron_2.png");
     c_single_electron_2->SaveAs("c_single_electron_2.pdf");
     c_single_electron_2->SaveAs("c_single_electron_2.C");
     delete c_single_electron_2;
+
+    TCanvas *c_single_electron = new TCanvas("c_single_electron", "", 4000, 3000);
+    h_single_electron_0->Draw("hist");
+    h_single_electron_1->Draw("histsame");
+    h_single_electron_2->Draw("histsame");
+    c_single_electron->SaveAs("c_single_electron.png");
+    c_single_electron->SaveAs("c_single_electron.pdf");
+    c_single_electron->SaveAs("c_single_electron.C");
+    delete c_single_electron;
+
+    ////////////////////////////////////////////////////////////////////////////
+    // ELECTRON ENERGY CONVERSION
+    ////////////////////////////////////////////////////////////////////////////
+
+    TH2D *h_convert_from{nullptr};
+    TH2D *h_convert_to{nullptr};
+
+    // convert from epsilon_31 = 0.0 to epsilon_31 = 0.8 
+    h_convert_from = h_data_0;
+    h_convert_to = h_data_2;
+
+    // electron energy in units of Q value
+    // the sum must be less than or equal to 1.0
+    // (1.0 - E1 - E2 = neutrino energy)
+    Double_t electron_energy_1{0.33};
+    Double_t electron_energy_2{0.33};
+
+    // get weights
+    Double_t weight_in{h_convert_from->GetBinContent(h_convert_from->FindBin(electron_energy_1, electron_energy_2))};
+    Double_t weight_out{h_convert_to->GetBinContent(h_convert_to->FindBin(electron_energy_1, electron_energy_2))};
+    Double_t weight_factor{weight_out / weight_in};
+
+    std::cout << "Weight factor is " << weight_factor << std::endl;
+
+    TH1D *h_single_electron_test = new TH1D("h_single_electron_test", "", dimension_xy, 0.0, 1.0);
+    h_single_electron_test->SetStats(0);
+    for(Int_t i{1}; i <= h_data_0->GetNbinsX(); ++ i)
+    {
+        Double_t energy_1{h_data_0->GetXaxis()->GetBinCenter(i)};
+        Double_t weight_integral_1{0.0};
+        Double_t weight_integral_2{0.0};
+        for(Int_t j{1}; j <= h_data_0->GetNbinsY(); ++ j)
+        {
+            Double_t energy_2{h_data_0->GetXaxis()->GetBinCenter(j)};
+            if(energy_1 + energy_2 <= 1.0)
+            {
+                weight_integral_1 += h_data_0->GetBinContent(i, j);
+                weight_integral_2 += h_data_2->GetBinContent(i, j);
+            }
+        }
+        if(weight_integral_1 > 0.0)
+        {
+            Double_t weight_factor{weight_integral_2 / weight_integral_1};
+            Double_t input_weight{h_single_electron_0->GetBinContent(i)};
+            Double_t output_weight{input_weight * weight_factor};
+            h_single_electron_test->SetBinContent(i, output_weight);
+        }
+    }
+
+ 
+    // test output, with histogram created from reweighting
+    TCanvas *c_single_electron_test = new TCanvas("c_single_electron_test", "", 4000, 3000);
+    h_single_electron_test->Draw("hist");
+    c_single_electron_test->SaveAs("c_single_electron_test.png");
+    c_single_electron_test->SaveAs("c_single_electron_test.pdf");
+    c_single_electron_test->SaveAs("c_single_electron_test.C");
+    delete c_single_electron_test;
+
+    // compare above histogram (created from reweighting)
+    // with histograms created from profile
+    TCanvas *c_single_electron_with_test = new TCanvas("c_single_electron_with_test", "", 4000, 3000);
+    h_single_electron_0->Draw("hist");
+    h_single_electron_1->Draw("histsame");
+    h_single_electron_2->Draw("histsame");
+    h_single_electron_test->Draw("histsame");
+    c_single_electron_with_test->SaveAs("c_single_electron_with_test.png");
+    c_single_electron_with_test->SaveAs("c_single_electron_with_test.pdf");
+    c_single_electron_with_test->SaveAs("c_single_electron_with_test.C");
+    delete c_single_electron_with_test;
+
+    ReWeight(0.5, 0.5, 0.0, data_nEqNull, data_nEqTwo); 
 
     return 0;
 
