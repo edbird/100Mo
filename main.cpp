@@ -94,10 +94,16 @@ void read_data(const char* buffer, std::vector<std::vector<double>>& data)
 // electron energies: T1, T2 (in units of Q value)
 // theory parameter: epsilon
 // data: G0, G2 (units of Q value)
+//Double_t ReWeight(const Double_t T1, const Double_t T2, const Double_t epsilon,
+//                  const std::vector<std::vector<double>>& data_nEqNull,
+//                  const std::vector<std::vector<double>>& data_nEqTwo)
 Double_t ReWeight(const Double_t T1, const Double_t T2, const Double_t epsilon,
-                  const std::vector<std::vector<double>>& data_nEqNull,
-                  const std::vector<std::vector<double>>& data_nEqTwo)
+                  const TH2D* const h_nEqNull,
+                  const TH2D* const h_nEqTwo,
+                  const Double_t psiN0, const Double_t psiN2)
 {
+
+    // TODO: NO INTERPOLATION DONE YET
 
     /*
     std::size_t l{data_nEqNull.size()};
@@ -123,8 +129,41 @@ Double_t ReWeight(const Double_t T1, const Double_t T2, const Double_t epsilon,
     Double_t probability4{data_nEqNull.at(index4).at(2)};
     */
 
-    std::cout << "T1=" << T1 << " energy1=" << energy1 << " energy2=" << energy2 << " energy3=" << energy3 << " energy4=" << energy4 << std::endl;
-    std::cout << "T1=" << T1 << " probability1=" << probability1 << " probability2=" << probability2 << " probability3=" << probability3 << " probability4=" << probability4 << std::endl;
+    // interpolate in 2D
+
+    // convert from input energy T1 to "higher and lower energies" as used in
+    // histogram data_nEqNull / data_nEqTwo
+    
+    std::cout << "T1=" << T1 << std::endl;
+    std::cout << "T2=" << T2 << std::endl;
+    Int_t bin_x{h_nEqNull->GetXaxis()->FindBin(T1)};
+    Int_t bin_y{h_nEqNull->GetYaxis()->FindBin(T2)};
+    std::cout << "bin_x=" << bin_x << std::endl;
+    std::cout << "bin_y=" << bin_y << std::endl;
+    Double_t bin_x_low{h_nEqNull->GetXaxis()->GetBinLowEdge(bin_x)};
+    Double_t bin_x_high{h_nEqNull->GetXaxis()->GetBinLowEdge(bin_x) + h_nEqNull->GetXaxis()->GetBinWidth(bin_x)};
+    Double_t bin_y_low{h_nEqNull->GetXaxis()->GetBinLowEdge(bin_y)};
+    Double_t bin_y_high{h_nEqNull->GetXaxis()->GetBinLowEdge(bin_y) + h_nEqNull->GetXaxis()->GetBinWidth(bin_y)};
+    std::cout << bin_x_low << " < " << T1 << " < " << bin_x_high << std::endl;
+    std::cout << bin_y_low << " < " << T2 << " < " << bin_y_high << std::endl;
+
+    // get the weight for this T1, T2
+    // the input data is for epsilon = 0.0
+    Double_t phase_1{1.0 / psiN0};
+    Double_t weight_1{phase_1 * h_nEqNull->GetBinContent(bin_x, bin_y)};
+    std::cout << "weight_1=" << weight_1 << std::endl;
+
+    // get the weight for this T1, T2
+    // the input data is for epsilon = some arbitary value
+    Double_t phase_2{1.0 / (psiN0 + epsilon * psiN2)};
+    Double_t weight_2{phase_2 * (h_nEqNull->GetBinContent(bin_x, bin_y) + epsilon * h_nEqTwo->GetBinContent(bin_x, bin_y))};
+    std::cout << "weight_2=" << weight_2 << std::endl;
+
+    std::cout << "reweight factor: " << weight_2 / weight_1 << std::endl;
+    return weight_2 / weight_1;
+
+    //std::cout << "T1=" << T1 << " T2=" << T2 << " energy1=" << energy1 << " energy2=" << energy2 << " energy3=" << energy3 << " energy4=" << energy4 << std::endl;
+    //std::cout << "T1=" << T1 << " probability1=" << probability1 << " probability2=" << probability2 << " probability3=" << probability3 << " probability4=" << probability4 << std::endl;
 
 }
 
@@ -204,7 +243,45 @@ int main()
     //std::cout << buf_nEqTwo << std::endl;
 
     ////////////////////////////////////////////////////////////////////////////
+    // TODO: apply phase space factor to data
+    ////////////////////////////////////////////////////////////////////////////
+
+    // ...
+
+    ////////////////////////////////////////////////////////////////////////////
+    // CONVERT INPUT DATA TO HISTOGRAM FORMAT
+    // Note: Added 2018-04-23 (After INTERMEDIATE DATA below)
+    // Note: These histograms do NOT have the phase space variable included
+    ////////////////////////////////////////////////////////////////////////////
+
+    Int_t dimension_xy{1001};
+    // don't plot raw data
+    TH2D *h_nEqNull = new TH2D("h_nEqNull", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
+    TH2D *h_nEqTwo = new TH2D("h_nEqTwo", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
+    //TH2D *h_ratio = new TH2D("h_ratio", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
+    h_nEqNull->SetStats(0);
+    h_nEqTwo->SetStats(0);
+    //h_ratio->SetStats(0);
+
+    for(std::size_t i{0}; i < dimension_xy; ++ i)
+    {
+        for(std::size_t j{0}; j < dimension_xy; ++ j)
+        {
+            h_nEqNull->SetBinContent(i, j, data_nEqNull.at(i * dimension_xy + j)[2]);
+            h_nEqTwo->SetBinContent(i, j, data_nEqTwo.at(i * dimension_xy + j)[2]);
+            //if(i < dimension_xy - j)
+            //if(i + j < dimension_xy - 1)
+            //{
+                // TODO: move above lines to inside this if
+                //h_ratio->SetBinContent(i, j, ratio.at(i * dimension_xy + j)[2]);
+            //}
+        }
+    }
+    std::cout << "Finished constructing input data histograms" << std::endl;
+
+    ////////////////////////////////////////////////////////////////////////////
     // CREATE INTERMEDIATE DATA
+    // Format: Nx3 array, each array a different value of epsilon
     ////////////////////////////////////////////////////////////////////////////
 
     // create data array for "complete data"
@@ -298,7 +375,7 @@ int main()
     // CREATE OUTPUT HISTOGRAMS
     ////////////////////////////////////////////////////////////////////////////
 
-    Int_t dimension_xy{1001};
+    //Int_t dimension_xy{1001};
     // don't plot raw data
     //TH2D *h_nEqNull = new TH2D("h_nEqNull", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
     //TH2D *h_nEqTwo = new TH2D("h_nEqTwo", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
@@ -534,7 +611,12 @@ int main()
     c_single_electron_with_test->SaveAs("c_single_electron_with_test.C");
     delete c_single_electron_with_test;
 
-    ReWeight(0.5, 0.5, 0.0, data_nEqNull, data_nEqTwo); 
+    //ReWeight(0.5, 0.5, 0.0, data_nEqNull, data_nEqTwo); 
+    //ReWeight(0.45, 0.3, 0.8, h_nEqNull, h_nEqTwo, psiN0, psiN2); 
+    
+    TFile *f = new TFile("
+
+    ReWeight(0.45, 0.3, 0.8, h_nEqNull, h_nEqTwo, psiN0, psiN2); 
 
     return 0;
 
