@@ -1,7 +1,7 @@
 void c_el_energy_sum_both()
 {
 //=========Macro generated from canvas: e_el_energy_sum_both/e_el_energy_sum_both
-//=========  (Mon Apr 23 17:25:50 2018) by ROOT version6.08/06
+//=========  (Mon Apr 23 21:55:33 2018) by ROOT version6.08/06
    TCanvas *e_el_energy_sum_both = new TCanvas("e_el_energy_sum_both", "e_el_energy_sum_both",0,0,800,600);
    e_el_energy_sum_both->SetHighLightColor(2);
    e_el_energy_sum_both->Range(0,0,1,1);

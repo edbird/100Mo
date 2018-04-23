@@ -639,7 +639,7 @@ int main()
     h_el_energy_sum_original->SetStats(0);
     h_el_energy_sum_original->SetLineColor(2);
     h_el_energy_sum_original->SetMarkerColor(2);
-    TH1D *h_el_energy_sum_reweight = new TH1D("h_el_energy_sum_original", "h_el_energy_sum_original", 100, 0.0, 4.0);
+    TH1D *h_el_energy_sum_reweight = new TH1D("h_el_energy_sum_reweight", "h_el_energy_sum_reweight", 100, 0.0, 4.0);
     h_el_energy_sum_reweight->SetStats(0);
     h_el_energy_sum_reweight->SetLineColor(3);
     h_el_energy_sum_reweight->SetMarkerColor(3);
@@ -817,6 +817,36 @@ int main()
     // and check single/sum histograms to see if they are the same as 
     // the ones from the paper
     // TODO: interpolation
+
+    TFile *f_out = new TFile("NewElectronNtuplizerExe_Int_ManDB_output.root.output", "recreate");
+    TTree *t_out = new TTree("NewElectronNtuplizer/NewElectronNtuplizer");
+
+    for(Int_t j{1}; j < h_data_0->GetNbinsY(); ++ j)
+    {
+        for(Int_t i{1}; i < h_data_0->GetNbinsX(); ++ i)
+        {
+            // the input weight
+            Double_t content{h_data_0->GetBinContent(i, j)};
+
+            // the "T1"
+            Double_t input_T1{h_data_0->GetXaxis()->GetBinLowEdge(i)};
+
+            // the "T2"
+            Double_t input_T2{h_data_0->GetYaxis()->GetBinLowEdge(j)};
+
+            Double_t epsilon_31{0.8}; // TODO: this value follows previous value
+            // TODO: need to change when previous value is changed (MANUALLY!)
+            // TODO: use same variable
+
+            // the output weight
+            Double_t weight{ReWeight(input_T1, input_T2, epsilon_31, h_nEqNull, h_nEqTwo, psiN0, psiN2, "false")};
+
+            // TODO: how should the weight information be put into the output file?
+
+
+        }
+    }
+
 
     return 0;
 
