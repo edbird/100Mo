@@ -92,93 +92,11 @@ void read_data(const char* buffer, std::vector<std::vector<double>>& data)
 
 }
 
-// electron energies: T1, T2 (in units of Q value)
-// theory parameter: epsilon
-// data: G0, G2 (units of Q value)
-//Double_t ReWeight(const Double_t T1, const Double_t T2, const Double_t epsilon,
-//                  const std::vector<std::vector<double>>& data_nEqNull,
-//                  const std::vector<std::vector<double>>& data_nEqTwo)
-Double_t ReWeight(const Double_t T1, const Double_t T2, const Double_t epsilon,
-                  const TH2D* const h_nEqNull,
-                  const TH2D* const h_nEqTwo,
-                  const Double_t psiN0, const Double_t psiN2,
-                  const std::string& debug)
-{
 
-    // TODO: NO INTERPOLATION DONE YET
+#include "ReWeight.hpp"
 
-    /*
-    std::size_t l{data_nEqNull.size()};
-    Int_t sub_length{1001};
 
-    // "primary" index
-    Int_t index1{(Int_t)(Double_t)(sub_length) * T1}; index1 *= sub_length;
-    Int_t index3{(Int_t)(Double_t)(sub_length) * T2};
-    //Int_t index1{(Int_t)((Double_t)(sub_length * sub_length) * T1 + (Double_t)(sub_length) * T2)};
-    Int_t index2{index1 + 1};
-    //Int_t index3{index1 + sub_length};
-    //Int_t index4{index1 + sub_length + 1};
-    Int_t index4{index3 + 1};
-
-    Double_t energy1{data_nEqNull.at(index1).at(0)};
-    Double_t energy2{data_nEqNull.at(index2).at(1)};
-    Double_t energy3{data_nEqNull.at(index3).at(0)};
-    Double_t energy4{data_nEqNull.at(index4).at(1)};
-
-    Double_t probability1{data_nEqNull.at(index1).at(2)};
-    Double_t probability2{data_nEqNull.at(index2).at(2)};
-    Double_t probability3{data_nEqNull.at(index3).at(2)};
-    Double_t probability4{data_nEqNull.at(index4).at(2)};
-    */
-
-    // interpolate in 2D
-
-    // convert from input energy T1 to "higher and lower energies" as used in
-    // histogram data_nEqNull / data_nEqTwo
-    
-    //std::cout << "T1=" << T1 << std::endl;
-    //std::cout << "T2=" << T2 << std::endl;
-    Int_t bin_x{h_nEqNull->GetXaxis()->FindBin(T1)};
-    Int_t bin_y{h_nEqNull->GetYaxis()->FindBin(T2)};
-    //std::cout << "bin_x=" << bin_x << std::endl;
-    //std::cout << "bin_y=" << bin_y << std::endl;
-    Double_t bin_x_low{h_nEqNull->GetXaxis()->GetBinLowEdge(bin_x)};
-    Double_t bin_x_high{h_nEqNull->GetXaxis()->GetBinLowEdge(bin_x) + h_nEqNull->GetXaxis()->GetBinWidth(bin_x)};
-    Double_t bin_y_low{h_nEqNull->GetXaxis()->GetBinLowEdge(bin_y)};
-    Double_t bin_y_high{h_nEqNull->GetXaxis()->GetBinLowEdge(bin_y) + h_nEqNull->GetXaxis()->GetBinWidth(bin_y)};
-    //std::cout << bin_x_low << " < " << T1 << " < " << bin_x_high << std::endl;
-    //std::cout << bin_y_low << " < " << T2 << " < " << bin_y_high << std::endl;
-
-    // get the weight for this T1, T2
-    // the input data is for epsilon = 0.0
-    Double_t phase_1{1.0 / psiN0};
-    Double_t weight_1{phase_1 * h_nEqNull->GetBinContent(bin_x, bin_y)};
-    //std::cout << "weight_1=" << weight_1 << std::endl;
-
-    // get the weight for this T1, T2
-    // the input data is for epsilon = some arbitary value
-    Double_t phase_2{1.0 / (psiN0 + epsilon * psiN2)};
-    Double_t weight_2{phase_2 * (h_nEqNull->GetBinContent(bin_x, bin_y) + epsilon * h_nEqTwo->GetBinContent(bin_x, bin_y))};
-    //std::cout << "weight_2=" << weight_2 << std::endl;
-
-    if(debug == "true")
-    {
-        std::cout << "T1=" << T1 << " T2=" << T2 << std::endl;
-        std::cout << "bin_x=" << bin_x << " bin_y=" << bin_y << std::endl;
-        std::cout << "h_nEqNull->GetBinContent(bin_x, bin_y)=" << h_nEqNull->GetBinContent(bin_x, bin_y) << std::endl;
-        std::cout << "h_nEqTwo->GetBinContent(bin_x, bin_y)=" << h_nEqTwo->GetBinContent(bin_x, bin_y) << std::endl;
-        std::cout << "weight_1=" << weight_1 << " weight_2=" << weight_2 << std::endl;
-    }
-
-    //std::cout << "reweight factor: " << weight_2 / weight_1 << std::endl;
-    return weight_2 / weight_1;
-
-    //std::cout << "T1=" << T1 << " T2=" << T2 << " energy1=" << energy1 << " energy2=" << energy2 << " energy3=" << energy3 << " energy4=" << energy4 << std::endl;
-    //std::cout << "T1=" << T1 << " probability1=" << probability1 << " probability2=" << probability2 << " probability3=" << probability3 << " probability4=" << probability4 << std::endl;
-
-}
-
-int main()
+int main(int argc, char* argv[])
 {
 
     ////////////////////////////////////////////////////////////////////////////
@@ -522,6 +440,8 @@ int main()
     }
     */
 
+
+/*
     TCanvas *c_single_electron_0 = new TCanvas("c_single_electron_0", "", 4000, 3000);
     h_single_electron_0->Draw("hist");
     c_single_electron_0->SaveAs("c_single_electron_0.png");
@@ -542,7 +462,10 @@ int main()
     c_single_electron_2->SaveAs("c_single_electron_2.pdf");
     c_single_electron_2->SaveAs("c_single_electron_2.C");
     delete c_single_electron_2;
+*/
 
+    // these histograms created from projection of the h_data_? histograms
+    // along the X direction
     TCanvas *c_single_electron = new TCanvas("c_single_electron", "", 4000, 3000);
     h_single_electron_0->Draw("hist");
     h_single_electron_1->Draw("histsame");
@@ -612,6 +535,8 @@ int main()
 
     // compare above histogram (created from reweighting)
     // with histograms created from profile
+    // NOTE: removed as this code is exactly the same as c_single_electron
+    /*
     TCanvas *c_single_electron_with_test = new TCanvas("c_single_electron_with_test", "", 4000, 3000);
     h_single_electron_0->Draw("hist");
     h_single_electron_1->Draw("histsame");
@@ -621,65 +546,103 @@ int main()
     c_single_electron_with_test->SaveAs("c_single_electron_with_test.pdf");
     c_single_electron_with_test->SaveAs("c_single_electron_with_test.C");
     delete c_single_electron_with_test;
+    */
 
     //ReWeight(0.5, 0.5, 0.0, data_nEqNull, data_nEqTwo); 
     //ReWeight(0.45, 0.3, 0.8, h_nEqNull, h_nEqTwo, psiN0, psiN2); 
     
 
-    TH1D *h_el_energy_original = new TH1D("h_el_energy_original", "h_el_energy_original", 100, 0.0, 4.0);
+    // load from NEMO-3 data (MC), the reconstructed electron energy (2 in same histogram)
+    TH1D *h_el_energy_original = new TH1D("h_el_energy_original", "", 100, 0.0, 4.0);
     h_el_energy_original->SetStats(0);
     h_el_energy_original->SetLineColor(2);
     h_el_energy_original->SetMarkerColor(2);
-    TH1D *h_el_energy_reweight = new TH1D("h_el_energy_reweight", "h_el_energy_reweight", 100, 0.0, 4.0);
+    // same as above but re-weighted
+    TH1D *h_el_energy_reweight = new TH1D("h_el_energy_reweight", "", 100, 0.0, 4.0);
     h_el_energy_reweight->SetStats(0);
     h_el_energy_reweight->SetLineColor(3);
     h_el_energy_reweight->SetMarkerColor(3);
 
-    TH1D *h_el_energy_sum_original = new TH1D("h_el_energy_sum_original", "h_el_energy_sum_original", 100, 0.0, 4.0);
+    // load from NEMO-3 data (mc), the sum of the two reconstructed electron energies
+    TH1D *h_el_energy_sum_original = new TH1D("h_el_energy_sum_original", "", 100, 0.0, 4.0);
     h_el_energy_sum_original->SetStats(0);
     h_el_energy_sum_original->SetLineColor(2);
     h_el_energy_sum_original->SetMarkerColor(2);
-    TH1D *h_el_energy_sum_reweight = new TH1D("h_el_energy_sum_reweight", "h_el_energy_sum_reweight", 100, 0.0, 4.0);
+    // same as above but re-weighted
+    TH1D *h_el_energy_sum_reweight = new TH1D("h_el_energy_sum_reweight", "", 100, 0.0, 4.0);
     h_el_energy_sum_reweight->SetStats(0);
     h_el_energy_sum_reweight->SetLineColor(3);
     h_el_energy_sum_reweight->SetMarkerColor(3);
 
     // test histograms
-    TH1D *h_test_single_original = new TH1D("h_test_single_original", "h_test_single_original", 100, 0.0, 4.0);
+    // NEMO-3 data/MC: truth electron energy x2 (T1, T2) (2 in same histo)
+    TH1D *h_test_single_original = new TH1D("h_test_single_original", "", 100, 0.0, 4.0);
     h_test_single_original->SetStats(0);
     h_test_single_original->SetLineColor(2);
     h_test_single_original->SetMarkerColor(2);
-    TH1D *h_test_single_reweight = new TH1D("h_test_single_reweight", "h_test_single_reweight", 100, 0.0, 4.0);
+    // re-weighted
+    TH1D *h_test_single_reweight = new TH1D("h_test_single_reweight", "", 100, 0.0, 4.0);
     h_test_single_reweight->SetStats(0);
     h_test_single_reweight->SetLineColor(3);
     h_test_single_reweight->SetMarkerColor(3);
 
     // test histograms
-    TH1D *h_test_sum_original = new TH1D("h_test_sum_original", "h_test_sum_original", 100, 0.0, 4.0);
+    // NEMO-3 data/MC: reconstructed electron energy x2 (2 in same histo)
+    TH1D *h_test_sum_original = new TH1D("h_test_sum_original", "", 100, 0.0, 4.0);
     h_test_sum_original->SetStats(0);
     h_test_sum_original->SetLineColor(2);
     h_test_sum_original->SetMarkerColor(2);
-    TH1D *h_test_sum_reweight = new TH1D("h_test_sum_reweight", "h_test_sum_reweight", 100, 0.0, 4.0);
+    // re-weighted
+    TH1D *h_test_sum_reweight = new TH1D("h_test_sum_reweight", "", 100, 0.0, 4.0);
     h_test_sum_reweight->SetStats(0);
     h_test_sum_reweight->SetLineColor(3);
     h_test_sum_reweight->SetMarkerColor(3);
 
 
+    // write data histograms to file
+    // intermediate file
+    TFile *f_histogram = new TFile("f_histogram.root", "recreate");
+    h_data_0->Write();
+    h_data_1->Write();
+    h_data_2->Write();
+    f_histogram->Close();
 
-    TFile *f = new TFile("NewElectronNtuplizerExe_Int_ManDB_output.root");
-    //f->cd("NewElectronNtuplizer");
+
+    // NEMO-3 data/MC read from tree
+    // input file
+    
+    // read file using program arguments
+    std::string filename_default("NewElectronNtuplizerExe_Int_ManDB_output.root");
+    std::string filename(filename_default);
+    bool gen_weight_enable{false};
+    if(argc == 2)
+    {
+        filename = std::string(argv[1]);
+        std::cout << "Specified filename: " << filename << std::endl;
+        if(filename != filename_default)
+        {
+            gen_weight_enable = true;
+        }
+    }
+    //TFile *f = new TFile("NewElectronNtuplizerExe_Int_ManDB_output.root");
+    TFile *f = new TFile(filename.c_str());
     TTree *t = (TTree*)f->Get("NewElectronNtuplizer/NewElectronNtuplizer");
 
     Int_t nElectrons;
-
     Double_t trueT1;
     Double_t trueT2;
     Double_t el_energy_[2];
+    Double_t gen_weight{1.0};
 
     t->SetBranchAddress("nElectrons", &nElectrons);
     t->SetBranchAddress("trueT1", &trueT1);
     t->SetBranchAddress("trueT2", &trueT2);
     t->SetBranchAddress("el_energy_", el_energy_);
+    // new method requires weight to be saved to tree
+    if(gen_weight_enable == true)
+    {
+        t->SetBranchAddress("gen_weight", &gen_weight);
+    }
 
     // Q value of decay
     // MeV
@@ -705,16 +668,16 @@ int main()
 
         Double_t weight{ReWeight(T1, T2, epsilon_31, h_nEqNull, h_nEqTwo, psiN0, psiN2, "false")};
 
-        h_el_energy_original->Fill(el_energy_[0], 1.0);
-        h_el_energy_original->Fill(el_energy_[1], 1.0);
+        h_el_energy_original->Fill(el_energy_[0], 1.0 * gen_weight);
+        h_el_energy_original->Fill(el_energy_[1], 1.0 * gen_weight);
         
-        h_el_energy_sum_original->Fill(el_energy_[0] + el_energy_[1], 1.0);
+        h_el_energy_sum_original->Fill(el_energy_[0] + el_energy_[1], 1.0 * gen_weight);
 
         // test histograms
-        h_test_single_original->Fill(trueT1, 1.0);
-        h_test_single_original->Fill(trueT2, 1.0);
+        h_test_single_original->Fill(trueT1, 1.0 * gen_weight);
+        h_test_single_original->Fill(trueT2, 1.0 * gen_weight);
 
-        h_test_sum_original->Fill(trueT1 + trueT2, 1.0);
+        h_test_sum_original->Fill(trueT1 + trueT2, 1.0 * gen_weight);
 
         /*
         if(!(weight < 3.0 && weight > 0.001))
@@ -729,16 +692,16 @@ int main()
         }
         */
 
-        h_el_energy_reweight->Fill(el_energy_[0], weight);
-        h_el_energy_reweight->Fill(el_energy_[1], weight);
+        h_el_energy_reweight->Fill(el_energy_[0], weight * gen_weight);
+        h_el_energy_reweight->Fill(el_energy_[1], weight * gen_weight);
 
-        h_el_energy_sum_reweight->Fill(el_energy_[0] + el_energy_[1], weight);
+        h_el_energy_sum_reweight->Fill(el_energy_[0] + el_energy_[1], weight * gen_weight);
 
         // test histograms
-        h_test_single_reweight->Fill(trueT1, weight);
-        h_test_single_reweight->Fill(trueT2, weight);
+        h_test_single_reweight->Fill(trueT1, weight * gen_weight);
+        h_test_single_reweight->Fill(trueT2, weight * gen_weight);
 
-        h_test_sum_reweight->Fill(trueT1 + trueT2, weight);
+        h_test_sum_reweight->Fill(trueT1 + trueT2, weight * gen_weight);
 
 
         //if(ix % 10 == 9) std::cin.get();
@@ -811,41 +774,6 @@ int main()
     // print entries
     std::cout << "Number of entries in each histogram: h_el_energy_original: " << h_el_energy_original->GetEntries() << " h_el_energy_reweight: " << h_el_energy_reweight->GetEntries() << std::endl;
 
-    // T1 reweight single and 2 electron
-    // 
-    // use c_data_0, to create new output->input tree, feed into this code
-    // and check single/sum histograms to see if they are the same as 
-    // the ones from the paper
-    // TODO: interpolation
-
-    TFile *f_out = new TFile("NewElectronNtuplizerExe_Int_ManDB_output.root.output", "recreate");
-    TTree *t_out = new TTree("NewElectronNtuplizer/NewElectronNtuplizer");
-
-    for(Int_t j{1}; j < h_data_0->GetNbinsY(); ++ j)
-    {
-        for(Int_t i{1}; i < h_data_0->GetNbinsX(); ++ i)
-        {
-            // the input weight
-            Double_t content{h_data_0->GetBinContent(i, j)};
-
-            // the "T1"
-            Double_t input_T1{h_data_0->GetXaxis()->GetBinLowEdge(i)};
-
-            // the "T2"
-            Double_t input_T2{h_data_0->GetYaxis()->GetBinLowEdge(j)};
-
-            Double_t epsilon_31{0.8}; // TODO: this value follows previous value
-            // TODO: need to change when previous value is changed (MANUALLY!)
-            // TODO: use same variable
-
-            // the output weight
-            Double_t weight{ReWeight(input_T1, input_T2, epsilon_31, h_nEqNull, h_nEqTwo, psiN0, psiN2, "false")};
-
-            // TODO: how should the weight information be put into the output file?
-
-
-        }
-    }
 
 
     return 0;
