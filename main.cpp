@@ -10,90 +10,10 @@
 
 
 #include <iostream>
-#include <fstream>
-
-void read_phase_space_factor(const char* buffer, double &value)
-{
-
-    const char* p{buffer};
-    while(*p != '0')
-    {
-        ++ p;
-    }
-    std::string value_string;
-    while((*p != '\0') && (*p != ' '))
-    {
-        value_string.push_back(*p);
-        ++ p;
-    }
-
-    value = std::stod(value_string);
-
-}
-
-template <typename T>
-std::ostream& operator<<(std::ostream& os, std::vector<std::vector<T>> v)
-{
-    typename std::vector<std::vector<T>>::const_iterator it{v.cbegin()};
-    for(; it != v.cend(); ++ it)
-    {
-        os << *it << "\n";
-    }
-    return os;
-}
-
-template <typename T>
-std::ostream& operator<<(std::ostream& os, std::vector<T> v)
-{
-    typename std::vector<T>::const_iterator it{v.cbegin()};
-    for(; it != v.cend(); ++ it)
-    {
-        os << *it << " ";
-    }
-    return os;
-}
-
-void read_data(const char* buffer, std::vector<std::vector<double>>& data)
-{
-    
-    data.clear();
-    data.emplace_back(std::vector<double>());
-
-    //std::cout << buffer << std::endl;
-
-    const char* p{buffer};
-    char* p_end;
-    while(*p != '\0')
-    {
-        while(*p == ' ') ++ p;
-        double value{strtod(p, &p_end)};
-        if(p == p_end)
-        {
-            data.pop_back();
-            break;
-        }
-        data.back().emplace_back(value);
-        p = p_end;
-        if(*p == '\n')
-        {
-            //std::cout << data.at(data.size() - 1) << std::endl;
-            data.emplace_back(std::vector<double>());
-        }
-    }
-
-    //std::cout << "data read" << std::endl;
-    //std::cout << "dimension x: " << data.size() << std::endl;
-    //for(std::size_t i{0}; i < data.size(); ++ i)
-    //{
-    //    std::cout << "x=" << i << " dimension y: " << data[i].size() << std::endl;
-    //    std::cin.get();
-    //}
-    //std::cout << "dimension y: " << data.at(0).size() << std::endl;
-
-}
 
 
 #include "ReWeight.hpp"
+#include "read_data.hpp"
 
 
 int main(int argc, char* argv[])
@@ -103,49 +23,6 @@ int main(int argc, char* argv[])
     // READ DATA IN FROM FILES
     ////////////////////////////////////////////////////////////////////////////
 
-    // ifstream objects
-    std::ifstream ifs_nEqNull("nEqNull.dat", std::ios::ate);
-    //std::ifstream ifs_nEqNull("test.dat", std::ios::ate);
-    std::ifstream ifs_nEqTwo("nEqTwo.dat", std::ios::ate);
-
-    std::ifstream ifs_psiN0("psiN0.txt", std::ios::ate);
-    std::ifstream ifs_psiN2("psiN2.txt", std::ios::ate);
-
-    // get size
-    std::streampos ifs_nEqNull_size{ifs_nEqNull.tellg()};
-    std::streampos ifs_nEqTwo_size{ifs_nEqTwo.tellg()};
-    
-    std::streampos ifs_psiN0_size{ifs_psiN0.tellg()};
-    std::streampos ifs_psiN2_size{ifs_psiN2.tellg()};
-
-    // allocate buffers
-    char* buf_nEqNull{new char[ifs_nEqNull_size + 1]};
-    char* buf_nEqTwo{new char[ifs_nEqTwo_size + 1]};
-    
-    char* buf_psiN0{new char[ifs_psiN0_size + 1]};
-    char* buf_psiN2{new char[ifs_psiN2_size + 1]};
-
-    // seek
-    ifs_nEqNull.seekg(0);
-    ifs_nEqTwo.seekg(0);
-
-    ifs_psiN0.seekg(0);
-    ifs_psiN2.seekg(0);
-
-    // read
-    ifs_nEqNull.read(buf_nEqNull, ifs_nEqNull_size);
-    ifs_nEqTwo.read(buf_nEqTwo, ifs_nEqTwo_size);
-
-    ifs_psiN0.read(buf_psiN0, ifs_psiN0_size);
-    ifs_psiN2.read(buf_psiN2, ifs_psiN2_size);
-
-    // close streams
-    ifs_nEqNull.close();
-    ifs_nEqTwo.close();
-
-    ifs_psiN0.close();
-    ifs_psiN2.close();
-
     // allocate data storage
     std::vector<std::vector<double>> data_nEqNull;
     std::vector<std::vector<double>> data_nEqTwo;
@@ -153,23 +30,10 @@ int main(int argc, char* argv[])
     double psiN0;
     double psiN2;
 
-    // extract phase space factors
-    //std::cout << buf_psiN0 << std::endl;
-    //std::cout << buf_psiN2 << std::endl;
-    read_phase_space_factor(buf_psiN0, psiN0);
-    read_phase_space_factor(buf_psiN2, psiN2);
+    read_data_helper("nEqNull.dat", "nEqTwo.dat", "psiN0.txt", "psiN2.txt", data_nEqNull, data_nEqTwo, psiN0, psiN2);
 
     std::cout << psiN0 << std::endl;
     std::cout << psiN2 << std::endl;
-
-    // read data
-    read_data(buf_nEqNull, data_nEqNull);
-    std::cout << "Finished reading " << "nEqNull.dat" << std::endl;
-    read_data(buf_nEqTwo, data_nEqTwo);
-    std::cout << "Finished reading " << "nEqTwo.dat" << std::endl;
-
-    //std::cout << buf_nEqNull << std::endl;
-    //std::cout << buf_nEqTwo << std::endl;
 
     ////////////////////////////////////////////////////////////////////////////
     // TODO: apply phase space factor to data
@@ -183,30 +47,15 @@ int main(int argc, char* argv[])
     // Note: These histograms do NOT have the phase space variable included
     ////////////////////////////////////////////////////////////////////////////
 
-    Int_t dimension_xy{1001};
+    const Int_t dimension_xy{1001};
     // don't plot raw data
-    TH2D *h_nEqNull = new TH2D("h_nEqNull", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
-    TH2D *h_nEqTwo = new TH2D("h_nEqTwo", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
+    TH2D *h_nEqNull = nullptr; //= new TH2D("h_nEqNull", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
+    TH2D *h_nEqTwo = nullptr; //= new TH2D("h_nEqTwo", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
     //TH2D *h_ratio = new TH2D("h_ratio", "", dimension_xy, 0.0, 1.0, dimension_xy, 0.0, 1.0);
-    h_nEqNull->SetStats(0);
-    h_nEqTwo->SetStats(0);
+    //h_nEqNull->SetStats(0);
+    //h_nEqTwo->SetStats(0);
     //h_ratio->SetStats(0);
-
-    for(std::size_t i{0}; i < dimension_xy; ++ i)
-    {
-        for(std::size_t j{0}; j < dimension_xy; ++ j)
-        {
-            h_nEqNull->SetBinContent(i, j, data_nEqNull.at(i * dimension_xy + j)[2]);
-            h_nEqTwo->SetBinContent(i, j, data_nEqTwo.at(i * dimension_xy + j)[2]);
-            //if(i < dimension_xy - j)
-            //if(i + j < dimension_xy - 1)
-            //{
-                // TODO: move above lines to inside this if
-                //h_ratio->SetBinContent(i, j, ratio.at(i * dimension_xy + j)[2]);
-            //}
-        }
-    }
-    std::cout << "Finished constructing input data histograms" << std::endl;
+    convert_data_to_histogram_format(data_nEqNull, data_nEqTwo, h_nEqNull, h_nEqTwo);
 
     ////////////////////////////////////////////////////////////////////////////
     // CREATE INTERMEDIATE DATA
@@ -216,63 +65,17 @@ int main(int argc, char* argv[])
     // create data array for "complete data"
     // (with phase space factors)
     
-    std::vector<std::vector<double>> data_0;
-    data_0.resize(data_nEqNull.size());
-    for(std::size_t i{0}; i < data_0.size(); ++ i)
-    {
-        data_0[i].resize(data_nEqNull[i].size());
-    }
-
-    std::vector<std::vector<double>> data_1;
-    data_1.resize(data_nEqNull.size());
-    for(std::size_t i{0}; i < data_1.size(); ++ i)
-    {
-        data_1[i].resize(data_nEqNull[i].size());
-    }
-
-    std::vector<std::vector<double>> data_2;
-    data_2.resize(data_nEqNull.size());
-    for(std::size_t i{0}; i < data_2.size(); ++ i)
-    {
-        data_2[i].resize(data_nEqNull[i].size());
-    }
-
     // epsilon_31 = 0.0
-    const double epsilon_31_0{0.0};
-    for(std::size_t i{0}; i < data_0.size(); ++ i)
-    {
-        for(std::size_t j{0}; j < 2; ++ j)
-        {
-            data_0[i][j] = data_nEqNull[i][j]; // NOTE: this is not used
-        }
-        double phase_space_factor{1.0 / (psiN0 + epsilon_31_0 * psiN2)};
-        data_0[i][2] = phase_space_factor * (data_nEqNull[i][2] + epsilon_31_0 * data_nEqTwo[i][2]);
-    }
-    
+    std::vector<std::vector<double>> data_0;
+    create_data_with_phase_space_factor(data_0, 0.0, data_nEqNull, data_nEqTwo, psiN0, psiN2);
+
     // epsilon_31 = 0.4
-    const double epsilon_31_1{0.4};
-    for(std::size_t i{0}; i < data_1.size(); ++ i)
-    {
-        for(std::size_t j{0}; j < 2; ++ j)
-        {
-            data_1[i][j] = data_nEqNull[i][j]; // NOTE: this is not used
-        }
-        double phase_space_factor{1.0 / (psiN0 + epsilon_31_1 * psiN2)};
-        data_1[i][2] = phase_space_factor * (data_nEqNull[i][2] + epsilon_31_1 * data_nEqTwo[i][2]);
-    }
-
+    std::vector<std::vector<double>> data_1;
+    create_data_with_phase_space_factor(data_1, 0.4, data_nEqNull, data_nEqTwo, psiN0, psiN2);
+    
     // epsilon_31 = 0.8
-    const double epsilon_31_2{0.8};
-    for(std::size_t i{0}; i < data_2.size(); ++ i)
-    {
-        for(std::size_t j{0}; j < 2; ++ j)
-        {
-            data_2[i][j] = data_nEqNull[i][j]; // NOTE: this is not used
-        }
-        double phase_space_factor{1.0 / (psiN0 + epsilon_31_2 * psiN2)};
-        data_2[i][2] = phase_space_factor * (data_nEqNull[i][2] + epsilon_31_2 * data_nEqTwo[i][2]);
-    }
-
+    std::vector<std::vector<double>> data_2;
+    create_data_with_phase_space_factor(data_2, 0.8, data_nEqNull, data_nEqTwo, psiN0, psiN2);
 
     // create data array for ratio
     /*
@@ -325,10 +128,11 @@ int main(int argc, char* argv[])
         {
             //h_nEqNull->SetBinContent(i, j, data_nEqNull.at(i * dimension_xy + j)[2]);
             //h_nEqTwo->SetBinContent(i, j, data_nEqTwo.at(i * dimension_xy + j)[2]);
-            h_data_0->SetBinContent(i, j, data_0.at(i * dimension_xy + j)[2]);
-            h_data_1->SetBinContent(i, j, data_1.at(i * dimension_xy + j)[2]);
-            h_data_2->SetBinContent(i, j, data_2.at(i * dimension_xy + j)[2]);
+            h_data_0->SetBinContent(i + 1, j + 1, data_0.at(i * dimension_xy + j)[2]);
+            h_data_1->SetBinContent(i + 1, j + 1, data_1.at(i * dimension_xy + j)[2]);
+            h_data_2->SetBinContent(i + 1, j + 1, data_2.at(i * dimension_xy + j)[2]);
             //if(i < dimension_xy - j)
+            // TODO: -1 or -0 ?
             if(i + j < dimension_xy - 1)
             {
                 // TODO: move above lines to inside this if
@@ -354,8 +158,8 @@ int main(int argc, char* argv[])
     delete c_nEqTwo;
     */
     
-    #define PRINT_1D_CANVAS 0
-    #if PRINT_1D_CANVAS
+    #define PRINT_DATA_CANVAS 0
+    #if PRINT_DATA_CANVAS
 
         TCanvas *c_data_0 = new TCanvas("c_data_0", "", 4000, 3000);
         h_data_0->Draw("colz");
@@ -499,6 +303,10 @@ int main(int argc, char* argv[])
 
     std::cout << "Weight factor is " << weight_factor << std::endl;
 
+    // same as the single electron histogram,
+    // however it is made using an explicit integration method
+    // results appear to be the same
+    /*
     TH1D *h_single_electron_test = new TH1D("h_single_electron_test", "", dimension_xy, 0.0, 1.0);
     h_single_electron_test->SetStats(0);
     for(Int_t i{1}; i <= h_data_0->GetNbinsX(); ++ i)
@@ -523,7 +331,7 @@ int main(int argc, char* argv[])
             h_single_electron_test->SetBinContent(i, output_weight);
         }
     }
-
+    
  
     // test output, with histogram created from reweighting
     TCanvas *c_single_electron_test = new TCanvas("c_single_electron_test", "", 4000, 3000);
@@ -532,6 +340,8 @@ int main(int argc, char* argv[])
     c_single_electron_test->SaveAs("c_single_electron_test.pdf");
     c_single_electron_test->SaveAs("c_single_electron_test.C");
     delete c_single_electron_test;
+    */
+
 
     // compare above histogram (created from reweighting)
     // with histograms created from profile
@@ -610,6 +420,9 @@ int main(int argc, char* argv[])
 
     // NEMO-3 data/MC read from tree
     // input file
+
+    TH2D *h_gen_weight = new TH2D("h_gen_weight", "", 100, 0.0, 4.0, 100, 0.0, 4.0);
+    h_gen_weight->SetStats(0);
     
     // read file using program arguments
     std::string filename_default("NewElectronNtuplizerExe_Int_ManDB_output.root");
@@ -666,7 +479,7 @@ int main(int argc, char* argv[])
         Double_t T1{trueT1 / bb_Q};
         Double_t T2{trueT2 / bb_Q};
 
-        Double_t weight{ReWeight(T1, T2, epsilon_31, h_nEqNull, h_nEqTwo, psiN0, psiN2, "false")};
+        Double_t weight{ReWeight(T1, T2, epsilon_31, h_nEqNull, h_nEqTwo, psiN0, psiN2, "true")};
 
         h_el_energy_original->Fill(el_energy_[0], 1.0 * gen_weight);
         h_el_energy_original->Fill(el_energy_[1], 1.0 * gen_weight);
@@ -703,6 +516,7 @@ int main(int argc, char* argv[])
 
         h_test_sum_reweight->Fill(trueT1 + trueT2, weight * gen_weight);
 
+        h_gen_weight->Fill(trueT1, trueT2, gen_weight);
 
         //if(ix % 10 == 9) std::cin.get();
 
@@ -713,6 +527,13 @@ int main(int argc, char* argv[])
         }
 
     }
+
+    TCanvas *c_gen_weight = new TCanvas("c_gen_weight", "", 800, 600);
+    h_gen_weight->Draw("colz");
+    c_gen_weight->SaveAs("c_gen_weight.C");
+    c_gen_weight->SaveAs("c_gen_weight.png");
+    c_gen_weight->SaveAs("c_gen_weight.pdf");
+    delete c_gen_weight;
 
     /*
     TCanvas *c_el_energy_original = new TCanvas("c_el_energy_original", "c_el_energy_original", 800, 600);
@@ -752,6 +573,7 @@ int main(int argc, char* argv[])
     TCanvas *c_test_single = new TCanvas("c_test_single", "c_test_single", 800, 600);
     h_test_single_original->Draw("E");
     h_test_single_reweight->Draw("Esame");
+    //h_test_single_reweight->Draw("E");
     c_test_single->SaveAs("c_test_single.C");
     c_test_single->SaveAs("c_test_single.png");
     c_test_single->SaveAs("c_test_single.pdf");
@@ -761,6 +583,7 @@ int main(int argc, char* argv[])
     TCanvas *c_test_sum = new TCanvas("c_test_sum", "c_test_sum", 800, 600);
     h_test_sum_original->Draw("E");
     h_test_sum_reweight->Draw("Esame");
+    //h_test_sum_reweight->Draw("E");
     c_test_sum->SaveAs("c_test_sum.C");
     c_test_sum->SaveAs("c_test_sum.png");
     c_test_sum->SaveAs("c_test_sum.pdf");

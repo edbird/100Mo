@@ -1,6 +1,7 @@
 #ifndef REWEIGHT_HPP
 #define REWEIGHT_HPP
 
+#include <cmath>
 
 // electron energies: T1, T2 (in units of Q value)
 // theory parameter: epsilon
@@ -52,10 +53,10 @@ Double_t ReWeight(const Double_t T1, const Double_t T2, const Double_t epsilon,
     Int_t bin_y{h_nEqNull->GetYaxis()->FindBin(T2)};
     //std::cout << "bin_x=" << bin_x << std::endl;
     //std::cout << "bin_y=" << bin_y << std::endl;
-    Double_t bin_x_low{h_nEqNull->GetXaxis()->GetBinLowEdge(bin_x)};
-    Double_t bin_x_high{h_nEqNull->GetXaxis()->GetBinLowEdge(bin_x) + h_nEqNull->GetXaxis()->GetBinWidth(bin_x)};
-    Double_t bin_y_low{h_nEqNull->GetXaxis()->GetBinLowEdge(bin_y)};
-    Double_t bin_y_high{h_nEqNull->GetXaxis()->GetBinLowEdge(bin_y) + h_nEqNull->GetXaxis()->GetBinWidth(bin_y)};
+    //Double_t bin_x_low{h_nEqNull->GetXaxis()->GetBinLowEdge(bin_x)};
+    //Double_t bin_x_high{h_nEqNull->GetXaxis()->GetBinLowEdge(bin_x) + h_nEqNull->GetXaxis()->GetBinWidth(bin_x)};
+    //Double_t bin_y_low{h_nEqNull->GetXaxis()->GetBinLowEdge(bin_y)};
+    //Double_t bin_y_high{h_nEqNull->GetXaxis()->GetBinLowEdge(bin_y) + h_nEqNull->GetXaxis()->GetBinWidth(bin_y)};
     //std::cout << bin_x_low << " < " << T1 << " < " << bin_x_high << std::endl;
     //std::cout << bin_y_low << " < " << T2 << " < " << bin_y_high << std::endl;
 
@@ -73,11 +74,14 @@ Double_t ReWeight(const Double_t T1, const Double_t T2, const Double_t epsilon,
 
     if(debug == "true")
     {
-        std::cout << "T1=" << T1 << " T2=" << T2 << std::endl;
-        std::cout << "bin_x=" << bin_x << " bin_y=" << bin_y << std::endl;
-        std::cout << "h_nEqNull->GetBinContent(bin_x, bin_y)=" << h_nEqNull->GetBinContent(bin_x, bin_y) << std::endl;
-        std::cout << "h_nEqTwo->GetBinContent(bin_x, bin_y)=" << h_nEqTwo->GetBinContent(bin_x, bin_y) << std::endl;
-        std::cout << "weight_1=" << weight_1 << " weight_2=" << weight_2 << std::endl;
+        if(std::isnan(weight_2 / weight_1))
+        {
+            std::cout << "T1=" << T1 << " T2=" << T2 << std::endl;
+            std::cout << "bin_x=" << bin_x << " bin_y=" << bin_y << std::endl;
+            std::cout << "h_nEqNull->GetBinContent(bin_x, bin_y)=" << h_nEqNull->GetBinContent(bin_x, bin_y) << std::endl;
+            std::cout << "h_nEqTwo->GetBinContent(bin_x, bin_y)=" << h_nEqTwo->GetBinContent(bin_x, bin_y) << std::endl;
+            std::cout << "weight_1=" << weight_1 << " weight_2=" << weight_2 << std::endl;
+        }
     }
 
     //std::cout << "reweight factor: " << weight_2 / weight_1 << std::endl;
