@@ -627,6 +627,11 @@ int main(int argc, char* argv[])
     }
     
     // rescale histograms pre other re-scaling
+    // NOTE: to get the same >>> amplitude <<<
+    // histograms must be scaled by the bin width
+    // the bin width for one set is 100 keV
+    // the bin width for the other set is 1 MeV / 1000 = 1 keV (?)
+    // factor 1000 discrepency?
     h_el_energy_original->Scale((1.0 / 0.1) / h_el_energy_original->Integral());
     h_el_energy_reweight->Scale((1.0 / 0.1) / h_el_energy_reweight->Integral());
     h_el_energy_sum_original->Scale((1.0 / 0.1) / h_el_energy_sum_original->Integral());
