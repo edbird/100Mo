@@ -176,8 +176,8 @@ void read_data_helper(const std::string& filename_nEqNull, const std::string& fi
 
 void convert_data_to_histogram_format(const std::vector<std::vector<double>> &data_nEqNull,
                                       const std::vector<std::vector<double>> &data_nEqTwo,
-                                      TH2D * h_nEqNull_return,
-                                      TH2D * h_nEqTwo_return)
+                                      TH2D * &h_nEqNull_return,
+                                      TH2D * &h_nEqTwo_return)
 {
 
     ////////////////////////////////////////////////////////////////////////////
