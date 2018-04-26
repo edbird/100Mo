@@ -83,6 +83,32 @@ void read_data(const char* buffer, std::vector<std::vector<double>>& data)
 
 }
 
+
+// read the 1D data (data in electron single and sum energy histograms from paper)
+void read_data_helper_2(const std::string& filename_data,
+                        std::vector<std::vector<double>> &data)
+{
+
+    ////////////////////////////////////////////////////////////////////////////
+    // READ DATA IN FROM FILE
+    ////////////////////////////////////////////////////////////////////////////
+
+    std::ifstream ifs_data(filename_data.c_str(), std::ios::ate);
+    std::streampos ifs_size{ifs_data.tellg()};
+    char * buf{new char[ifs_size + 1]};
+    ifs_data.seekg(0);
+    ifs_data.read(buf, ifs_size);
+    ifs_data.close();
+    std::vector<std::vector<double>> data_temp;
+    read_data(buf, data_temp);
+    data = data_temp;
+    
+    return;
+
+}
+
+// read the 2D data (theory data)
+// including phase space factors x2 and decay rate data x2
 void read_data_helper(const std::string& filename_nEqNull, const std::string& filename_nEqTwo,
                       const std::string& filename_psiN0, const std::string& filename_psiN2,
                       std::vector<std::vector<double>> &data_nEqNull_ret, std::vector<std::vector<double>> &data_nEqTwo_ret,

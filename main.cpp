@@ -2,6 +2,7 @@
 
 
 #include "TCanvas.h"
+#include "TGraph.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TFile.h"
@@ -15,9 +16,15 @@
 #include "ReWeight.hpp"
 #include "read_data.hpp"
 
+// 0.0 MeV to 4.0 MeV = 4.0 MeV range
+// num_bins keV bin width: 4.0 MeV / 0.1 MeV = 40 bins
+Int_t num_bins{40};
 
 int main(int argc, char* argv[])
 {
+    // Q value of decay
+    // MeV
+    Double_t bb_Q{3.034};
 
     ////////////////////////////////////////////////////////////////////////////
     // READ DATA IN FROM FILES
@@ -30,10 +37,104 @@ int main(int argc, char* argv[])
     double psiN0;
     double psiN2;
 
+    // read
     read_data_helper("nEqNull.dat", "nEqTwo.dat", "psiN0.txt", "psiN2.txt", data_nEqNull, data_nEqTwo, psiN0, psiN2);
 
     std::cout << psiN0 << std::endl;
     std::cout << psiN2 << std::endl;
+
+    ////////////////////////////////////////////////////////////////////////////
+    // READ DATA FOR ELECTRON ENERGY SINGLE AND SUM HISTOGRAMS
+    ////////////////////////////////////////////////////////////////////////////
+
+    // allocate data storage
+    std::vector<std::vector<double>> data_electron_energy_single_0_0;
+    std::vector<std::vector<double>> data_electron_energy_single_0_4;
+    std::vector<std::vector<double>> data_electron_energy_single_0_8;
+    std::vector<std::vector<double>> data_electron_energy_sum_0_0;
+    std::vector<std::vector<double>> data_electron_energy_sum_0_4;
+    std::vector<std::vector<double>> data_electron_energy_sum_0_8;
+
+    // read
+    read_data_helper_2("./data/mo100/single0.0.dat", data_electron_energy_single_0_0);
+    read_data_helper_2("./data/mo100/single0.4.dat", data_electron_energy_single_0_4);
+    read_data_helper_2("./data/mo100/single0.8.dat", data_electron_energy_single_0_8);
+    read_data_helper_2("./data/mo100/sum0.0.dat", data_electron_energy_sum_0_0);
+    read_data_helper_2("./data/mo100/sum0.4.dat", data_electron_energy_sum_0_4);
+    read_data_helper_2("./data/mo100/sum0.8.dat", data_electron_energy_sum_0_8);
+
+    ////////////////////////////////////////////////////////////////////////////
+    // CONVERT INPUT DATA TO GRAPH FORMAT
+    ////////////////////////////////////////////////////////////////////////////
+
+    Int_t data_size{data_electron_energy_single_0_0.size()};
+
+    if(data_electron_energy_single_0_4.size() != data_size)
+        throw "error: size";
+    
+    if(data_electron_energy_single_0_8.size() != data_size)
+        throw "error: size";
+    
+    if(data_electron_energy_sum_0_0.size() != data_size)
+        throw "error: size";
+    
+    if(data_electron_energy_sum_0_4.size() != data_size)
+        throw "error: size";
+
+    if(data_electron_energy_sum_0_8.size() != data_size)
+        throw "error: size";
+
+    Double_t *data_x = new Double_t[data_size];
+
+    Double_t *data_single_0 = new Double_t[data_size];
+    Double_t *data_single_1 = new Double_t[data_size];
+    Double_t *data_single_2 = new Double_t[data_size];
+
+    Double_t *data_sum_0 = new Double_t[data_size];
+    Double_t *data_sum_1 = new Double_t[data_size];
+    Double_t *data_sum_2 = new Double_t[data_size];
+
+    for(std::size_t i{0}; i < data_size; ++ i)
+        data_x[i] = bb_Q * data_electron_energy_single_0_0[i][0];
+
+    for(std::size_t i{0}; i < data_size; ++ i)
+        data_single_0[i] = (1.0 / bb_Q) * data_electron_energy_single_0_0[i][1];
+
+    for(std::size_t i{0}; i < data_size; ++ i)
+        data_single_1[i] = (1.0 / bb_Q) * data_electron_energy_single_0_4[i][1];
+    
+    for(std::size_t i{0}; i < data_size; ++ i)
+        data_single_2[i] = (1.0 / bb_Q) * data_electron_energy_single_0_8[i][1];
+
+    for(std::size_t i{0}; i < data_size; ++ i)
+        data_sum_0[i] = (1.0 / bb_Q) * data_electron_energy_sum_0_0[i][1];
+
+    for(std::size_t i{0}; i < data_size; ++ i)
+        data_sum_1[i] = (1.0 / bb_Q) * data_electron_energy_sum_0_4[i][1];
+    
+    for(std::size_t i{0}; i < data_size; ++ i)
+        data_sum_2[i] = (1.0 / bb_Q) * data_electron_energy_sum_0_8[i][1];
+
+    TGraph *g_el_energy_single_0 = new TGraph(data_size, data_x, data_single_0);
+    TGraph *g_el_energy_single_1 = new TGraph(data_size, data_x, data_single_1);
+    TGraph *g_el_energy_single_2 = new TGraph(data_size, data_x, data_single_2);
+
+    TGraph *g_el_energy_sum_0 = new TGraph(data_size, data_x, data_sum_0);
+    TGraph *g_el_energy_sum_1 = new TGraph(data_size, data_x, data_sum_1);
+    TGraph *g_el_energy_sum_2 = new TGraph(data_size, data_x, data_sum_2);
+
+    // compute integral to test
+    Double_t data_single_0_integral{0.0};
+    for(Int_t i{0 + 1}; i < data_size - 1; ++ i)
+    {
+        data_single_0_integral += data_single_0[i];
+    }
+    data_single_0_integral *= 2.0;
+    data_single_0_integral += data_single_0[0];
+    data_single_0_integral += data_single_0[data_size - 1];
+    data_single_0_integral *= (data_x[1] - data_x[0]) / 2.0;
+    std::cout << "data_single_0_integral=" << data_single_0_integral << std::endl;
+
 
     ////////////////////////////////////////////////////////////////////////////
     // TODO: apply phase space factor to data
@@ -363,47 +464,47 @@ int main(int argc, char* argv[])
     
 
     // load from NEMO-3 data (MC), the reconstructed electron energy (2 in same histogram)
-    TH1D *h_el_energy_original = new TH1D("h_el_energy_original", "", 100, 0.0, 4.0);
+    TH1D *h_el_energy_original = new TH1D("h_el_energy_original", "", num_bins, 0.0, 4.0);
     h_el_energy_original->SetStats(0);
     h_el_energy_original->SetLineColor(2);
     h_el_energy_original->SetMarkerColor(2);
     // same as above but re-weighted
-    TH1D *h_el_energy_reweight = new TH1D("h_el_energy_reweight", "", 100, 0.0, 4.0);
+    TH1D *h_el_energy_reweight = new TH1D("h_el_energy_reweight", "", num_bins, 0.0, 4.0);
     h_el_energy_reweight->SetStats(0);
     h_el_energy_reweight->SetLineColor(3);
     h_el_energy_reweight->SetMarkerColor(3);
 
     // load from NEMO-3 data (mc), the sum of the two reconstructed electron energies
-    TH1D *h_el_energy_sum_original = new TH1D("h_el_energy_sum_original", "", 100, 0.0, 4.0);
+    TH1D *h_el_energy_sum_original = new TH1D("h_el_energy_sum_original", "", num_bins, 0.0, 4.0);
     h_el_energy_sum_original->SetStats(0);
     h_el_energy_sum_original->SetLineColor(2);
     h_el_energy_sum_original->SetMarkerColor(2);
     // same as above but re-weighted
-    TH1D *h_el_energy_sum_reweight = new TH1D("h_el_energy_sum_reweight", "", 100, 0.0, 4.0);
+    TH1D *h_el_energy_sum_reweight = new TH1D("h_el_energy_sum_reweight", "", num_bins, 0.0, 4.0);
     h_el_energy_sum_reweight->SetStats(0);
     h_el_energy_sum_reweight->SetLineColor(3);
     h_el_energy_sum_reweight->SetMarkerColor(3);
 
     // test histograms
     // NEMO-3 data/MC: truth electron energy x2 (T1, T2) (2 in same histo)
-    TH1D *h_test_single_original = new TH1D("h_test_single_original", "", 100, 0.0, 4.0);
+    TH1D *h_test_single_original = new TH1D("h_test_single_original", "", num_bins, 0.0, 4.0);
     h_test_single_original->SetStats(0);
     h_test_single_original->SetLineColor(2);
     h_test_single_original->SetMarkerColor(2);
     // re-weighted
-    TH1D *h_test_single_reweight = new TH1D("h_test_single_reweight", "", 100, 0.0, 4.0);
+    TH1D *h_test_single_reweight = new TH1D("h_test_single_reweight", "", num_bins, 0.0, 4.0);
     h_test_single_reweight->SetStats(0);
     h_test_single_reweight->SetLineColor(3);
     h_test_single_reweight->SetMarkerColor(3);
 
     // test histograms
     // NEMO-3 data/MC: reconstructed electron energy x2 (2 in same histo)
-    TH1D *h_test_sum_original = new TH1D("h_test_sum_original", "", 100, 0.0, 4.0);
+    TH1D *h_test_sum_original = new TH1D("h_test_sum_original", "", num_bins, 0.0, 4.0);
     h_test_sum_original->SetStats(0);
     h_test_sum_original->SetLineColor(2);
     h_test_sum_original->SetMarkerColor(2);
     // re-weighted
-    TH1D *h_test_sum_reweight = new TH1D("h_test_sum_reweight", "", 100, 0.0, 4.0);
+    TH1D *h_test_sum_reweight = new TH1D("h_test_sum_reweight", "", num_bins, 0.0, 4.0);
     h_test_sum_reweight->SetStats(0);
     h_test_sum_reweight->SetLineColor(3);
     h_test_sum_reweight->SetMarkerColor(3);
@@ -421,7 +522,7 @@ int main(int argc, char* argv[])
     // NEMO-3 data/MC read from tree
     // input file
 
-    TH2D *h_gen_weight = new TH2D("h_gen_weight", "", 100, 0.0, 4.0, 100, 0.0, 4.0);
+    TH2D *h_gen_weight = new TH2D("h_gen_weight", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
     h_gen_weight->SetStats(0);
     
     // read file using program arguments
@@ -457,9 +558,6 @@ int main(int argc, char* argv[])
         t->SetBranchAddress("gen_weight", &gen_weight);
     }
 
-    // Q value of decay
-    // MeV
-    Double_t bb_Q{3.034};
 
     std::cout << "Processing data" << std::endl;
     Long64_t prog_c{-1};
@@ -527,6 +625,27 @@ int main(int argc, char* argv[])
         }
 
     }
+    
+    // rescale histograms pre other re-scaling
+    h_el_energy_original->Scale((1.0 / 0.1) / h_el_energy_original->Integral());
+    h_el_energy_reweight->Scale((1.0 / 0.1) / h_el_energy_reweight->Integral());
+    h_el_energy_sum_original->Scale((1.0 / 0.1) / h_el_energy_sum_original->Integral());
+    h_el_energy_sum_reweight->Scale((1.0 / 0.1) / h_el_energy_sum_reweight->Integral());
+
+    h_test_single_original->Scale((1.0 / 0.1) / h_test_single_original->Integral());
+    h_test_single_reweight->Scale((1.0 / 0.1) / h_test_single_reweight->Integral());
+    h_test_sum_original->Scale((1.0 / 0.1) / h_test_sum_original->Integral());
+    h_test_sum_reweight->Scale((1.0 / 0.1) / h_test_sum_reweight->Integral());
+
+    std::cout << "h_el_energy_original_integral=" << h_el_energy_original->Integral() << std::endl;
+
+    // calculate integral manually
+    Double_t h_el_energy_original_integral{0.0};
+    for(Int_t i{1}; i <= h_el_energy_original->GetNbinsX(); ++ i)
+    {
+        h_el_energy_original_integral += h_el_energy_original->GetBinContent(i);
+    }
+    std::cout << "h_el_energy_original_integral=" << h_el_energy_original_integral << std::endl;
 
     TCanvas *c_gen_weight = new TCanvas("c_gen_weight", "", 800, 600);
     h_gen_weight->Draw("colz");
@@ -534,6 +653,14 @@ int main(int argc, char* argv[])
     c_gen_weight->SaveAs("c_gen_weight.png");
     c_gen_weight->SaveAs("c_gen_weight.pdf");
     delete c_gen_weight;
+
+    // scale the green histogram to match the red one (for sum energy histo)
+    Double_t integral_1{h_el_energy_sum_original->Integral()};
+    Double_t integral_2{h_el_energy_sum_reweight->Integral()};
+    h_el_energy_sum_reweight->Scale(integral_1 / integral_2);
+    h_el_energy_reweight->Scale(integral_1 / integral_2);
+    Double_t chi_square{chi_square_test(h_el_energy_reweight, h_el_energy_original)};
+    std::cout << "chi_square=" << chi_square << std::endl;
 
     /*
     TCanvas *c_el_energy_original = new TCanvas("c_el_energy_original", "c_el_energy_original", 800, 600);
@@ -573,6 +700,9 @@ int main(int argc, char* argv[])
     TCanvas *c_test_single = new TCanvas("c_test_single", "c_test_single", 800, 600);
     h_test_single_original->Draw("E");
     h_test_single_reweight->Draw("Esame");
+    g_el_energy_single_0->Draw("same");
+    g_el_energy_single_1->Draw("same");
+    g_el_energy_single_2->Draw("same");
     //h_test_single_reweight->Draw("E");
     c_test_single->SaveAs("c_test_single.C");
     c_test_single->SaveAs("c_test_single.png");
@@ -583,6 +713,9 @@ int main(int argc, char* argv[])
     TCanvas *c_test_sum = new TCanvas("c_test_sum", "c_test_sum", 800, 600);
     h_test_sum_original->Draw("E");
     h_test_sum_reweight->Draw("Esame");
+    g_el_energy_sum_0->Draw("same");
+    g_el_energy_sum_1->Draw("same");
+    g_el_energy_sum_2->Draw("same");
     //h_test_sum_reweight->Draw("E");
     c_test_sum->SaveAs("c_test_sum.C");
     c_test_sum->SaveAs("c_test_sum.png");

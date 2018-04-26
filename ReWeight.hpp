@@ -93,4 +93,37 @@ Double_t ReWeight(const Double_t T1, const Double_t T2, const Double_t epsilon,
 }
 
 
+Double_t chi_square_test(const TH1D* const histo_base, const TH1D* const histo_test)
+{
+    if(histo_base->GetNbinsX() != histo_test->GetNbinsX())
+    {
+        throw "invalid bin number error";
+    }
+
+    Double_t sum{0.0};
+    for(Int_t ix{1}; ix <= histo_base->GetNbinsX(); ++ ix)
+    {
+        Double_t content_1{histo_base->GetBinContent(ix)};
+        Double_t content_2{histo_test->GetBinContent(ix)};
+        Double_t delta{content_1 - content_2};
+        Double_t error{histo_test->GetBinError(ix)};
+        if(error <= 0.0)
+        {
+            if(content_2 == 0.0)
+            {
+                continue;
+            }
+            else
+            {
+                std::cerr << "Warning: Skipping bin with index " << ix << " in chi_square_test, bin error is 0.0 but content != 0.0" << std::endl;
+            }
+        }
+        Double_t chi{std::pow(delta / error, 2.0)};
+        sum += chi;
+    }
+    sum /= (Double_t)histo_base->GetNbinsX();
+    return sum;
+}
+
+
 #endif
