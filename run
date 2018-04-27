@@ -1,1 +1,2 @@
-./build/main
+#!/bin/bash
+./build/main --epsilon 0.8

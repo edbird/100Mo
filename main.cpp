@@ -393,7 +393,7 @@ int main(int argc, char* argv[])
     if(arg_batch_mode == std::string("true"))
     {
         batch_mode = true;
-        batch_mode_enable_string("false");
+        std::string batch_mode_enable_string("false");
         if(batch_mode)
         {
             batch_mode_enable_string = std::string("true");
@@ -1035,10 +1035,14 @@ int main(int argc, char* argv[])
     // the bin width for the other set is 1 MeV / 1000 = 1 keV (?)
     // factor 1000 discrepency?
     // TODO: resolve this issue
-    h_el_energy_original->Scale((1.0 / 0.1) / h_el_energy_original->Integral());
-    h_el_energy_reweight->Scale((1.0 / 0.1) / h_el_energy_reweight->Integral());
-    h_el_energy_sum_original->Scale((1.0 / 0.1) / h_el_energy_sum_original->Integral());
-    h_el_energy_sum_reweight->Scale((1.0 / 0.1) / h_el_energy_sum_reweight->Integral());
+    //h_el_energy_original->Scale((1.0 / 0.1) / h_el_energy_original->Integral());
+    //h_el_energy_reweight->Scale((1.0 / 0.1) / h_el_energy_reweight->Integral());
+    //h_el_energy_sum_original->Scale((1.0 / 0.1) / h_el_energy_sum_original->Integral());
+    //h_el_energy_sum_reweight->Scale((1.0 / 0.1) / h_el_energy_sum_reweight->Integral());
+    TH1D *h_el_energy_sum_reweight_clone = (TH1D*)h_el_energy_sum_reweight->Clone();
+    h_el_energy_sum_reweight_clone->SetLineColor(4);
+    TH1D *h_el_energy_sum_original_clone = (TH1D*)h_el_energy_sum_original->Clone();
+    h_el_energy_sum_original_clone->SetLineColor(5);
 
     h_test_single_original->Scale((1.0 / 0.1) / h_test_single_original->Integral());
     h_test_single_reweight->Scale((1.0 / 0.1) / h_test_single_reweight->Integral());
@@ -1114,6 +1118,8 @@ int main(int argc, char* argv[])
             f_el_energy_sum_original->FixParameter(ix, par_ix);
             f_el_energy_sum_original->FixParameter(jx, par_jx);
             
+            // TODO: am i putting the right information into the fitting function and am
+            // i fitting the correct function?
             h_el_energy_sum_original->Fit("f_el_energy_sum_original", "0");
 
         }
@@ -1173,6 +1179,8 @@ int main(int argc, char* argv[])
         c_el_energy_sum_both->SetLogy(log_mode);
         h_el_energy_sum_original->Draw("E");
         h_el_energy_sum_reweight->Draw("Esame");
+        h_el_energy_sum_original_clone->Draw("Esame");
+        h_el_energy_sum_reweight_clone->Draw("Esame");
         c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.C");
         c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.png");
         c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.pdf");
