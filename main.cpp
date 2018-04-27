@@ -5,6 +5,7 @@
 #include "TGraph.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TF1.h"
 #include "TFile.h"
 #include "TTree.h"
 
@@ -15,6 +16,77 @@
 
 #include "ReWeight.hpp"
 #include "read_data.hpp"
+
+// should the parameter go in the "function" or the "data"?
+// currently I have it in the data, not the function, which is weird?
+
+// x[0] stores the current x value, par[0] stores the "parameter" (amplitude)
+// par[1 ...] stores the data for the other histogram, however these parameters
+// are constants
+// NOTE: par also includes the "position of the end of the final bin"
+Double_t fit_function(Double_t *x, Double_t *par)
+{
+    Double_t amplitude{par[0]};
+    Int_t number_of_bins{40}; // TODO: change to global variable?
+
+    // expand par into x and y values
+    // NOTE: par also includes the "position of the end of the final bin"
+    Double_t *x_values{new Double_t[number_of_bins + 1]};
+    Double_t *y_values{new Double_t[number_of_bins + 1]};
+
+    for(Int_t i{0}; i <= number_of_bins; ++ i)
+    {
+        Int_t ix{2 * i + 1};
+        Int_t jx{2 * i + 2};
+
+        x_values[i] = par[ix];
+        y_values[i] = par[jx];
+
+        std::cout << "x=" << x_values[i] << " y=" << y_values[i] << std::endl;
+    }
+
+    std::cin.get();
+
+    Double_t xx{x[0]};
+    
+    // find bin in which x lies
+    if(xx < x_values[0])
+    {
+        // x too small
+    }
+
+    if(xx > x_values[number_of_bins])
+    {
+        // x too large
+    }
+
+    //debug
+    bool found{false};
+    Int_t found_bin_index{-1};
+
+    for(Int_t i{0}; i < number_of_bins; ++ i)
+    {
+        if(x_values[i] <= xx)
+        {
+            if(xx < x_values[i + 1])
+            {
+                found = true;
+                found_bin_index = i;
+            }
+        }
+    }
+
+    if(!found)
+    {
+        std::cerr << "error, bin not found in fit_function" << std::endl;
+        throw "problem";
+    }
+
+    // get y value (content) of this bin
+    // return content
+    Double_t ret{y_values[found_bin_index]};
+    return ret;
+}
 
 // 0.0 MeV to 4.0 MeV = 4.0 MeV range
 // num_bins keV bin width: 4.0 MeV / 0.1 MeV = 40 bins
@@ -116,12 +188,22 @@ int main(int argc, char* argv[])
         data_sum_2[i] = (1.0 / bb_Q) * data_electron_energy_sum_0_8[i][1];
 
     TGraph *g_el_energy_single_0 = new TGraph(data_size, data_x, data_single_0);
+    g_el_energy_single_0->SetLineColor(2);
+
     TGraph *g_el_energy_single_1 = new TGraph(data_size, data_x, data_single_1);
+    g_el_energy_single_1->SetLineColor(3);
+    
     TGraph *g_el_energy_single_2 = new TGraph(data_size, data_x, data_single_2);
+    g_el_energy_single_2->SetLineColor(4);
 
     TGraph *g_el_energy_sum_0 = new TGraph(data_size, data_x, data_sum_0);
+    g_el_energy_sum_0->SetLineColor(2);
+    
     TGraph *g_el_energy_sum_1 = new TGraph(data_size, data_x, data_sum_1);
+    g_el_energy_sum_1->SetLineColor(3);
+    
     TGraph *g_el_energy_sum_2 = new TGraph(data_size, data_x, data_sum_2);
+    g_el_energy_sum_2->SetLineColor(4);
 
     // compute integral to test
     Double_t data_single_0_integral{0.0};
@@ -316,7 +398,7 @@ int main(int argc, char* argv[])
     }*/
     h_single_electron_1->SetStats(0);
     h_single_electron_1->SetLineColor(3);
-    h_single_electron_0->SetMarkerColor(2);
+    h_single_electron_1->SetMarkerColor(3);
     
     // epsilon_31 = 0.8
     TH1D *h_single_electron_2 = h_data_2->ProjectionX("h_single_electron_2");
@@ -328,7 +410,7 @@ int main(int argc, char* argv[])
     }*/
     h_single_electron_2->SetStats(0);
     h_single_electron_2->SetLineColor(4);
-    h_single_electron_0->SetMarkerColor(4);
+    h_single_electron_2->SetMarkerColor(4);
 
     /*
     TH1D *h_single_electron_0 = new TH1D("h_single_electron_0", "", dimension_xy, 0.0, 1.0);
@@ -461,7 +543,7 @@ int main(int argc, char* argv[])
 
     //ReWeight(0.5, 0.5, 0.0, data_nEqNull, data_nEqTwo); 
     //ReWeight(0.45, 0.3, 0.8, h_nEqNull, h_nEqTwo, psiN0, psiN2); 
-    
+
 
     // load from NEMO-3 data (MC), the reconstructed electron energy (2 in same histogram)
     TH1D *h_el_energy_original = new TH1D("h_el_energy_original", "", num_bins, 0.0, 4.0);
@@ -471,8 +553,8 @@ int main(int argc, char* argv[])
     // same as above but re-weighted
     TH1D *h_el_energy_reweight = new TH1D("h_el_energy_reweight", "", num_bins, 0.0, 4.0);
     h_el_energy_reweight->SetStats(0);
-    h_el_energy_reweight->SetLineColor(3);
-    h_el_energy_reweight->SetMarkerColor(3);
+    h_el_energy_reweight->SetLineColor(4);
+    h_el_energy_reweight->SetMarkerColor(4);
 
     // load from NEMO-3 data (mc), the sum of the two reconstructed electron energies
     TH1D *h_el_energy_sum_original = new TH1D("h_el_energy_sum_original", "", num_bins, 0.0, 4.0);
@@ -482,8 +564,8 @@ int main(int argc, char* argv[])
     // same as above but re-weighted
     TH1D *h_el_energy_sum_reweight = new TH1D("h_el_energy_sum_reweight", "", num_bins, 0.0, 4.0);
     h_el_energy_sum_reweight->SetStats(0);
-    h_el_energy_sum_reweight->SetLineColor(3);
-    h_el_energy_sum_reweight->SetMarkerColor(3);
+    h_el_energy_sum_reweight->SetLineColor(4);
+    h_el_energy_sum_reweight->SetMarkerColor(4);
 
     // test histograms
     // NEMO-3 data/MC: truth electron energy x2 (T1, T2) (2 in same histo)
@@ -494,8 +576,8 @@ int main(int argc, char* argv[])
     // re-weighted
     TH1D *h_test_single_reweight = new TH1D("h_test_single_reweight", "", num_bins, 0.0, 4.0);
     h_test_single_reweight->SetStats(0);
-    h_test_single_reweight->SetLineColor(3);
-    h_test_single_reweight->SetMarkerColor(3);
+    h_test_single_reweight->SetLineColor(4);
+    h_test_single_reweight->SetMarkerColor(4);
 
     // test histograms
     // NEMO-3 data/MC: reconstructed electron energy x2 (2 in same histo)
@@ -506,8 +588,8 @@ int main(int argc, char* argv[])
     // re-weighted
     TH1D *h_test_sum_reweight = new TH1D("h_test_sum_reweight", "", num_bins, 0.0, 4.0);
     h_test_sum_reweight->SetStats(0);
-    h_test_sum_reweight->SetLineColor(3);
-    h_test_sum_reweight->SetMarkerColor(3);
+    h_test_sum_reweight->SetLineColor(4);
+    h_test_sum_reweight->SetMarkerColor(4);
 
 
     // write data histograms to file
@@ -632,6 +714,7 @@ int main(int argc, char* argv[])
     // the bin width for one set is 100 keV
     // the bin width for the other set is 1 MeV / 1000 = 1 keV (?)
     // factor 1000 discrepency?
+    // TODO: resolve this issue
     h_el_energy_original->Scale((1.0 / 0.1) / h_el_energy_original->Integral());
     h_el_energy_reweight->Scale((1.0 / 0.1) / h_el_energy_reweight->Integral());
     h_el_energy_sum_original->Scale((1.0 / 0.1) / h_el_energy_sum_original->Integral());
@@ -660,12 +743,53 @@ int main(int argc, char* argv[])
     delete c_gen_weight;
 
     // scale the green histogram to match the red one (for sum energy histo)
-    Double_t integral_1{h_el_energy_sum_original->Integral()};
-    Double_t integral_2{h_el_energy_sum_reweight->Integral()};
-    h_el_energy_sum_reweight->Scale(integral_1 / integral_2);
-    h_el_energy_reweight->Scale(integral_1 / integral_2);
-    Double_t chi_square{chi_square_test(h_el_energy_reweight, h_el_energy_original)};
-    std::cout << "chi_square=" << chi_square << std::endl;
+    // OLD
+    //Double_t integral_1{h_el_energy_sum_original->Integral()};
+    //Double_t integral_2{h_el_energy_sum_reweight->Integral()};
+    //h_el_energy_sum_reweight->Scale(integral_1 / integral_2);
+    //h_el_energy_reweight->Scale(integral_1 / integral_2);
+    //Double_t chi_square{chi_square_test(h_el_energy_reweight, h_el_energy_original)};
+    //std::cout << "chi_square=" << chi_square << std::endl;
+    // NEW
+    TF1 *f_el_energy_sum_original = new TF1("f_el_energy_sum_original", fit_function, 0.0, 4.0, 1 + 2 * h_el_energy_sum_reweight->GetNbinsX());
+    f_el_energy_sum_original->SetParameter(0, 1.0); // set initial amplitude parameter to 1.0
+    // set the "parameters" (constants)
+    // these are the values from the histogram
+    {
+        Int_t ix{0};
+        Int_t jx{0};
+        Double_t par_ix{0.0};
+        Double_t par_jx{0.0};
+
+        Int_t nbx{h_el_energy_sum_reweight->GetNbinsX()};
+
+        for(Int_t i{0}; i <= nbx; ++ i)
+        {
+            ix = 2 * i + 1;
+            jx = 2 * i + 2;
+
+            par_ix = h_el_energy_sum_reweight->GetXaxis()->GetBinCenter(i + 1);
+            par_jx = h_el_energy_sum_reweight->GetBinContent(i + 1);
+
+            //std::cout << "x=" << par_ix << " y=" << par_jx << std::endl;
+
+            f_el_energy_sum_original->FixParameter(ix, par_ix);
+            f_el_energy_sum_original->FixParameter(jx, par_jx);
+        }
+
+        ix = 2 * nbx + 3;
+        ix = 2 * nbx + 4;
+        
+        par_ix = h_el_energy_sum_reweight->GetXaxis()->GetBinCenter(nbx + 1) + h_el_energy_sum_reweight->GetBinWidth(1);
+        par_jx = 0.0; // content doesn't make sense here, don't use "overflow" by accident
+
+        // final 2, marks the end point of final "bin"
+        f_el_energy_sum_original->FixParameter(ix, par_ix);
+        f_el_energy_sum_original->FixParameter(jx, par_jx);
+        
+        h_el_energy_sum_original->Fit("f_el_energy_sum_original");
+
+    }
 
     /*
     TCanvas *c_el_energy_original = new TCanvas("c_el_energy_original", "c_el_energy_original", 800, 600);
@@ -682,9 +806,13 @@ int main(int argc, char* argv[])
     c_el_energy_reweight->SaveAs("c_el_energy_reweight.pdf");
     delete c_el_energy_reweight; 
     */
+    
+    // enable/disable printing with log canvas
+    Bool_t log_mode{false};
 
     // print single electron distribution
     TCanvas *c_el_energy_both = new TCanvas("e_el_energy_both", "e_el_energy_both", 800, 600);
+    c_el_energy_both->SetLogy(log_mode);
     h_el_energy_original->Draw("E");
     h_el_energy_reweight->Draw("Esame");
     c_el_energy_both->SaveAs("c_el_energy_both.C");
@@ -694,6 +822,7 @@ int main(int argc, char* argv[])
 
     // print summed distribution
     TCanvas *c_el_energy_sum_both = new TCanvas("e_el_energy_sum_both", "e_el_energy_sum_both", 800, 600);
+    c_el_energy_sum_both->SetLogy(log_mode);
     h_el_energy_sum_original->Draw("E");
     h_el_energy_sum_reweight->Draw("Esame");
     c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.C");
@@ -703,6 +832,7 @@ int main(int argc, char* argv[])
 
     // print single electron distribution test histograms
     TCanvas *c_test_single = new TCanvas("c_test_single", "c_test_single", 800, 600);
+    c_test_single->SetLogy(log_mode);
     h_test_single_original->Draw("E");
     h_test_single_reweight->Draw("Esame");
     g_el_energy_single_0->Draw("same");
@@ -716,6 +846,7 @@ int main(int argc, char* argv[])
     
     // print summed distribution test histograms
     TCanvas *c_test_sum = new TCanvas("c_test_sum", "c_test_sum", 800, 600);
+    c_test_sum->SetLogy(log_mode);
     h_test_sum_original->Draw("E");
     h_test_sum_reweight->Draw("Esame");
     g_el_energy_sum_0->Draw("same");
