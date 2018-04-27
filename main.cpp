@@ -289,6 +289,121 @@ Int_t num_bins{40};
 
 int main(int argc, char* argv[])
 {
+    
+    ////////////////////////////////////////////////////////////////////////////
+    // PROCESS PROGRAM ARGUMENTS
+    ////////////////////////////////////////////////////////////////////////////
+
+    // specify argument defaults, as string
+    const std::string arg_default_filename("NewElectronNtuplizerExe_Int_ManDB_output.root");
+    const std::string arg_default_epsilon_31("0.0");
+    const std::string arg_default_batch_mode("false");
+
+    // specify actual argument, as string
+    std::string arg_filename(arg_default_filename);
+    std::string arg_epsilon_31(arg_default_epsilon_31);
+    std::string arg_batch_mode(arg_default_batch_mode);
+
+    // specify actual argument, as required value, no value set yet
+    std::string filename;
+    double epsilon_31;
+    bool batch_mode;
+
+    // specify argument trigger strings
+    std::string arg_trigger_filename("--filename");
+    std::string arg_trigger_epsilon_31("--epsilon");
+    std::string arg_trigger_batch_mode("--batch-mode");
+
+    // process arguments
+    for(int ix{1}; ix < argc; ++ ix)
+    {
+        // current argument
+        std::string arg{std::string(argv[ix])};
+
+        // TODO: this always true?
+        if(ix < argc)
+        {
+            // switch arg, search for trigger
+            if(arg == std::string("-h") || arg == std::string("--help"))
+            {
+                //print_general_help(std::cout, argv);
+                std::cout << "todo: help" << std::endl;
+                std::cout.flush();
+            }
+            else if(arg == arg_trigger_filename)
+            {
+                if(++ ix < argc)
+                {
+                    arg_filename = std::string(argv[ix]);
+                }
+                else
+                {
+                    std::cout << "[ WARNING ] : " << arg << " FILENAME" << std::endl;
+                    std::cout << "[ WARNING ] : expected string FILENAME following argument " << arg << std::endl;
+                }
+            }
+            else if(arg == arg_trigger_epsilon_31)
+            {
+                if(++ ix < argc)
+                {
+                    arg_epsilon_31 = std::string(argv[ix]);
+                }
+                else
+                {
+                    std::cout << "[ WARNING ] : " << arg << " EPSILON_31" << std::endl;
+                    std::cout << "[ WARNING ] : expected floating point EPSILON_31 following argument " << arg << std::endl;
+                }
+            }
+            else if(arg == arg_trigger_batch_mode)
+            {
+                if(++ ix < argc)
+                {
+                    arg_batch_mode = std::string(argv[ix]);
+                }
+                else
+                {
+                    std::cout << "[ WARNING ] : " << arg << " BOOLEAN" << std::endl;
+                    std::cout << "[ WARNING ] : expected [true/false] following argument " << arg << std::endl;
+                }
+            }
+            else
+            {
+                std::cerr << "[ WARNING ] : unrecognized argument " << arg << " at index " << ix << std::endl;
+            }
+        }
+    }
+
+    // process gathered argument data
+    filename = arg_filename;
+    std::string filename_default(arg_default_filename); // required for later if test
+    // TODO: check filename exists!
+
+    epsilon_31 = std::stod(arg_epsilon_31);
+    // todo: check valid
+    if(0.0 <= epsilon_31 && epsilon_31 <= 0.8)
+    {
+        std::cout << "[ INFO ] : Set epsilon_31 = " << epsilon_31 << std::endl;
+    }
+    else
+    {
+        std::cout << "invalid epsilon_31 value" << std::endl;
+        throw "invalid epsilon_31 value";
+    }
+
+    if(arg_batch_mode == std::string("true"))
+    {
+        batch_mode = true;
+        batch_mode_enable_string("false");
+        if(batch_mode)
+        {
+            batch_mode_enable_string = std::string("true");
+        }
+        std::cout << "[ INFO ] : Batch mode: " << batch_mode_enable_string << std::endl;
+    }
+
+
+
+
     // Q value of decay
     // MeV
     Double_t bb_Q{3.034};
@@ -539,26 +654,29 @@ int main(int argc, char* argv[])
     #define PRINT_DATA_CANVAS 0
     #if PRINT_DATA_CANVAS
 
-        TCanvas *c_data_0 = new TCanvas("c_data_0", "", 4000, 3000);
-        h_data_0->Draw("colz");
-        c_data_0->SaveAs("c_data_0.png");
-        c_data_0->SaveAs("c_data_0.pdf");
-        c_data_0->SaveAs("c_data_0.C");
-        delete c_data_0;
+        if(batch_mode == false)
+        {
+            TCanvas *c_data_0 = new TCanvas("c_data_0", "", 4000, 3000);
+            h_data_0->Draw("colz");
+            c_data_0->SaveAs("c_data_0.png");
+            c_data_0->SaveAs("c_data_0.pdf");
+            c_data_0->SaveAs("c_data_0.C");
+            delete c_data_0;
 
-        TCanvas *c_data_1 = new TCanvas("c_data_1", "", 4000, 3000);
-        h_data_1->Draw("colz");
-        c_data_1->SaveAs("c_data_1.png");
-        c_data_1->SaveAs("c_data_1.pdf");
-        c_data_1->SaveAs("c_data_1.C");
-        delete c_data_1;
+            TCanvas *c_data_1 = new TCanvas("c_data_1", "", 4000, 3000);
+            h_data_1->Draw("colz");
+            c_data_1->SaveAs("c_data_1.png");
+            c_data_1->SaveAs("c_data_1.pdf");
+            c_data_1->SaveAs("c_data_1.C");
+            delete c_data_1;
 
-        TCanvas *c_data_2 = new TCanvas("c_data_2", "", 4000, 3000);
-        h_data_2->Draw("colz");
-        c_data_2->SaveAs("c_data_2.png");
-        c_data_2->SaveAs("c_data_2.pdf");
-        c_data_2->SaveAs("c_data_2.C");
-        delete c_data_2;
+            TCanvas *c_data_2 = new TCanvas("c_data_2", "", 4000, 3000);
+            h_data_2->Draw("colz");
+            c_data_2->SaveAs("c_data_2.png");
+            c_data_2->SaveAs("c_data_2.pdf");
+            c_data_2->SaveAs("c_data_2.C");
+            delete c_data_2;
+        }
 
     #endif
 
@@ -648,14 +766,17 @@ int main(int argc, char* argv[])
 
     // these histograms created from projection of the h_data_? histograms
     // along the X direction
-    TCanvas *c_single_electron = new TCanvas("c_single_electron", "", 4000, 3000);
-    h_single_electron_0->Draw("hist");
-    h_single_electron_1->Draw("histsame");
-    h_single_electron_2->Draw("histsame");
-    c_single_electron->SaveAs("c_single_electron.png");
-    c_single_electron->SaveAs("c_single_electron.pdf");
-    c_single_electron->SaveAs("c_single_electron.C");
-    delete c_single_electron;
+    if(batch_mode == false)
+    {
+        TCanvas *c_single_electron = new TCanvas("c_single_electron", "", 4000, 3000);
+        h_single_electron_0->Draw("hist");
+        h_single_electron_1->Draw("histsame");
+        h_single_electron_2->Draw("histsame");
+        c_single_electron->SaveAs("c_single_electron.png");
+        c_single_electron->SaveAs("c_single_electron.pdf");
+        c_single_electron->SaveAs("c_single_electron.C");
+        delete c_single_electron;
+    }
 
     ////////////////////////////////////////////////////////////////////////////
     // ELECTRON ENERGY CONVERSION
@@ -789,6 +910,7 @@ int main(int argc, char* argv[])
 
     // write data histograms to file
     // intermediate file
+    // used for creating test histogram
     TFile *f_histogram = new TFile("f_histogram.root", "recreate");
     h_data_0->Write();
     h_data_1->Write();
@@ -803,8 +925,8 @@ int main(int argc, char* argv[])
     h_gen_weight->SetStats(0);
     
     // read file using program arguments
-    std::string filename_default("NewElectronNtuplizerExe_Int_ManDB_output.root");
-    std::string filename(filename_default);
+    //std::string filename_default("NewElectronNtuplizerExe_Int_ManDB_output.root");
+    //std::string filename(filename_default);
     bool gen_weight_enable{false};
     if(argc == 2)
     {
@@ -838,6 +960,7 @@ int main(int argc, char* argv[])
 
     std::cout << "Processing data" << std::endl;
     Long64_t prog_c{-1};
+    //const Double epsilon_31{0.0};
     for(Long64_t ix{0}; ix < t->GetEntries(); ++ ix)
     {
 
@@ -851,7 +974,7 @@ int main(int argc, char* argv[])
         //std::cout << "trueT1=" << trueT1 << " trueT2=" << trueT2;
         //std::cout << " -> " << ReWeight(trueT1 / bb_Q, trueT2 / bb_Q, 0.8, h_nEqNull, h_nEqTwo, psiN0, psiN2) << std::endl;
 
-        const Double_t epsilon_31{0.8};
+        //const Double_t epsilon_31{0.8};
 
         Double_t T1{trueT1 / bb_Q};
         Double_t T2{trueT2 / bb_Q};
@@ -932,12 +1055,15 @@ int main(int argc, char* argv[])
     }
     std::cout << "h_el_energy_original_integral=" << h_el_energy_original_integral << std::endl;
 
-    TCanvas *c_gen_weight = new TCanvas("c_gen_weight", "", 800, 600);
-    h_gen_weight->Draw("colz");
-    c_gen_weight->SaveAs("c_gen_weight.C");
-    c_gen_weight->SaveAs("c_gen_weight.png");
-    c_gen_weight->SaveAs("c_gen_weight.pdf");
-    delete c_gen_weight;
+    if(batch_mode == false)
+    {
+        TCanvas *c_gen_weight = new TCanvas("c_gen_weight", "", 800, 600);
+        h_gen_weight->Draw("colz");
+        c_gen_weight->SaveAs("c_gen_weight.C");
+        c_gen_weight->SaveAs("c_gen_weight.png");
+        c_gen_weight->SaveAs("c_gen_weight.pdf");
+        delete c_gen_weight;
+    }
 
     // scale the green histogram to match the red one (for sum energy histo)
     // OLD
@@ -948,6 +1074,7 @@ int main(int argc, char* argv[])
     //Double_t chi_square{chi_square_test(h_el_energy_reweight, h_el_energy_original)};
     //std::cout << "chi_square=" << chi_square << std::endl;
     // NEW
+    Double_t sensitivity_chisquare{0.0};
     #define FIT_METHOD_2 1
     #if FIT_METHOD_2
         TF1 *f_el_energy_sum_original = new TF1("f_el_energy_sum_original", fit_function, 0.0, 4.0, 1 + 2 * (h_el_energy_sum_reweight->GetNbinsX() + 1));
@@ -999,7 +1126,8 @@ int main(int argc, char* argv[])
         h_el_energy_reweight->Scale(f_el_energy_sum_original->GetParameter(0));
 
         // get chi-square for single electron histograms
-        std::cout << "chi square of single electron: " << chi_square_test(h_el_energy_reweight, h_el_energy_original) << std::endl;
+        sensitivity_chisquare = chi_square_test(h_el_energy_reweight, h_el_energy_original);
+        std::cout << "chi square of single electron: " << sensitivity_chisquare << std::endl;
     #endif
     
     #define FIT_METHOD_3 0
@@ -1028,53 +1156,56 @@ int main(int argc, char* argv[])
     // enable/disable printing with log canvas
     Bool_t log_mode{false};
 
-    // print single electron distribution
-    TCanvas *c_el_energy_both = new TCanvas("e_el_energy_both", "e_el_energy_both", 800, 600);
-    c_el_energy_both->SetLogy(log_mode);
-    h_el_energy_original->Draw("E");
-    h_el_energy_reweight->Draw("Esame");
-    c_el_energy_both->SaveAs("c_el_energy_both.C");
-    c_el_energy_both->SaveAs("c_el_energy_both.png");
-    c_el_energy_both->SaveAs("c_el_energy_both.pdf");
-    delete c_el_energy_both;
+    if(batch_mode == false)
+    {
+        // print single electron distribution
+        TCanvas *c_el_energy_both = new TCanvas("e_el_energy_both", "e_el_energy_both", 800, 600);
+        c_el_energy_both->SetLogy(log_mode);
+        h_el_energy_original->Draw("E");
+        h_el_energy_reweight->Draw("Esame");
+        c_el_energy_both->SaveAs("c_el_energy_both.C");
+        c_el_energy_both->SaveAs("c_el_energy_both.png");
+        c_el_energy_both->SaveAs("c_el_energy_both.pdf");
+        delete c_el_energy_both;
 
-    // print summed distribution
-    TCanvas *c_el_energy_sum_both = new TCanvas("e_el_energy_sum_both", "e_el_energy_sum_both", 800, 600);
-    c_el_energy_sum_both->SetLogy(log_mode);
-    h_el_energy_sum_original->Draw("E");
-    h_el_energy_sum_reweight->Draw("Esame");
-    c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.C");
-    c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.png");
-    c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.pdf");
-    delete c_el_energy_sum_both; 
+        // print summed distribution
+        TCanvas *c_el_energy_sum_both = new TCanvas("e_el_energy_sum_both", "e_el_energy_sum_both", 800, 600);
+        c_el_energy_sum_both->SetLogy(log_mode);
+        h_el_energy_sum_original->Draw("E");
+        h_el_energy_sum_reweight->Draw("Esame");
+        c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.C");
+        c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.png");
+        c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.pdf");
+        delete c_el_energy_sum_both; 
 
-    // print single electron distribution test histograms
-    TCanvas *c_test_single = new TCanvas("c_test_single", "c_test_single", 800, 600);
-    c_test_single->SetLogy(log_mode);
-    h_test_single_original->Draw("E");
-    h_test_single_reweight->Draw("Esame");
-    g_el_energy_single_0->Draw("same");
-    g_el_energy_single_1->Draw("same");
-    g_el_energy_single_2->Draw("same");
-    //h_test_single_reweight->Draw("E");
-    c_test_single->SaveAs("c_test_single.C");
-    c_test_single->SaveAs("c_test_single.png");
-    c_test_single->SaveAs("c_test_single.pdf");
-    delete c_test_single;
-    
-    // print summed distribution test histograms
-    TCanvas *c_test_sum = new TCanvas("c_test_sum", "c_test_sum", 800, 600);
-    c_test_sum->SetLogy(log_mode);
-    h_test_sum_original->Draw("E");
-    h_test_sum_reweight->Draw("Esame");
-    g_el_energy_sum_0->Draw("same");
-    g_el_energy_sum_1->Draw("same");
-    g_el_energy_sum_2->Draw("same");
-    //h_test_sum_reweight->Draw("E");
-    c_test_sum->SaveAs("c_test_sum.C");
-    c_test_sum->SaveAs("c_test_sum.png");
-    c_test_sum->SaveAs("c_test_sum.pdf");
-    delete c_test_sum;
+        // print single electron distribution test histograms
+        TCanvas *c_test_single = new TCanvas("c_test_single", "c_test_single", 800, 600);
+        c_test_single->SetLogy(log_mode);
+        h_test_single_original->Draw("E");
+        h_test_single_reweight->Draw("Esame");
+        g_el_energy_single_0->Draw("same");
+        g_el_energy_single_1->Draw("same");
+        g_el_energy_single_2->Draw("same");
+        //h_test_single_reweight->Draw("E");
+        c_test_single->SaveAs("c_test_single.C");
+        c_test_single->SaveAs("c_test_single.png");
+        c_test_single->SaveAs("c_test_single.pdf");
+        delete c_test_single;
+        
+        // print summed distribution test histograms
+        TCanvas *c_test_sum = new TCanvas("c_test_sum", "c_test_sum", 800, 600);
+        c_test_sum->SetLogy(log_mode);
+        h_test_sum_original->Draw("E");
+        h_test_sum_reweight->Draw("Esame");
+        g_el_energy_sum_0->Draw("same");
+        g_el_energy_sum_1->Draw("same");
+        g_el_energy_sum_2->Draw("same");
+        //h_test_sum_reweight->Draw("E");
+        c_test_sum->SaveAs("c_test_sum.C");
+        c_test_sum->SaveAs("c_test_sum.png");
+        c_test_sum->SaveAs("c_test_sum.pdf");
+        delete c_test_sum;
+    }
 
 
 
@@ -1084,6 +1215,10 @@ int main(int argc, char* argv[])
     // print entries
     std::cout << "Number of entries in each histogram: h_el_energy_original: " << h_el_energy_original->GetEntries() << " h_el_energy_reweight: " << h_el_energy_reweight->GetEntries() << std::endl;
 
+
+    // add data to data output file
+    std::ofstream of_data("of_data.txt", std::ios::app);
+    of_data << "epsilon_31, " << epsilon_31 << ", chi_square, " << sensitivity_chisquare << std::endl;
 
 
     return 0;
