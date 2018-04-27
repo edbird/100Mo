@@ -27,7 +27,7 @@
 Double_t fit_function(Double_t *x, Double_t *par)
 {
     Double_t amplitude{par[0]};
-    std::cout << "amplitude=" << amplitude << std::endl;
+    //std::cout << "amplitude=" << amplitude << std::endl;
     Int_t number_of_bins{40}; // TODO: change to global variable?
 
     // expand par into x and y values
@@ -97,7 +97,7 @@ Double_t fit_function(Double_t *x, Double_t *par)
 
     // get y value (content) of this bin
     // return content
-    Double_t ret{y_values[found_bin_index]};
+    Double_t ret{amplitude * y_values[found_bin_index]};
     return ret;
 }
 
@@ -948,10 +948,11 @@ int main(int argc, char* argv[])
     //Double_t chi_square{chi_square_test(h_el_energy_reweight, h_el_energy_original)};
     //std::cout << "chi_square=" << chi_square << std::endl;
     // NEW
-    #define FIT_METHOD_2 0
+    #define FIT_METHOD_2 1
     #if FIT_METHOD_2
         TF1 *f_el_energy_sum_original = new TF1("f_el_energy_sum_original", fit_function, 0.0, 4.0, 1 + 2 * (h_el_energy_sum_reweight->GetNbinsX() + 1));
         f_el_energy_sum_original->SetParameter(0, 1.0); // set initial amplitude parameter to 1.0
+        f_el_energy_sum_original->SetNpx(100000);
         // set the "parameters" (constants)
         // these are the values from the histogram
         {
@@ -986,15 +987,22 @@ int main(int argc, char* argv[])
             f_el_energy_sum_original->FixParameter(ix, par_ix);
             f_el_energy_sum_original->FixParameter(jx, par_jx);
             
-            h_el_energy_sum_original->Fit("f_el_energy_sum_original");
+            h_el_energy_sum_original->Fit("f_el_energy_sum_original", "0");
 
         }
-        std::cout << "Amplitude parameter: " << f_el_energy_sum_original->GetParameter(1) << std::endl;
-        std::cout << "                err: " << f_el_energy_sum_original->GetParError(1) << std::endl;
+        std::cout << "Amplitude parameter: " << f_el_energy_sum_original->GetParameter(0) << std::endl;
+        std::cout << "                err: " << f_el_energy_sum_original->GetParError(0) << std::endl;
         std::cout << "         chi square: " << f_el_energy_sum_original->GetChisquare() / h_el_energy_sum_original->GetNbinsX() << std::endl;
+
+        // scale the red histogram using the amplitude parameter
+        h_el_energy_sum_reweight->Scale(f_el_energy_sum_original->GetParameter(0));
+        h_el_energy_reweight->Scale(f_el_energy_sum_original->GetParameter(0));
+
+        // get chi-square for single electron histograms
+        std::cout << "chi square of single electron: " << chi_square_test(h_el_energy_reweight, h_el_energy_original) << std::endl;
     #endif
     
-    #define FIT_METHOD_3 1
+    #define FIT_METHOD_3 0
     #if FIT_METHOD_3
         Double_t amplitude{1.0};
         driver(h_el_energy_sum_original, h_el_energy_sum_reweight, amplitude);
