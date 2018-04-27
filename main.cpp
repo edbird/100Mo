@@ -5,6 +5,7 @@
 #include "TGraph.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TF1.h"
 #include "TFile.h"
 #include "TTree.h"
 
@@ -15,6 +16,77 @@
 
 #include "ReWeight.hpp"
 #include "read_data.hpp"
+
+// should the parameter go in the "function" or the "data"?
+// currently I have it in the data, not the function, which is weird?
+
+// x[0] stores the current x value, par[0] stores the "parameter" (amplitude)
+// par[1 ...] stores the data for the other histogram, however these parameters
+// are constants
+// NOTE: par also includes the "position of the end of the final bin"
+Double_t fit_function(Double_t *x, Double_t *par)
+{
+    Double_t amplitude{par[0]};
+    Int_t number_of_bins{40}; // TODO: change to global variable?
+
+    // expand par into x and y values
+    // NOTE: par also includes the "position of the end of the final bin"
+    Double_t *x_values{new Double_t[number_of_bins + 1]};
+    Double_t *y_values{new Double_t[number_of_bins + 1]};
+
+    for(Int_t i{0}; i <= number_of_bins; ++ i)
+    {
+        Int_t ix{2 * i + 1};
+        Int_t jx{2 * i + 2};
+
+        x_values[i] = par[ix];
+        y_values[i] = par[jx];
+
+        std::cout << "x=" << x_values[i] << " y=" << y_values[i] << std::endl;
+    }
+
+    std::cin.get();
+
+    Double_t xx{x[0]};
+    
+    // find bin in which x lies
+    if(xx < x_values[0])
+    {
+        // x too small
+    }
+
+    if(xx > x_values[number_of_bins])
+    {
+        // x too large
+    }
+
+    //debug
+    bool found{false};
+    Int_t found_bin_index{-1};
+
+    for(Int_t i{0}; i < number_of_bins; ++ i)
+    {
+        if(x_values[i] <= xx)
+        {
+            if(xx < x_values[i + 1])
+            {
+                found = true;
+                found_bin_index = i;
+            }
+        }
+    }
+
+    if(!found)
+    {
+        std::cerr << "error, bin not found in fit_function" << std::endl;
+        throw "problem";
+    }
+
+    // get y value (content) of this bin
+    // return content
+    Double_t ret{y_values[found_bin_index]};
+    return ret;
+}
 
 // 0.0 MeV to 4.0 MeV = 4.0 MeV range
 // num_bins keV bin width: 4.0 MeV / 0.1 MeV = 40 bins
@@ -671,12 +743,53 @@ int main(int argc, char* argv[])
     delete c_gen_weight;
 
     // scale the green histogram to match the red one (for sum energy histo)
-    Double_t integral_1{h_el_energy_sum_original->Integral()};
-    Double_t integral_2{h_el_energy_sum_reweight->Integral()};
-    h_el_energy_sum_reweight->Scale(integral_1 / integral_2);
-    h_el_energy_reweight->Scale(integral_1 / integral_2);
-    Double_t chi_square{chi_square_test(h_el_energy_reweight, h_el_energy_original)};
-    std::cout << "chi_square=" << chi_square << std::endl;
+    // OLD
+    //Double_t integral_1{h_el_energy_sum_original->Integral()};
+    //Double_t integral_2{h_el_energy_sum_reweight->Integral()};
+    //h_el_energy_sum_reweight->Scale(integral_1 / integral_2);
+    //h_el_energy_reweight->Scale(integral_1 / integral_2);
+    //Double_t chi_square{chi_square_test(h_el_energy_reweight, h_el_energy_original)};
+    //std::cout << "chi_square=" << chi_square << std::endl;
+    // NEW
+    TF1 *f_el_energy_sum_original = new TF1("f_el_energy_sum_original", fit_function, 0.0, 4.0, 1 + 2 * h_el_energy_sum_reweight->GetNbinsX());
+    f_el_energy_sum_original->SetParameter(0, 1.0); // set initial amplitude parameter to 1.0
+    // set the "parameters" (constants)
+    // these are the values from the histogram
+    {
+        Int_t ix{0};
+        Int_t jx{0};
+        Double_t par_ix{0.0};
+        Double_t par_jx{0.0};
+
+        Int_t nbx{h_el_energy_sum_reweight->GetNbinsX()};
+
+        for(Int_t i{0}; i <= nbx; ++ i)
+        {
+            ix = 2 * i + 1;
+            jx = 2 * i + 2;
+
+            par_ix = h_el_energy_sum_reweight->GetXaxis()->GetBinCenter(i + 1);
+            par_jx = h_el_energy_sum_reweight->GetBinContent(i + 1);
+
+            //std::cout << "x=" << par_ix << " y=" << par_jx << std::endl;
+
+            f_el_energy_sum_original->FixParameter(ix, par_ix);
+            f_el_energy_sum_original->FixParameter(jx, par_jx);
+        }
+
+        ix = 2 * nbx + 3;
+        ix = 2 * nbx + 4;
+        
+        par_ix = h_el_energy_sum_reweight->GetXaxis()->GetBinCenter(nbx + 1) + h_el_energy_sum_reweight->GetBinWidth(1);
+        par_jx = 0.0; // content doesn't make sense here, don't use "overflow" by accident
+
+        // final 2, marks the end point of final "bin"
+        f_el_energy_sum_original->FixParameter(ix, par_ix);
+        f_el_energy_sum_original->FixParameter(jx, par_jx);
+        
+        h_el_energy_sum_original->Fit("f_el_energy_sum_original");
+
+    }
 
     /*
     TCanvas *c_el_energy_original = new TCanvas("c_el_energy_original", "c_el_energy_original", 800, 600);
