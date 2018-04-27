@@ -27,6 +27,7 @@
 Double_t fit_function(Double_t *x, Double_t *par)
 {
     Double_t amplitude{par[0]};
+    std::cout << "amplitude=" << amplitude << std::endl;
     Int_t number_of_bins{40}; // TODO: change to global variable?
 
     // expand par into x and y values
@@ -42,10 +43,8 @@ Double_t fit_function(Double_t *x, Double_t *par)
         x_values[i] = par[ix];
         y_values[i] = par[jx];
 
-        std::cout << "x=" << x_values[i] << " y=" << y_values[i] << std::endl;
+        //std::cout << "x=" << x_values[i] << " y=" << y_values[i] << std::endl;
     }
-
-    std::cin.get();
 
     Double_t xx{x[0]};
     
@@ -53,18 +52,22 @@ Double_t fit_function(Double_t *x, Double_t *par)
     if(xx < x_values[0])
     {
         // x too small
+        std::cerr << "x too small" << std::endl;
+        std::cout << "x = " << xx << std::endl;
     }
 
     if(xx > x_values[number_of_bins])
     {
         // x too large
+        std::cerr << "x too large" << std::endl;
+        std::cout << "x = " << xx << std::endl;
     }
 
     //debug
     bool found{false};
     Int_t found_bin_index{-1};
 
-    for(Int_t i{0}; i < number_of_bins; ++ i)
+    for(Int_t i{0}; i <= number_of_bins; ++ i)
     {
         if(x_values[i] <= xx)
         {
@@ -75,10 +78,20 @@ Double_t fit_function(Double_t *x, Double_t *par)
             }
         }
     }
+    if(!found)
+    {
+        if(xx == x_values[number_of_bins])
+        {
+            found = true;
+            found_bin_index = number_of_bins - 1;
+        }
+    }
 
     if(!found)
     {
         std::cerr << "error, bin not found in fit_function" << std::endl;
+        std::cout << "x = " << xx << std::endl;
+        std::cout << x_values[number_of_bins] << std::endl;
         throw "problem";
     }
 
@@ -87,6 +100,188 @@ Double_t fit_function(Double_t *x, Double_t *par)
     Double_t ret{y_values[found_bin_index]};
     return ret;
 }
+
+
+// histo_fit is the fit function
+// histo_data is the data
+Double_t chi_square_test(const TH1* const histo_fit, const TH1* const histo_data)
+{
+    // number of bins
+    Int_t nbx{histo_fit->GetNbinsX()};
+    
+    // check same number of bins in each histo
+    if(nbx != histo_data->GetNbinsX())
+        throw "bin number mismatch in function histo_histo_chisquare";
+
+    Double_t chisquare{0.0};
+    for(Int_t ix{1}; ix <= nbx; ++ ix)
+    {
+        Double_t content_f{histo_fit->GetBinContent(ix)};
+        Double_t content_d{histo_data->GetBinContent(ix)};
+        Double_t delta{content_f - content_d};
+        Double_t error_d{histo_data->GetBinError(ix)};
+        if(error_d <= 0.0)
+        {
+            if(content_d == 0.0)
+            {
+                continue;
+            }
+            else
+            {
+                std::cerr << "Warning: Skipping bin with index " << ix << " in chi_square_data, bin error is 0.0 but content != 0.0" << std::endl;
+            }
+        }
+        Double_t chi{std::pow(delta / error_d, 2.0)};
+        chisquare += chi;
+    }
+    //chisquare /= (Double_t)histo_fit->GetNbinsX();
+    return chisquare;
+}
+
+
+// driver for chisquare test
+void driver(const TH1* const histo_fit, const TH1* const histo_data, Double_t &param)
+{
+
+    // delta param, how much to change param by each step
+    Double_t delta_param{param};
+
+    // iteration direction for delta
+    //Double_t direction{1.0};
+
+    // limit for delta_param
+    Double_t delta_param_min{std::abs(0.001 * param)};
+    
+    // copy the data fit histogram
+    TH1 *histo_fit_copy_plus = (TH1*)histo_fit->Clone();
+    TH1 *histo_fit_copy = (TH1*)histo_fit->Clone();
+    TH1 *histo_fit_copy_minus = (TH1*)histo_fit->Clone();
+    
+    // scale by amplitude
+    histo_fit_copy_plus->Scale(param);
+    histo_fit_copy->Scale(param);
+    histo_fit_copy_minus->Scale(param);
+
+    // get current chi square
+    Double_t chi_plus{chi_square_test(histo_fit_copy_plus, histo_data)};
+    Double_t chi_current{chi_square_test(histo_fit_copy, histo_data)};
+    Double_t chi_minus{chi_square_test(histo_fit_copy_minus, histo_data)};
+
+    // count iterations
+    Long64_t iterations{0};
+
+    for(;;)
+    {
+        std::cout << "param=" << param << " chi=" << chi_current << std::endl;
+        
+        // exit condition
+        if(std::abs(delta_param) <= delta_param_min) break;
+
+        // step param
+        //param += direction * delta_param;
+        Double_t param_plus{param + delta_param};
+        Double_t param_minus{param - delta_param};
+
+        // set histo_fit_copy
+        histo_fit_copy_plus = (TH1*)histo_fit->Clone();
+        histo_fit_copy = (TH1*)histo_fit->Clone();
+        histo_fit_copy_minus = (TH1*)histo_fit->Clone();
+
+        // scale by amplitude
+        histo_fit_copy_plus->Scale(param_plus);
+        histo_fit_copy->Scale(param);
+        histo_fit_copy_minus->Scale(param_minus);
+
+        // evaluate chisquare
+        Double_t chi_plus{chi_square_test(histo_fit_copy_plus, histo_data)};
+        Double_t chi_current{chi_square_test(histo_fit_copy, histo_data)};
+        Double_t chi_minus{chi_square_test(histo_fit_copy_minus, histo_data)};
+
+        // TODO: there are 6 possibilities for ordering A, B, C ?
+        // some are valid and some are not
+        //if(chi_plus < chi_current && chi_current < chi_minus)
+        // stupid method
+
+        // make decision based on chisquare
+        if(chi_plus < chi_current)
+        {
+            // keep going in this direction (delta_param ok)
+            if(chi_plus < chi_minus)
+            {
+                // chi plus is the minimum - go in this direction
+                param = param_plus;
+                chi_current = chi_plus;
+
+                // this can probably never happen?
+            }
+            else if(chi_minus < chi_plus)
+            {
+                // chi minus is the minimum - go in this direction
+                param = param_minus;
+                chi_current = chi_minus;
+
+                // this can probably never happen
+            }
+            else
+            {
+                // chi minus and chi plus are equal, but chi current is greater
+                // this cannot happen
+                throw "chi error";
+            }
+        }
+        else if(chi_current < chi_plus)
+        {
+            if(chi_minus < chi_current)
+            {
+                // chi minus is the minimum - go in this direction
+                param = param_minus;
+                chi_current = chi_minus;
+            }
+            else if(chi_current < chi_minus)
+            {
+                // the minimum is somewhere around chi_current
+                delta_param *= 0.8;
+            }
+            else
+            {
+                // chi_minus == chi_current
+                // the minimum is somewhere around chi_current
+                delta_param *= 0.8;
+            }
+        }
+        else
+        {
+            // chi_plus == chi_current
+            // the minimum is somewhere around chi_current
+            delta_param *= 0.8;
+        }
+
+        //else
+        //{
+        //    if(direction > 0.0)
+        //    {
+        //        direction = -1.0;
+        //    }
+        //    else if(direction < 0.0)
+        //    {
+        //        direction = 1.0;
+        //    }
+        //
+        //    // switch direction of delta param and make smaller
+        //    delta_param *= 0.8;
+        //}
+
+        // set chi-square
+        //chi_current = chi_new;
+
+        ++ iterations;
+
+    }
+
+    std::cout << "iteration converged after " << iterations << " iterations" << std::endl;
+
+}
+
 
 // 0.0 MeV to 4.0 MeV = 4.0 MeV range
 // num_bins keV bin width: 4.0 MeV / 0.1 MeV = 40 bins
@@ -646,10 +841,12 @@ int main(int argc, char* argv[])
     for(Long64_t ix{0}; ix < t->GetEntries(); ++ ix)
     {
 
+        // TODO remove
+        //if(ix == 1000) break;
+
         t->GetEntry(ix);
 
         if(nElectrons != 2) continue;
-
 
         //std::cout << "trueT1=" << trueT1 << " trueT2=" << trueT2;
         //std::cout << " -> " << ReWeight(trueT1 / bb_Q, trueT2 / bb_Q, 0.8, h_nEqNull, h_nEqTwo, psiN0, psiN2) << std::endl;
@@ -751,45 +948,58 @@ int main(int argc, char* argv[])
     //Double_t chi_square{chi_square_test(h_el_energy_reweight, h_el_energy_original)};
     //std::cout << "chi_square=" << chi_square << std::endl;
     // NEW
-    TF1 *f_el_energy_sum_original = new TF1("f_el_energy_sum_original", fit_function, 0.0, 4.0, 1 + 2 * h_el_energy_sum_reweight->GetNbinsX());
-    f_el_energy_sum_original->SetParameter(0, 1.0); // set initial amplitude parameter to 1.0
-    // set the "parameters" (constants)
-    // these are the values from the histogram
-    {
-        Int_t ix{0};
-        Int_t jx{0};
-        Double_t par_ix{0.0};
-        Double_t par_jx{0.0};
-
-        Int_t nbx{h_el_energy_sum_reweight->GetNbinsX()};
-
-        for(Int_t i{0}; i <= nbx; ++ i)
+    #define FIT_METHOD_2 0
+    #if FIT_METHOD_2
+        TF1 *f_el_energy_sum_original = new TF1("f_el_energy_sum_original", fit_function, 0.0, 4.0, 1 + 2 * (h_el_energy_sum_reweight->GetNbinsX() + 1));
+        f_el_energy_sum_original->SetParameter(0, 1.0); // set initial amplitude parameter to 1.0
+        // set the "parameters" (constants)
+        // these are the values from the histogram
         {
-            ix = 2 * i + 1;
-            jx = 2 * i + 2;
+            Int_t ix{0};
+            Int_t jx{0};
+            Double_t par_ix{0.0};
+            Double_t par_jx{0.0};
 
-            par_ix = h_el_energy_sum_reweight->GetXaxis()->GetBinCenter(i + 1);
-            par_jx = h_el_energy_sum_reweight->GetBinContent(i + 1);
+            Int_t nbx{h_el_energy_sum_reweight->GetNbinsX()};
 
-            //std::cout << "x=" << par_ix << " y=" << par_jx << std::endl;
+            for(Int_t i{0}; i <= nbx; ++ i)
+            {
+                ix = 2 * i + 1;
+                jx = 2 * i + 2;
 
+                par_ix = h_el_energy_sum_reweight->GetXaxis()->GetBinLowEdge(i + 1);
+                par_jx = h_el_energy_sum_reweight->GetBinContent(i + 1);
+
+                //std::cout << "x=" << par_ix << " y=" << par_jx << std::endl;
+
+                f_el_energy_sum_original->FixParameter(ix, par_ix);
+                f_el_energy_sum_original->FixParameter(jx, par_jx);
+            }
+
+            ix = 2 * nbx + 3;
+            ix = 2 * nbx + 4;
+            
+            par_ix = h_el_energy_sum_reweight->GetXaxis()->GetBinLowEdge(nbx + 1) + h_el_energy_sum_reweight->GetBinWidth(1);
+            par_jx = 0.0; // content doesn't make sense here, don't use "overflow" by accident
+
+            // final 2, marks the end point of final "bin"
             f_el_energy_sum_original->FixParameter(ix, par_ix);
             f_el_energy_sum_original->FixParameter(jx, par_jx);
+            
+            h_el_energy_sum_original->Fit("f_el_energy_sum_original");
+
         }
+        std::cout << "Amplitude parameter: " << f_el_energy_sum_original->GetParameter(1) << std::endl;
+        std::cout << "                err: " << f_el_energy_sum_original->GetParError(1) << std::endl;
+        std::cout << "         chi square: " << f_el_energy_sum_original->GetChisquare() / h_el_energy_sum_original->GetNbinsX() << std::endl;
+    #endif
+    
+    #define FIT_METHOD_3 1
+    #if FIT_METHOD_3
+        Double_t amplitude{1.0};
+        driver(h_el_energy_sum_original, h_el_energy_sum_reweight, amplitude);
+    #endif
 
-        ix = 2 * nbx + 3;
-        ix = 2 * nbx + 4;
-        
-        par_ix = h_el_energy_sum_reweight->GetXaxis()->GetBinCenter(nbx + 1) + h_el_energy_sum_reweight->GetBinWidth(1);
-        par_jx = 0.0; // content doesn't make sense here, don't use "overflow" by accident
-
-        // final 2, marks the end point of final "bin"
-        f_el_energy_sum_original->FixParameter(ix, par_ix);
-        f_el_energy_sum_original->FixParameter(jx, par_jx);
-        
-        h_el_energy_sum_original->Fit("f_el_energy_sum_original");
-
-    }
 
     /*
     TCanvas *c_el_energy_original = new TCanvas("c_el_energy_original", "c_el_energy_original", 800, 600);
