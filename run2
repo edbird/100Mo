@@ -1,2 +1,2 @@
 #!/bin/bash
-./build/main NewElectronNtuplizerExe_Int_ManDB_output.output.root
+./build/main --filename NewElectronNtuplizerExe_Int_ManDB_output.output.root --epsilon 0.8
