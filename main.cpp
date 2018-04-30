@@ -1041,14 +1041,19 @@ int main(int argc, char* argv[])
     //h_el_energy_sum_reweight->Scale(1.0 / h_el_energy_sum_reweight->Integral());
 
     // NOTE: must scale all by same amount here
+    // TODO: removed scaling
+    /*
     Double_t scale_factor{1.0 / h_el_energy_sum_original->Integral()};
     h_el_energy_original->Scale(scale_factor);
     h_el_energy_reweight->Scale(scale_factor);
     h_el_energy_sum_original->Scale(scale_factor);
     h_el_energy_sum_reweight->Scale(scale_factor);
-    TH1D *h_el_energy_sum_reweight_clone = (TH1D*)h_el_energy_sum_reweight->Clone();
-    h_el_energy_sum_reweight_clone->SetLineColor(6);
-    h_el_energy_sum_reweight_clone->SetMarkerColor(6);
+    */
+    
+    //TH1D *h_el_energy_sum_reweight_clone = (TH1D*)h_el_energy_sum_reweight->Clone();
+    //h_el_energy_sum_reweight_clone->SetLineColor(6);
+    //h_el_energy_sum_reweight_clone->SetMarkerColor(6);
+    
     //TH1D *h_el_energy_sum_original_clone = (TH1D*)h_el_energy_sum_original->Clone();
     //h_el_energy_sum_original_clone->SetLineColor(7);
     //h_el_energy_sum_original_clone->SetMarkerColor(7);
@@ -1189,7 +1194,7 @@ int main(int argc, char* argv[])
         h_el_energy_sum_original->Draw("E");
         h_el_energy_sum_reweight->Draw("Esame");
         //h_el_energy_sum_original_clone->Draw("Esame");
-        h_el_energy_sum_reweight_clone->Draw("Esame");
+        //h_el_energy_sum_reweight_clone->Draw("Esame");
         c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.C");
         c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.png");
         c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.pdf");
