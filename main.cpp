@@ -21,6 +21,14 @@
 
 #include "program_arguments.hpp"
 
+//#include "HistogramWrapper.hpp"
+// TODO: make some nice histograms
+// X/Y AXIS: LABEL: TEXT, FONT SIZE, FONT
+// X/Y AXIS: TICK NUMBERS: FONT SIZE, FONT
+// X/Y AXIS LIMITS, RANGE, PARTICULARLY Y MAX
+// GRAPH COLORS
+
+
 
 // 0.0 MeV to 4.0 MeV = 4.0 MeV range
 // num_bins keV bin width: 4.0 MeV / 0.1 MeV = 40 bins
@@ -175,6 +183,11 @@ int main(int argc, char* argv[])
     Double_t *data_sum_1 = new Double_t[data_size];
     Double_t *data_sum_2 = new Double_t[data_size];
 
+    // SCALE THE DATA SO THAT X RUNS FROM 0.0 TO Q_BB RATHER THAN 0.0 TO 1.0
+    // SCALE THE DATA SO THAT THE INTEGRAL IS UNCHANGED, IE: INTEGRAL = 1.0
+    // THIS IS DONE BY SCALING THE Y VALUES IN THE INVERSE WAY TO THE SCALING
+    // OF THE X VALUES
+
     for(std::size_t i{0}; i < data_size; ++ i)
         data_x[i] = bb_Q * data_electron_energy_single_0_0[i][0];
 
@@ -215,6 +228,7 @@ int main(int argc, char* argv[])
     g_el_energy_sum_2->SetLineColor(4);
 
     // compute integral to test
+    // trapezium rule
     Double_t data_single_0_integral{0.0};
     for(Int_t i{0 + 1}; i < data_size - 1; ++ i)
     {
@@ -232,6 +246,7 @@ int main(int argc, char* argv[])
     ////////////////////////////////////////////////////////////////////////////
 
     // ...
+    // Note: Do not do this
 
     ////////////////////////////////////////////////////////////////////////////
     // CONVERT INPUT DATA TO HISTOGRAM FORMAT
@@ -442,6 +457,7 @@ int main(int argc, char* argv[])
 
 /*
     TCanvas *c_single_electron_0 = new TCanvas("c_single_electron_0", "", 4000, 3000);
+    ->SetMaximum();
     h_single_electron_0->Draw("hist");
     c_single_electron_0->SaveAs("c_single_electron_0.png");
     c_single_electron_0->SaveAs("c_single_electron_0.pdf");
@@ -449,6 +465,7 @@ int main(int argc, char* argv[])
     delete c_single_electron_0;
     
     TCanvas *c_single_electron_1 = new TCanvas("c_single_electron_1", "", 4000, 3000);
+    ->SetMaximum();
     h_single_electron_1->Draw("hist");
     c_single_electron_1->SaveAs("c_single_electron_1.png");
     c_single_electron_1->SaveAs("c_single_electron_1.pdf");
@@ -456,6 +473,7 @@ int main(int argc, char* argv[])
     delete c_single_electron_1;
     
     TCanvas *c_single_electron_2 = new TCanvas("c_single_electron_2", "", 4000, 3000);
+    ->SetMaximum();
     h_single_electron_2->Draw("hist");
     c_single_electron_2->SaveAs("c_single_electron_2.png");
     c_single_electron_2->SaveAs("c_single_electron_2.pdf");
@@ -468,6 +486,9 @@ int main(int argc, char* argv[])
     if(batch_mode == false)
     {
         TCanvas *c_single_electron = new TCanvas("c_single_electron", "", 4000, 3000);
+        h_single_electron_0->SetMaximum(1.1);
+        h_single_electron_0->GetXaxis()->SetTitle("Energy [MeV]");
+        h_single_electron_0->GetYaxis()->SetTitle("Events");
         h_single_electron_0->Draw("hist");
         h_single_electron_1->Draw("histsame");
         h_single_electron_2->Draw("histsame");
@@ -481,6 +502,9 @@ int main(int argc, char* argv[])
     // ELECTRON ENERGY CONVERSION
     ////////////////////////////////////////////////////////////////////////////
 
+    // This is a test code
+
+    /*
     TH2D *h_convert_from{nullptr};
     TH2D *h_convert_to{nullptr};
 
@@ -500,6 +524,7 @@ int main(int argc, char* argv[])
     Double_t weight_factor{weight_out / weight_in};
 
     std::cout << "Weight factor is " << weight_factor << std::endl;
+    */
 
     // same as the single electron histogram,
     // however it is made using an explicit integration method
@@ -533,6 +558,9 @@ int main(int argc, char* argv[])
  
     // test output, with histogram created from reweighting
     TCanvas *c_single_electron_test = new TCanvas("c_single_electron_test", "", 4000, 3000);
+        h_single_electron_0->GetYaxis()->SetMaximum();
+        h_single_electron_0->GetXaxis()->SetTitle("Energy [MeV]");
+        h_single_electron_0->GetYaxis()->SetTitle("Events");
     h_single_electron_test->Draw("hist");
     c_single_electron_test->SaveAs("c_single_electron_test.png");
     c_single_electron_test->SaveAs("c_single_electron_test.pdf");
@@ -546,6 +574,9 @@ int main(int argc, char* argv[])
     // NOTE: removed as this code is exactly the same as c_single_electron
     /*
     TCanvas *c_single_electron_with_test = new TCanvas("c_single_electron_with_test", "", 4000, 3000);
+        h_single_electron_0->GetYaxis()->SetMaximum();
+        h_single_electron_0->GetXaxis()->SetTitle("Energy [MeV]");
+        h_single_electron_0->GetYaxis()->SetTitle("Events");
     h_single_electron_0->Draw("hist");
     h_single_electron_1->Draw("histsame");
     h_single_electron_2->Draw("histsame");
@@ -559,6 +590,11 @@ int main(int argc, char* argv[])
     //ReWeight(0.5, 0.5, 0.0, data_nEqNull, data_nEqTwo); 
     //ReWeight(0.45, 0.3, 0.8, h_nEqNull, h_nEqTwo, psiN0, psiN2); 
 
+
+    ////////////////////////////////////////////////////////////////////////////
+    // HISTOGRAMS FOR SINGLE AND SUM ENERGY HISTOGRAMS FOR BASELINE (EPS=BASE)
+    // AND RESCALED HISTOGRAMS (EPS=SOME OTHER VALUE)
+    ////////////////////////////////////////////////////////////////////////////
 
     // load from NEMO-3 data (MC), the reconstructed electron energy (2 in same histogram)
     TH1D *h_el_energy_original = new TH1D("h_el_energy_original", "", num_bins, 0.0, 4.0);
@@ -610,6 +646,7 @@ int main(int argc, char* argv[])
     // write data histograms to file
     // intermediate file
     // used for creating test histogram
+    // with createtree code
     TFile *f_histogram = new TFile("f_histogram.root", "recreate");
     h_data_0->Write();
     h_data_1->Write();
@@ -851,6 +888,7 @@ int main(int argc, char* argv[])
         std::cout << "chi square of single electron: " << sensitivity_chisquare << std::endl;
     #endif
     
+    // Note: never got this working
     #define FIT_METHOD_3 0
     #if FIT_METHOD_3
         Double_t amplitude{1.0};
@@ -879,9 +917,23 @@ int main(int argc, char* argv[])
 
     if(batch_mode == false)
     {
+        //HistogramWrapper2 hwrap_el_energy("el_energy", "x_axis_label_text", "y_axis_label_text", "E");
+        //hwrap_el_energy.SetLogMode(log_mode);
+        //hwrap_el_energy.Add("h_el_energy_original", h_el_energy_original);
+        //hwrap_el_energy.Canvas();
+        // TODO: make some nice histograms
+        // X/Y AXIS: LABEL: TEXT, FONT SIZE, FONT
+        // X/Y AXIS: TICK NUMBERS: FONT SIZE, FONT
+        // X/Y AXIS LIMITS, RANGE, PARTICULARLY Y MAX
+        // GRAPH COLORS
+
+
         // print single electron distribution
         TCanvas *c_el_energy_both = new TCanvas("e_el_energy_both", "e_el_energy_both", 800, 600);
         c_el_energy_both->SetLogy(log_mode);
+        h_el_energy_original->SetMaximum(220.0e3);
+        h_el_energy_original->GetXaxis()->SetTitle("Energy [MeV]");
+        h_el_energy_original->GetYaxis()->SetTitle("Events");
         h_el_energy_original->Draw("E");
         h_el_energy_reweight->Draw("Esame");
         c_el_energy_both->SaveAs("c_el_energy_both.C");
@@ -889,9 +941,13 @@ int main(int argc, char* argv[])
         c_el_energy_both->SaveAs("c_el_energy_both.pdf");
         delete c_el_energy_both;
 
+
         // print summed distribution
         TCanvas *c_el_energy_sum_both = new TCanvas("e_el_energy_sum_both", "e_el_energy_sum_both", 800, 600);
         c_el_energy_sum_both->SetLogy(log_mode);
+        h_el_energy_sum_original->SetMaximum(220.0e3);
+        h_el_energy_sum_original->GetXaxis()->SetTitle("Energy [MeV]");
+        h_el_energy_sum_original->GetYaxis()->SetTitle("Events");
         h_el_energy_sum_original->Draw("E");
         h_el_energy_sum_reweight->Draw("Esame");
         //h_el_energy_sum_original_clone->Draw("Esame");
@@ -904,6 +960,9 @@ int main(int argc, char* argv[])
         // print single electron distribution test histograms
         TCanvas *c_test_single = new TCanvas("c_test_single", "c_test_single", 800, 600);
         c_test_single->SetLogy(log_mode);
+        h_test_single_original->SetMaximum(220.0e3);
+        h_test_single_original->GetXaxis()->SetTitle("Energy [MeV]");
+        h_test_single_original->GetYaxis()->SetTitle("Events");
         h_test_single_original->Draw("E");
         h_test_single_reweight->Draw("Esame");
         g_el_energy_single_0->Draw("same");
@@ -921,6 +980,9 @@ int main(int argc, char* argv[])
         // print summed distribution test histograms
         TCanvas *c_test_sum = new TCanvas("c_test_sum", "c_test_sum", 800, 600);
         c_test_sum->SetLogy(log_mode);
+        h_test_sum_original->SetMaximum(220.0e3);
+        h_test_sum_original->GetXaxis()->SetTitle("Energy [MeV]");
+        h_test_sum_original->GetYaxis()->SetTitle("Events");
         h_test_sum_original->Draw("E");
         h_test_sum_reweight->Draw("Esame");
         g_el_energy_sum_0->Draw("same");
