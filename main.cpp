@@ -19,6 +19,8 @@
 
 #include "aux.hpp"
 
+#include "program_arguments.hpp"
+
 
 // 0.0 MeV to 4.0 MeV = 4.0 MeV range
 // num_bins keV bin width: 4.0 MeV / 0.1 MeV = 40 bins
@@ -31,27 +33,58 @@ int main(int argc, char* argv[])
     // PROCESS PROGRAM ARGUMENTS
     ////////////////////////////////////////////////////////////////////////////
 
+    // new program arguments processing method
+    ProgramArguments pa;
+    pa.Add("help", "--help", "false");
+    pa.Add("filename", "--filename", "NewElectronNtuplizerExe_Int_ManDB_output.root");
+    pa.Add("epsilon", "--epsilon", "0.0");
+    pa.Add("batch_mode", "--batch-mode", "false");
+    pa.Print();
+    pa.Process(argc, argv);
+
+    // this argument is a string
+    std::string help{pa.Get("help")};
+    // this argument is a string
+    std::string filename{pa.Get("filename")};
+    // this argument is to be converted to a double
+    std::string arg_epsilon_31{pa.Get("epsilon")};
+    // this argument is to be converted to a bool
+    std::string arg_batch_mode{pa.Get("batch_mode")};
+
+    double epsilon_31{std::stod(arg_epsilon_31)};
+    bool batch_mode{false};
+    if(arg_batch_mode == std::string("true"))
+    {
+        batch_mode = true;
+        std::cout << "[ INFO ] : Batch mode: " << "true" << std::endl;
+    }
+    else
+    {
+        std::cout << "[ INFO ] : Batch mode: " << "false" << std::endl;
+    }
+
     // specify argument defaults, as string
-    const std::string arg_default_filename("NewElectronNtuplizerExe_Int_ManDB_output.root");
-    const std::string arg_default_epsilon_31("0.0");
-    const std::string arg_default_batch_mode("false");
+    //const std::string arg_default_filename("NewElectronNtuplizerExe_Int_ManDB_output.root");
+    //const std::string arg_default_epsilon_31("0.0");
+    //const std::string arg_default_batch_mode("false");
 
     // specify actual argument, as string
-    std::string arg_filename(arg_default_filename);
-    std::string arg_epsilon_31(arg_default_epsilon_31);
-    std::string arg_batch_mode(arg_default_batch_mode);
+    //std::string arg_filename(arg_default_filename);
+    //std::string arg_epsilon_31(arg_default_epsilon_31);
+    //std::string arg_batch_mode(arg_default_batch_mode);
 
     // specify actual argument, as required value, no value set yet
-    std::string filename;
-    double epsilon_31;
-    bool batch_mode;
+    //std::string filename;
+    //double epsilon_31;
+    //bool batch_mode;
 
     // specify argument trigger strings
-    std::string arg_trigger_filename("--filename");
-    std::string arg_trigger_epsilon_31("--epsilon");
-    std::string arg_trigger_batch_mode("--batch-mode");
+    //std::string arg_trigger_filename("--filename");
+    //std::string arg_trigger_epsilon_31("--epsilon");
+    //std::string arg_trigger_batch_mode("--batch-mode");
 
     // process arguments
+    /*
     for(int ix{1}; ix < argc; ++ ix)
     {
         // current argument
@@ -109,18 +142,20 @@ int main(int argc, char* argv[])
             }
         }
     }
+    */
 
     // process gathered argument data
-    filename = arg_filename;
-    std::string filename_default(arg_default_filename); // required for later if test
+    //filename = arg_filename;
+    //std::string filename_default(arg_default_filename); // required for later if test
     bool gen_weight_enable{false};
-    if(arg_filename != filename_default)
+    //if(arg_filename != filename_default)
+    if(filename != pa.GetDefault("filename"))
     {
         gen_weight_enable = true;
     }
     // TODO: check filename exists!
 
-    epsilon_31 = std::stod(arg_epsilon_31);
+    //epsilon_31 = std::stod(arg_epsilon_31);
     // todo: check valid
     if(0.0 <= epsilon_31 && epsilon_31 <= 0.8)
     {
@@ -132,6 +167,7 @@ int main(int argc, char* argv[])
         throw "invalid epsilon_31 value";
     }
 
+    /*
     if(arg_batch_mode == std::string("true"))
     {
         batch_mode = true;
@@ -142,6 +178,7 @@ int main(int argc, char* argv[])
         }
         std::cout << "[ INFO ] : Batch mode: " << batch_mode_enable_string << std::endl;
     }
+    */
 
 
 
