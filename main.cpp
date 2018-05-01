@@ -483,20 +483,22 @@ int main(int argc, char* argv[])
 
     // these histograms created from projection of the h_data_? histograms
     // along the X direction
-    if(batch_mode == false)
-    {
-        TCanvas *c_single_electron = new TCanvas("c_single_electron", "", 4000, 3000);
-        h_single_electron_0->SetMaximum(3.5);
-        h_single_electron_0->GetXaxis()->SetTitle("Energy [MeV]");
-        h_single_electron_0->GetYaxis()->SetTitle("Events");
-        h_single_electron_0->Draw("hist");
-        h_single_electron_1->Draw("histsame");
-        h_single_electron_2->Draw("histsame");
-        c_single_electron->SaveAs("c_single_electron.png");
-        c_single_electron->SaveAs("c_single_electron.pdf");
-        c_single_electron->SaveAs("c_single_electron.C");
-        delete c_single_electron;
-    }
+    #if PRINT_DATA_CANVAS
+        if(batch_mode == false)
+        {
+            TCanvas *c_single_electron = new TCanvas("c_single_electron", "", 4000, 3000);
+            h_single_electron_0->SetMaximum(3.5);
+            h_single_electron_0->GetXaxis()->SetTitle("Energy [MeV]");
+            h_single_electron_0->GetYaxis()->SetTitle("Events");
+            h_single_electron_0->Draw("hist");
+            h_single_electron_1->Draw("histsame");
+            h_single_electron_2->Draw("histsame");
+            c_single_electron->SaveAs("c_single_electron.png");
+            c_single_electron->SaveAs("c_single_electron.pdf");
+            c_single_electron->SaveAs("c_single_electron.C");
+            delete c_single_electron;
+        }
+    #endif
 
     ////////////////////////////////////////////////////////////////////////////
     // ELECTRON ENERGY CONVERSION
@@ -913,7 +915,7 @@ int main(int argc, char* argv[])
     */
     
     // enable/disable printing with log canvas
-    Bool_t log_mode{false};
+    Bool_t log_mode{true};
 
     if(batch_mode == false)
     {
@@ -931,7 +933,8 @@ int main(int argc, char* argv[])
         // print single electron distribution
         TCanvas *c_el_energy_both = new TCanvas("e_el_energy_both", "e_el_energy_both", 800, 600);
         c_el_energy_both->SetLogy(log_mode);
-        h_el_energy_original->SetMaximum(220.0e3);
+        //h_el_energy_original->SetMaximum(220.0e3); // MC data
+        h_el_energy_original->SetMaximum(1000.0e3); // MC data log mode
         h_el_energy_original->GetXaxis()->SetTitle("Energy [MeV]");
         h_el_energy_original->GetYaxis()->SetTitle("Events");
         h_el_energy_original->Draw("E");
@@ -945,7 +948,8 @@ int main(int argc, char* argv[])
         // print summed distribution
         TCanvas *c_el_energy_sum_both = new TCanvas("e_el_energy_sum_both", "e_el_energy_sum_both", 800, 600);
         c_el_energy_sum_both->SetLogy(log_mode);
-        h_el_energy_sum_original->SetMaximum(80.0e3);
+        //h_el_energy_sum_original->SetMaximum(80.0e3); // MC data
+        h_el_energy_sum_original->SetMaximum(100.0e3); // MC data log mode
         h_el_energy_sum_original->GetXaxis()->SetTitle("Energy [MeV]");
         h_el_energy_sum_original->GetYaxis()->SetTitle("Events");
         h_el_energy_sum_original->Draw("E");
@@ -960,7 +964,9 @@ int main(int argc, char* argv[])
         // print single electron distribution test histograms
         TCanvas *c_test_single = new TCanvas("c_test_single", "c_test_single", 800, 600);
         c_test_single->SetLogy(log_mode);
-        h_test_single_original->SetMaximum(1.4);
+        //h_test_single_original->SetMaximum(1.4); // MC data
+        //h_test_single_original->SetMaximum(1.2); // createtree data
+        h_test_single_original->SetMaximum(10.0); // createtree data log mode
         h_test_single_original->GetXaxis()->SetTitle("Energy [MeV]");
         h_test_single_original->GetYaxis()->SetTitle("Events");
         h_test_single_original->Draw("E");
@@ -980,7 +986,9 @@ int main(int argc, char* argv[])
         // print summed distribution test histograms
         TCanvas *c_test_sum = new TCanvas("c_test_sum", "c_test_sum", 800, 600);
         c_test_sum->SetLogy(log_mode);
-        h_test_sum_original->SetMaximum(1.2);
+        //h_test_sum_original->SetMaximum(1.0); // MC data
+        //h_test_sum_original->SetMaximum(0.8); // createtree data
+        h_test_sum_original->SetMaximum(1.0); // createtree data log mode
         h_test_sum_original->GetXaxis()->SetTitle("Energy [MeV]");
         h_test_sum_original->GetYaxis()->SetTitle("Events");
         h_test_sum_original->Draw("E");
