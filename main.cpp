@@ -711,6 +711,10 @@ int main(int argc, char* argv[])
 
         if(nElectrons != 2) continue;
 
+        // cut both electrons > 300 keV
+        if(el_energy_[0] < 0.3) continue;
+        if(el_energy_[1] < 0.3) continue;
+
         //std::cout << "trueT1=" << trueT1 << " trueT2=" << trueT2;
         //std::cout << " -> " << ReWeight(trueT1 / bb_Q, trueT2 / bb_Q, 0.8, h_nEqNull, h_nEqTwo, psiN0, psiN2) << std::endl;
 
@@ -877,6 +881,7 @@ int main(int argc, char* argv[])
             // TODO: am i putting the right information into the fitting function and am
             // i fitting the correct function?
             h_el_energy_sum_original->Fit("f_el_energy_sum_original", "0");
+            //h_el_energy_sum_original->Fit("f_el_energy_sum_original", "0", "", 2.0, 4.0);
 
         }
         std::cout << "Amplitude parameter: " << f_el_energy_sum_original->GetParameter(0) << std::endl;
@@ -890,6 +895,8 @@ int main(int argc, char* argv[])
         // get chi-square for single electron histograms
         sensitivity_chisquare = chi_square_test(h_el_energy_reweight, h_el_energy_original);
         std::cout << "chi square of single electron: " << sensitivity_chisquare << std::endl;
+        sensitivity_chisquare = chi_square_test(h_el_energy_reweight, h_el_energy_original, 2.0, 4.0);
+        std::cout << "chi square of single electron, 2.0 MeV - 4.0 MeV: " << sensitivity_chisquare << std::endl;
     #endif
     
     // Note: never got this working
@@ -948,43 +955,49 @@ int main(int argc, char* argv[])
         //c_el_energy_both->SaveAs("c_el_energy_both.png");
         //c_el_energy_both->SaveAs("c_el_energy_both.pdf");
         //delete c_el_energy_both;
-        const Double_t max_log_mode{1000e3};
-        const Double_t max_nolog_mode{220e3};
+        const Double_t max_log_mode{1000.0e3};
+        const Double_t max_nolog_mode{220.0e3};
         Double_t max{0.0};
-        if(log_mode) max = max_log_mode;
-        else max = max_nolog_mode;
-        CanvasFactorySettings settings("Energy [MeV]", "Events", 0.1, max, log_mode);
+        Double_t min{0.0};
+        const std::string dir_log_mode("el_energy_log_dir");
+        const std::string dir_nolog_mode("el_energy_nolog_dir");
+        std::string dir;
+        if(log_mode) { min = 0.1; max = max_log_mode; dir = dir_log_mode; }
+        else { min = 0.0; max = max_nolog_mode; dir = dir_nolog_mode; }
+        CanvasFactorySettings settings("Energy [MeV]", "Events", min, max, log_mode);
         settings.SetDrawOption("E");
         CanvasFactory factory(settings);
-        factory.Canvas("el_energy", "el_energy_log_dir", h_el_energy_original, "Baseline", h_el_energy_reweight, "Reweighted");
-
-
-
-
-
-
-
-
-
-
-
+        factory.Canvas("el_energy", dir, h_el_energy_original, "Baseline", h_el_energy_reweight, "Reweighted");
 
 
         // print summed distribution
-        TCanvas *c_el_energy_sum_both = new TCanvas("e_el_energy_sum_both", "e_el_energy_sum_both", 800, 600);
-        c_el_energy_sum_both->SetLogy(log_mode);
+        //TCanvas *c_el_energy_sum_both = new TCanvas("e_el_energy_sum_both", "e_el_energy_sum_both", 800, 600);
+        //c_el_energy_sum_both->SetLogy(log_mode);
         //h_el_energy_sum_original->SetMaximum(80.0e3); // MC data
-        h_el_energy_sum_original->SetMaximum(100.0e3); // MC data log mode
-        h_el_energy_sum_original->GetXaxis()->SetTitle("Energy [MeV]");
-        h_el_energy_sum_original->GetYaxis()->SetTitle("Events");
-        h_el_energy_sum_original->Draw("E");
-        h_el_energy_sum_reweight->Draw("Esame");
+        //h_el_energy_sum_original->SetMaximum(100.0e3); // MC data log mode
+        //h_el_energy_sum_original->GetXaxis()->SetTitle("Energy [MeV]");
+        //h_el_energy_sum_original->GetYaxis()->SetTitle("Events");
+        //h_el_energy_sum_original->Draw("E");
+        //h_el_energy_sum_reweight->Draw("Esame");
         //h_el_energy_sum_original_clone->Draw("Esame");
         //h_el_energy_sum_reweight_clone->Draw("Esame");
-        c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.C");
-        c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.png");
-        c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.pdf");
-        delete c_el_energy_sum_both; 
+        //c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.C");
+        //c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.png");
+        //c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.pdf");
+        //delete c_el_energy_sum_both; 
+        const Double_t max_log_mode_2{100.0e3};
+        const Double_t max_nolog_mode_2{80.0e3};
+        const std::string dir_log_mode_2("el_energy_sum_log_dir");
+        const std::string dir_nolog_mode_2("el_energy_sum_nolog_dir");
+        if(log_mode) { min = 0.1; max = max_log_mode_2; dir = dir_log_mode_2; }
+        else { min = 0.0; max = max_nolog_mode_2; dir = dir_nolog_mode_2; }
+        CanvasFactorySettings settings_2("Energy [MeV]", "Events", min, max, log_mode);
+        settings_2.SetDrawOption("E");
+        CanvasFactory factory_2(settings_2);
+        factory_2.Canvas("el_energy_sum", dir, h_el_energy_sum_original, "Baseline", h_el_energy_sum_reweight, "Reweighted");
+        // TODO: settings should be passed to canvas in case settings should be changed?
+        // or setsettings function should be provided
+
 
         // print single electron distribution test histograms
         TCanvas *c_test_single = new TCanvas("c_test_single", "c_test_single", 800, 600);
