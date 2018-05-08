@@ -21,6 +21,8 @@
 
 #include "program_arguments.hpp"
 
+#include "CanvasFactory.hpp"
+
 //#include "HistogramWrapper.hpp"
 // TODO: make some nice histograms
 // X/Y AXIS: LABEL: TEXT, FONT SIZE, FONT
@@ -597,17 +599,17 @@ int main(int argc, char* argv[])
     // HISTOGRAMS FOR SINGLE AND SUM ENERGY HISTOGRAMS FOR BASELINE (EPS=BASE)
     // AND RESCALED HISTOGRAMS (EPS=SOME OTHER VALUE)
     ////////////////////////////////////////////////////////////////////////////
-
+    
     // load from NEMO-3 data (MC), the reconstructed electron energy (2 in same histogram)
     TH1D *h_el_energy_original = new TH1D("h_el_energy_original", "", num_bins, 0.0, 4.0);
-    h_el_energy_original->SetStats(0);
-    h_el_energy_original->SetLineColor(2);
-    h_el_energy_original->SetMarkerColor(2);
+    //h_el_energy_original->SetStats(0);
+    //h_el_energy_original->SetLineColor(2);
+    //h_el_energy_original->SetMarkerColor(2);
     // same as above but re-weighted
     TH1D *h_el_energy_reweight = new TH1D("h_el_energy_reweight", "", num_bins, 0.0, 4.0);
-    h_el_energy_reweight->SetStats(0);
-    h_el_energy_reweight->SetLineColor(4);
-    h_el_energy_reweight->SetMarkerColor(4);
+    //h_el_energy_reweight->SetStats(0);
+    //h_el_energy_reweight->SetLineColor(4);
+    //h_el_energy_reweight->SetMarkerColor(4);
 
     // load from NEMO-3 data (mc), the sum of the two reconstructed electron energies
     TH1D *h_el_energy_sum_original = new TH1D("h_el_energy_sum_original", "", num_bins, 0.0, 4.0);
@@ -931,18 +933,41 @@ int main(int argc, char* argv[])
 
 
         // print single electron distribution
-        TCanvas *c_el_energy_both = new TCanvas("e_el_energy_both", "e_el_energy_both", 800, 600);
-        c_el_energy_both->SetLogy(log_mode);
+        //TCanvas *c_el_energy_both = new TCanvas("e_el_energy_both", "e_el_energy_both", 800, 600);
+        //c_el_energy_both->SetLogy(log_mode);
         //h_el_energy_original->SetMaximum(220.0e3); // MC data
-        h_el_energy_original->SetMaximum(1000.0e3); // MC data log mode
-        h_el_energy_original->GetXaxis()->SetTitle("Energy [MeV]");
-        h_el_energy_original->GetYaxis()->SetTitle("Events");
-        h_el_energy_original->Draw("E");
-        h_el_energy_reweight->Draw("Esame");
-        c_el_energy_both->SaveAs("c_el_energy_both.C");
-        c_el_energy_both->SaveAs("c_el_energy_both.png");
-        c_el_energy_both->SaveAs("c_el_energy_both.pdf");
-        delete c_el_energy_both;
+        //h_el_energy_original->SetMaximum(1000.0e3); // MC data log mode
+        //h_el_energy_original->GetXaxis()->SetTitle("Energy [MeV]");
+        //h_el_energy_original->GetYaxis()->SetTitle("Events");
+        //h_el_energy_reweight->SetMaximum(1000.0e3);
+        //h_el_energy_reweight->GetXaxis()->SetTitle("Energy [MeV]");
+        //h_el_energy_reweight->GetYaxis()->SetTitle("Events");
+        //h_el_energy_original->Draw("E");
+        //h_el_energy_reweight->Draw("Esame");
+        //c_el_energy_both->SaveAs("c_el_energy_both.C");
+        //c_el_energy_both->SaveAs("c_el_energy_both.png");
+        //c_el_energy_both->SaveAs("c_el_energy_both.pdf");
+        //delete c_el_energy_both;
+        const Double_t max_log_mode{1000e3};
+        const Double_t max_nolog_mode{220e3};
+        Double_t max{0.0};
+        if(log_mode) max = max_log_mode;
+        else max = max_nolog_mode;
+        CanvasFactorySettings settings("Energy [MeV]", "Events", 0.1, max, log_mode);
+        settings.SetDrawOption("E");
+        CanvasFactory factory(settings);
+        factory.Canvas("el_energy", "el_energy_log_dir", h_el_energy_original, "Baseline", h_el_energy_reweight, "Reweighted");
+
+
+
+
+
+
+
+
+
+
+
 
 
         // print summed distribution

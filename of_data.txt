@@ -109,3 +109,11 @@ epsilon_31, 0.8, chi_square, 8.97017e-22
 epsilon_31, 0.8, chi_square, 8.97017e-22
 epsilon_31, 0.8, chi_square, 6344.7
 epsilon_31, 0.8, chi_square, 6344.7
+epsilon_31, 0.8, chi_square, 8.97017e-22
+epsilon_31, 0.8, chi_square, 6344.7
+epsilon_31, 0.8, chi_square, 6344.7
+epsilon_31, 0.8, chi_square, 6344.7
+epsilon_31, 0.8, chi_square, 6344.7
+epsilon_31, 0.8, chi_square, 6344.7
+epsilon_31, 0.8, chi_square, 6344.7
+epsilon_31, 0.8, chi_square, 6344.7
