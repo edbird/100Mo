@@ -712,8 +712,11 @@ int main(int argc, char* argv[])
         if(nElectrons != 2) continue;
 
         // cut both electrons > 300 keV
-        if(el_energy_[0] < 0.3) continue;
-        if(el_energy_[1] < 0.3) continue;
+        if(true)
+        {
+            if(el_energy_[0] < 0.3) continue;
+            if(el_energy_[1] < 0.3) continue;
+        }
 
         //std::cout << "trueT1=" << trueT1 << " trueT2=" << trueT2;
         //std::cout << " -> " << ReWeight(trueT1 / bb_Q, trueT2 / bb_Q, 0.8, h_nEqNull, h_nEqTwo, psiN0, psiN2) << std::endl;
@@ -839,6 +842,7 @@ int main(int argc, char* argv[])
     #endif
 
     Double_t sensitivity_chisquare{0.0};
+    bool fit_subrange{false};
     #define FIT_METHOD_2 1
     #if FIT_METHOD_2
         TF1 *f_el_energy_sum_original = new TF1("f_el_energy_sum_original", fit_function, 0.0, 4.0, 1 + 2 * (h_el_energy_sum_reweight->GetNbinsX() + 1));
@@ -880,8 +884,14 @@ int main(int argc, char* argv[])
             
             // TODO: am i putting the right information into the fitting function and am
             // i fitting the correct function?
-            h_el_energy_sum_original->Fit("f_el_energy_sum_original", "0");
-            //h_el_energy_sum_original->Fit("f_el_energy_sum_original", "0", "", 2.0, 4.0);
+            if(fit_subrange == false)
+            {
+                h_el_energy_sum_original->Fit("f_el_energy_sum_original", "0");
+            }
+            else if(fit_subrange == true)
+            {
+                h_el_energy_sum_original->Fit("f_el_energy_sum_original", "0", "", 2.0, 4.0);
+            }
 
         }
         std::cout << "Amplitude parameter: " << f_el_energy_sum_original->GetParameter(0) << std::endl;
@@ -893,10 +903,16 @@ int main(int argc, char* argv[])
         h_el_energy_reweight->Scale(f_el_energy_sum_original->GetParameter(0));
 
         // get chi-square for single electron histograms
-        sensitivity_chisquare = chi_square_test(h_el_energy_reweight, h_el_energy_original);
-        std::cout << "chi square of single electron: " << sensitivity_chisquare << std::endl;
-        sensitivity_chisquare = chi_square_test(h_el_energy_reweight, h_el_energy_original, 2.0, 4.0);
-        std::cout << "chi square of single electron, 2.0 MeV - 4.0 MeV: " << sensitivity_chisquare << std::endl;
+        if(fit_subrange == false)
+        {
+            sensitivity_chisquare = chi_square_test(h_el_energy_reweight, h_el_energy_original);
+            std::cout << "chi square of single electron: " << sensitivity_chisquare << std::endl;
+        }
+        else if(fit_subrange == true)
+        {
+            sensitivity_chisquare = chi_square_test(h_el_energy_reweight, h_el_energy_original, 2.0, 4.0);
+            std::cout << "chi square of single electron, 2.0 MeV - 4.0 MeV: " << sensitivity_chisquare << std::endl;
+        }
     #endif
     
     // Note: never got this working
