@@ -86,11 +86,10 @@ Double_t fit_function(Double_t *x, Double_t *par)
 }
 
 
-
 // chi square test histogram to TGraph
 Double_t chi_square_test(const TGraph* const graph_fit, const TH1* const histo_data)
 {
-    std::cout << "START" << std::endl;
+    //std::cout << "START" << std::endl;
 
     // number of bins
     Int_t nbx{histo_data->GetNbinsX()};
@@ -120,12 +119,53 @@ Double_t chi_square_test(const TGraph* const graph_fit, const TH1* const histo_d
             }
         }
         Double_t chi{std::pow(delta / error_d, 2.0)};
-        std::cout << "chi=" << chi << std::endl;
+        //std::cout << "chi=" << chi << std::endl;
         chisquare += chi;
     }
     //chisquare /= (Double_t)histo_fit->GetNbinsX();
     return chisquare;
     
+}
+
+
+// histo_fit is the fit function
+// histo_data is the data
+// TODO: assumes ranges are the same
+Double_t chi_square_test(const TH1* const histo_fit, const TH1* const histo_data, const Double_t min, const Double_t max)
+{
+    // number of bins
+    Int_t nbx{histo_fit->GetNbinsX()};
+    
+    // check same number of bins in each histo
+    if(nbx != histo_data->GetNbinsX())
+        throw "bin number mismatch in function histo_histo_chisquare";
+
+    Double_t chisquare{0.0};
+    for(Int_t ix{1}; ix <= nbx; ++ ix)
+    {
+        Double_t bin_center{histo_fit->GetBinCenter(ix)};
+        if(bin_center < min) continue;
+        if(bin_center > max) continue;
+        Double_t content_f{histo_fit->GetBinContent(ix)};
+        Double_t content_d{histo_data->GetBinContent(ix)};
+        Double_t delta{content_f - content_d};
+        Double_t error_d{histo_data->GetBinError(ix)};
+        if(error_d <= 0.0)
+        {
+            if(content_d == 0.0)
+            {
+                continue;
+            }
+            else
+            {
+                std::cerr << "Warning: Skipping bin with index " << ix << " in chi_square_data, bin error is 0.0 but content != 0.0" << std::endl;
+            }
+        }
+        Double_t chi{std::pow(delta / error_d, 2.0)};
+        chisquare += chi;
+    }
+    //chisquare /= (Double_t)histo_fit->GetNbinsX();
+    return chisquare;
 }
 
 
