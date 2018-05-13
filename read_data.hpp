@@ -44,7 +44,99 @@ std::ostream& operator<<(std::ostream& os, std::vector<T> v)
     return os;
 }
 
-void read_data(const char* buffer, std::vector<std::vector<double>>& data)
+// non numeric characters (not 0-9 and not special)
+bool is_alpha(const char ch)
+{
+    if(' ' <= ch && ch <= '/')
+    {
+        return true;
+    }
+    else if(':' <= ch && ch <= '~')
+    {
+        return true;
+    }
+    else return false;
+}
+
+bool is_numeric_start(const char ch)
+{
+    if('.' == ch)
+    {
+        return true;
+    }
+    else if('0' <= ch && ch <= '9')
+    {
+        return true;
+    }
+    else return false;
+}
+
+bool is_numeric(const char ch)
+{
+    
+}
+
+// TODO: look for simpler approach by searching for ',' and splitting
+
+void read_data_2(const char* buffer, std::vector<std::vector<double>>& data, const char delimiter = ' ')
+{
+
+    data.clear();
+    data.emplace_back(std::vector<double>());
+
+    std::string word;
+    const char *p{buffer};
+    for(;;)
+    {
+        if(*p == '\n' || *p == '\0' || *p == delimiter)
+        {
+            double value{atof(word.c_str())};
+            word.clear();
+            data[data.size() - 1].emplace_back(value);
+
+            if(*p == '\n')
+            {
+                data.emplace_back(std::vector<double>());
+            }
+            else if(*p == '\0')
+            {
+                break;
+            }
+        }
+        else
+        {
+            word.push_back(*p);
+        }
+        ++ p;
+    }
+
+    /*
+    const char* p{buffer};
+    const char* p_end;
+    while(*p != '\0')
+    {
+        // skim all non alpha chars
+        while(is_alpha(*p)) ++ p;
+        if(is_numeric_start(*p))
+        {
+            p_end = p;
+            int number_of_periods{0};
+            int number_of_exponents{0}; // TODO: this, plus, minus at start
+            if(*p_end == '.') ++ number_of_periods;
+            ++ p_end;
+            while(is_numeric(*p_end))
+            {
+                if(*p_end == '.') ++ number_of_periods;
+                ++ p_end;
+            }
+            if(number_of_periods > 1)
+        }
+    }
+    */
+
+}
+
+void read_data(const char* buffer, std::vector<std::vector<double>>& data, const char delimiter = ' ')
 {
     
     data.clear();
@@ -56,7 +148,9 @@ void read_data(const char* buffer, std::vector<std::vector<double>>& data)
     char* p_end;
     while(*p != '\0')
     {
-        while(*p == ' ') ++ p;
+        std::cout << *p;
+        //while(*p == ' ') ++ p;
+        while(*p == delimiter) ++ p;
         double value{strtod(p, &p_end)};
         if(p == p_end)
         {
@@ -86,7 +180,8 @@ void read_data(const char* buffer, std::vector<std::vector<double>>& data)
 
 // read the 1D data (data in electron single and sum energy histograms from paper)
 void read_data_helper_2(const std::string& filename_data,
-                        std::vector<std::vector<double>> &data)
+                        std::vector<std::vector<double>> &data,
+                        const char delimiter = ' ')
 {
 
     ////////////////////////////////////////////////////////////////////////////
@@ -100,7 +195,7 @@ void read_data_helper_2(const std::string& filename_data,
     ifs_data.read(buf, ifs_size);
     ifs_data.close();
     std::vector<std::vector<double>> data_temp;
-    read_data(buf, data_temp);
+    read_data_2(buf, data_temp, delimiter);
     data = data_temp;
     
     return;
