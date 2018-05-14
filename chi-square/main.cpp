@@ -192,6 +192,13 @@ int main(int argc, char* argv[])
     c->SaveAs("c_out.eps");
     c->SaveAs("c_out.C");
             
+    TFile *f_out = new TFile("f_out.root", "RECREATE");
+    c->Write();
+    g_0->Write();
+    g_1->Write();
+    g_2->Write();
+    g_3->Write();
+    f_out->Close();
    
     /*
 
