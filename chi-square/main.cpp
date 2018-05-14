@@ -98,33 +98,36 @@ int main(int argc, char* argv[])
     Double_t *data_y_2 = new Double_t[data_size_2];
     Double_t *data_y_3 = new Double_t[data_size_3];
 
-    // SCALE THE DATA SO THAT X RUNS FROM 0.0 TO Q_BB RATHER THAN 0.0 TO 1.0
-    // SCALE THE DATA SO THAT THE INTEGRAL IS UNCHANGED, IE: INTEGRAL = 1.0
-    // THIS IS DONE BY SCALING THE Y VALUES IN THE INVERSE WAY TO THE SCALING
-    // OF THE X VALUES
+
+    // NOTE: chi-square value is calculated as chi-square not chi-square
+    // reduced, to obtain chi-square reduced divide by the number of bins
+    // use in the test (40)
+    // NOT DONE YET
+
+    Double_t scale_factor{1.0 / 40.0};
 
     for(std::size_t i{0}; i < data_size_0; ++ i)
     {
         data_x_0[i] = data_FULLRANGE_CUT[i][1];
-        data_y_0[i] = data_FULLRANGE_CUT[i][3];
+        data_y_0[i] = scale_factor * data_FULLRANGE_CUT[i][3];
     }
 
     for(std::size_t i{0}; i < data_size_1; ++ i)
     {
         data_x_1[i] = data_FULLRANGE_NOCUT[i][1];
-        data_y_1[i] = data_FULLRANGE_NOCUT[i][3];
+        data_y_1[i] = scale_factor * data_FULLRANGE_NOCUT[i][3];
     }
 
     for(std::size_t i{0}; i < data_size_2; ++ i)
     {
         data_x_2[i] = data_SUBRANGE_CUT[i][1];
-        data_y_2[i] = data_SUBRANGE_CUT[i][3];
+        data_y_2[i] = scale_factor * data_SUBRANGE_CUT[i][3];
     }
 
     for(std::size_t i{0}; i < data_size_3; ++ i)
     {
         data_x_3[i] = data_SUBRANGE_NOCUT[i][1];
-        data_y_3[i] = data_SUBRANGE_NOCUT[i][3];
+        data_y_3[i] = scale_factor * data_SUBRANGE_NOCUT[i][3];
     }
 
     TGraph *g_0 = new TGraph(data_size_0, data_x_0, data_y_0);
@@ -170,34 +173,51 @@ int main(int argc, char* argv[])
     std::cout << "Finished constructing intermediate data" << std::endl;
 
     TLegend *l = new TLegend(0.1, 0.7, 0.3, 0.9);
-    l->AddEntry(g_1, "Full range cut", "l");
-    l->AddEntry(g_0, "Full range no cut", "l");
-    l->AddEntry(g_3, "Sub range cut", "l");
+    l->AddEntry(g_1, "Full range no cut", "l");
+    l->AddEntry(g_0, "Full range cut", "l");
     l->AddEntry(g_2, "Sub range no cut", "l");
+    l->AddEntry(g_3, "Sub range cut", "l");
 
     ////////////////////////////////////////////////////////////////////////////
     // CREATE OUTPUT GRAPH
     ////////////////////////////////////////////////////////////////////////////
     
-    TCanvas *c = new TCanvas("c", "", 800, 600);
+    TFile *f_out = new TFile("f_out.root", "RECREATE");
+
+    TCanvas *c = new TCanvas("c", "", 804, 628);
     c->GetPad(0)->SetTicks(1, 2);
     g_1->Draw();
     g_0->Draw("same");
     g_2->Draw("same");
     g_3->Draw("same");
     l->Draw();
-
     c->SaveAs("c_out.png");
     c->SaveAs("c_out.pdf");
     c->SaveAs("c_out.eps");
     c->SaveAs("c_out.C");
-            
-    TFile *f_out = new TFile("f_out.root", "RECREATE");
     c->Write();
+            
+    TCanvas *c_log = new TCanvas("c_log", "", 804, 628);
+    c_log->GetPad(0)->SetTicks(1, 2);
+    c_log->SetLogy();
+    //g_1->GetYaxis()->SetLimits(1.0e0, 1.0e5);
+    g_1->GetYaxis()->SetRangeUser(1.0e0, 1.0e4);
+    g_1->Draw();
+    g_0->Draw("same");
+    g_2->Draw("same");
+    g_3->Draw("same");
+    l->Draw();
+    c_log->SaveAs("c_log_out.png");
+    c_log->SaveAs("c_log_out.pdf");
+    c_log->SaveAs("c_log_out.eps");
+    c_log->SaveAs("c_log_out.C");
+    c_log->Write();
+
     g_0->Write();
     g_1->Write();
     g_2->Write();
     g_3->Write();
+
     f_out->Close();
    
     /*
