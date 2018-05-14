@@ -49,6 +49,9 @@ int main(int argc, char* argv[])
     pa.Add("filename", "--filename", "NewElectronNtuplizerExe_Int_ManDB_output.root");
     pa.Add("epsilon", "--epsilon", "0.0");
     pa.Add("batch_mode", "--batch-mode", "false");
+    //pa.Add("300 keV energy cut", "--energy-cut", "false");
+    pa.Add("energy_cut", "--energy-cut", "false");
+    pa.Add("fit_subrange", "--fit-subrange", "false");
     pa.Print();
     pa.Process(argc, argv);
 
@@ -60,6 +63,8 @@ int main(int argc, char* argv[])
     std::string arg_epsilon_31{pa.Get("epsilon")};
     // this argument is to be converted to a bool
     std::string arg_batch_mode{pa.Get("batch_mode")};
+    std::string arg_energy_cut{pa.Get("energy_cut")};
+    std::string arg_fit_subrange{pa.Get("fit_subrange")};
 
     double epsilon_31{std::stod(arg_epsilon_31)};
     bool batch_mode{false};
@@ -71,6 +76,24 @@ int main(int argc, char* argv[])
     else
     {
         std::cout << "[ INFO ] : Batch mode: " << "false" << std::endl;
+    }
+
+    if(arg_fit_subrange == std::string("true"))
+    {
+        std::cout << "[ INFO ] : Fit subrange: " << "true" << std::endl;
+    }
+    else
+    {
+        std::cout << "[ INFO ] : Fit subrange: " << "false" << std::endl;
+    }
+
+    if(arg_energy_cut == std::string("true"))
+    {
+        std::cout << "[ INFO ] : Energy cut: " << "true" << std::endl;
+    }
+    else
+    {
+        std::cout << "[ INFO ] : Energy cut: " << "false" << std::endl;
     }
 
 
@@ -712,7 +735,7 @@ int main(int argc, char* argv[])
         if(nElectrons != 2) continue;
 
         // cut both electrons > 300 keV
-        if(true)
+        if(arg_energy_cut == std::string("true"))
         {
             if(el_energy_[0] < 0.3) continue;
             if(el_energy_[1] < 0.3) continue;
@@ -843,6 +866,7 @@ int main(int argc, char* argv[])
 
     Double_t sensitivity_chisquare{0.0};
     bool fit_subrange{false};
+    if(arg_fit_subrange == std::string("true")) fit_substring = true;
     #define FIT_METHOD_2 1
     #if FIT_METHOD_2
         TF1 *f_el_energy_sum_original = new TF1("f_el_energy_sum_original", fit_function, 0.0, 4.0, 1 + 2 * (h_el_energy_sum_reweight->GetNbinsX() + 1));
