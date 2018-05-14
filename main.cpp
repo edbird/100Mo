@@ -866,7 +866,7 @@ int main(int argc, char* argv[])
 
     Double_t sensitivity_chisquare{0.0};
     bool fit_subrange{false};
-    if(arg_fit_subrange == std::string("true")) fit_substring = true;
+    if(arg_fit_subrange == std::string("true")) fit_subrange = true;
     #define FIT_METHOD_2 1
     #if FIT_METHOD_2
         TF1 *f_el_energy_sum_original = new TF1("f_el_energy_sum_original", fit_function, 0.0, 4.0, 1 + 2 * (h_el_energy_sum_reweight->GetNbinsX() + 1));
