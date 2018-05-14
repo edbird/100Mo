@@ -52,6 +52,7 @@ int main(int argc, char* argv[])
     //pa.Add("300 keV energy cut", "--energy-cut", "false");
     pa.Add("energy_cut", "--energy-cut", "false");
     pa.Add("fit_subrange", "--fit-subrange", "false");
+    pa.Add("log_mode", "--log-mode", "true");
     pa.Print();
     pa.Process(argc, argv);
 
@@ -65,6 +66,7 @@ int main(int argc, char* argv[])
     std::string arg_batch_mode{pa.Get("batch_mode")};
     std::string arg_energy_cut{pa.Get("energy_cut")};
     std::string arg_fit_subrange{pa.Get("fit_subrange")};
+    std::string arg_log_mode{pa.Get("log_mode")};
 
     double epsilon_31{std::stod(arg_epsilon_31)};
     bool batch_mode{false};
@@ -78,6 +80,15 @@ int main(int argc, char* argv[])
         std::cout << "[ INFO ] : Batch mode: " << "false" << std::endl;
     }
 
+    if(arg_energy_cut == std::string("true"))
+    {
+        std::cout << "[ INFO ] : Energy cut: " << "true" << std::endl;
+    }
+    else
+    {
+        std::cout << "[ INFO ] : Energy cut: " << "false" << std::endl;
+    }
+
     if(arg_fit_subrange == std::string("true"))
     {
         std::cout << "[ INFO ] : Fit subrange: " << "true" << std::endl;
@@ -87,13 +98,13 @@ int main(int argc, char* argv[])
         std::cout << "[ INFO ] : Fit subrange: " << "false" << std::endl;
     }
 
-    if(arg_energy_cut == std::string("true"))
+    if(arg_log_mode == std::string("true"))
     {
-        std::cout << "[ INFO ] : Energy cut: " << "true" << std::endl;
+        std::cout << "[ INFO ] : Log mode: " << "true" << std::endl;
     }
     else
     {
-        std::cout << "[ INFO ] : Energy cut: " << "false" << std::endl;
+        std::cout << "[ INFO ] : Log mode: " << "false" << std::endl;
     }
 
 
@@ -964,7 +975,8 @@ int main(int argc, char* argv[])
     */
     
     // enable/disable printing with log canvas
-    Bool_t log_mode{true};
+    Bool_t log_mode{false};
+    if(arg_log_mode == std::string("true")) log_mode = true;
 
     if(batch_mode == false)
     {
