@@ -1,6 +1,6 @@
 
 
-
+#include "TMath.h"
 #include "TCanvas.h"
 #include "TGraph.h"
 #include "TH1.h"
@@ -1114,10 +1114,26 @@ int main(int argc, char* argv[])
 
     }
 
+    // log likelihood method
+    // create "data" histogram - rounded original histogram
+    TH1D *h_el_energy_data = new TH1D("h_el_energy_data", "", num_bins, 0.0, 4.0);
+    for(Int_t ix{1}; ix <= h_el_energy_sum_original->GetNbinsX(); ++ ix)
+    {
+        Double_t content{h_el_energy_sum_original->GetBinContent(ix)};
+        content = std::round(content);
+        h_el_energy_data->SetBinContent(ix, content);
+    }
 
-
-
-        
+    // compute poisson likelihood for each bin
+    Double_t likelihood{1.0};
+    for(Int_t ix{1}; ix <= h_el_energy_sum_original->GetNbinsX(); ++ ix)
+    {
+        Double_t lambda{h_el_energy_sum_reweight->GetBinContent(ix)};
+        Double_t data{h_el_energy_data->GetBinContent(ix)};
+        Double_t poi{TMath::Poisson(data, lambda)};
+        likelihood *= poi;
+    }
+    Double_t log_likelihood{std::log(likelihood)};
 
     // print entries
     std::cout << "Number of entries in each histogram: h_el_energy_original: " << h_el_energy_original->GetEntries() << " h_el_energy_reweight: " << h_el_energy_reweight->GetEntries() << std::endl;
@@ -1127,14 +1143,15 @@ int main(int argc, char* argv[])
     std::ofstream of_data(arg_output_filename.c_str(), std::ios::app);
     if(of_data.tellp() == 0)
     {
-        of_data << "epsilon_31, chisquare (fit), degrees of freedom, chisquare (fit reduced), chisquare (sensitivity), chisquare (sensitivity reduced)" << std::endl;
+        of_data << "epsilon_31, chisquare (fit), degrees of freedom, chisquare (fit reduced), chisquare (sensitivity), chisquare (sensitivity reduced), -2log(l)" << std::endl;
     }
     of_data << epsilon_31
             << f_el_energy_sum_original->GetChisquare() << ','
             << non_empty_bins << ','
             << f_el_energy_sum_original->GetChisquare() / (Double_t)non_empty_bins << ','
             << sensitivity_chisquare << ','
-            << sensitivity_chisquare / (Double_t)non_empty_bins
+            << sensitivity_chisquare / (Double_t)non_empty_bins << ','
+            << -2.0 * log_likelihood
             << std::endl;
 
 
