@@ -936,7 +936,7 @@ int main(int argc, char* argv[])
         Int_t non_empty_bins{0};
         for(Int_t i{1}; i <= h_el_energy_sum_original->GetNbinsX(); ++ i)
         {
-            if(f_el_energy_sum_original->GetBinContent(i) =! 0.0) ++ non_empty_bins;
+            if(h_el_energy_sum_original->GetBinContent(i) != 0.0) ++ non_empty_bins;
         }
         std::cout << " degrees of freedom: " << non_empty_bins << std::endl;
         std::cout << " chi square reduced: " << f_el_energy_sum_original->GetChisquare() / (Double_t)non_empty_bins << std::endl;
