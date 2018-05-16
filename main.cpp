@@ -53,6 +53,7 @@ int main(int argc, char* argv[])
     pa.Add("energy_cut", "--energy-cut", "false");
     pa.Add("fit_subrange", "--fit-subrange", "false");
     pa.Add("log_mode", "--log-mode", "true");
+    pa.Add("output_filename", "--output-file", "of_data.txt");
     pa.Print();
     pa.Process(argc, argv);
 
@@ -67,6 +68,7 @@ int main(int argc, char* argv[])
     std::string arg_energy_cut{pa.Get("energy_cut")};
     std::string arg_fit_subrange{pa.Get("fit_subrange")};
     std::string arg_log_mode{pa.Get("log_mode")};
+    std::string arg_output_filename{pa.Get("output_filename")};
 
     double epsilon_31{std::stod(arg_epsilon_31)};
     bool batch_mode{false};
@@ -107,6 +109,7 @@ int main(int argc, char* argv[])
         std::cout << "[ INFO ] : Log mode: " << "false" << std::endl;
     }
 
+    std::cout << "Writing data to file " << arg_output_filename << " append mode" << std::endl;
 
     // process gathered argument data
     //filename = arg_filename;
@@ -121,7 +124,7 @@ int main(int argc, char* argv[])
 
     //epsilon_31 = std::stod(arg_epsilon_31);
     // todo: check valid
-    if(0.0 <= epsilon_31 && epsilon_31 <= 0.8)
+    if(0.0 <= epsilon_31 && epsilon_31 <= 10.0)
     {
         std::cout << "[ INFO ] : Set epsilon_31 = " << epsilon_31 << std::endl;
     }
@@ -878,6 +881,8 @@ int main(int argc, char* argv[])
     Double_t sensitivity_chisquare{0.0};
     bool fit_subrange{false};
     if(arg_fit_subrange == std::string("true")) fit_subrange = true;
+    // number of degrees of freedom
+    Int_t non_empty_bins{0};
     #define FIT_METHOD_2 1
     #if FIT_METHOD_2
         TF1 *f_el_energy_sum_original = new TF1("f_el_energy_sum_original", fit_function, 0.0, 4.0, 1 + 2 * (h_el_energy_sum_reweight->GetNbinsX() + 1));
@@ -933,7 +938,6 @@ int main(int argc, char* argv[])
         std::cout << "                err: " << f_el_energy_sum_original->GetParError(0) << std::endl;
         //std::cout << "         chi square: " << f_el_energy_sum_original->GetChisquare() / h_el_energy_sum_original->GetNbinsX() << std::endl;
         std::cout << "         chi square: " << f_el_energy_sum_original->GetChisquare() << std::endl;
-        Int_t non_empty_bins{0};
         for(Int_t i{1}; i <= h_el_energy_sum_original->GetNbinsX(); ++ i)
         {
             if(h_el_energy_sum_original->GetBinContent(i) != 0.0) ++ non_empty_bins;
@@ -1120,8 +1124,18 @@ int main(int argc, char* argv[])
 
 
     // add data to data output file
-    std::ofstream of_data("of_data.txt", std::ios::app);
-    of_data << "epsilon_31, " << epsilon_31 << ", chi_square, " << sensitivity_chisquare << std::endl;
+    std::ofstream of_data(arg_output_filename.c_str(), std::ios::app);
+    if(of_data.tellp() == 0)
+    {
+        of_data << "epsilon_31, chisquare (fit), degrees of freedom, chisquare (fit reduced), chisquare (sensitivity), chisquare (sensitivity reduced)" << std::endl;
+    }
+    of_data << epsilon_31
+            << f_el_energy_sum_original->GetChisquare()
+            << non_empty_bins
+            << f_el_energy_sum_original->GetChisquare() / (Double_t)non_empty_bins
+            << sensitivity_chisquare
+            << sensitivity_chisquare / (Double_t)non_empty_bins
+            << std::endl;
 
 
     return 0;
