@@ -1130,10 +1130,10 @@ int main(int argc, char* argv[])
         of_data << "epsilon_31, chisquare (fit), degrees of freedom, chisquare (fit reduced), chisquare (sensitivity), chisquare (sensitivity reduced)" << std::endl;
     }
     of_data << epsilon_31
-            << f_el_energy_sum_original->GetChisquare()
-            << non_empty_bins
-            << f_el_energy_sum_original->GetChisquare() / (Double_t)non_empty_bins
-            << sensitivity_chisquare
+            << f_el_energy_sum_original->GetChisquare() << ','
+            << non_empty_bins << ','
+            << f_el_energy_sum_original->GetChisquare() / (Double_t)non_empty_bins << ','
+            << sensitivity_chisquare << ','
             << sensitivity_chisquare / (Double_t)non_empty_bins
             << std::endl;
 
