@@ -931,7 +931,15 @@ int main(int argc, char* argv[])
         }
         std::cout << "Amplitude parameter: " << f_el_energy_sum_original->GetParameter(0) << std::endl;
         std::cout << "                err: " << f_el_energy_sum_original->GetParError(0) << std::endl;
-        std::cout << "         chi square: " << f_el_energy_sum_original->GetChisquare() / h_el_energy_sum_original->GetNbinsX() << std::endl;
+        //std::cout << "         chi square: " << f_el_energy_sum_original->GetChisquare() / h_el_energy_sum_original->GetNbinsX() << std::endl;
+        std::cout << "         chi square: " << f_el_energy_sum_original->GetChisquare() << std::endl;
+        Int_t non_empty_bins{0};
+        for(Int_t i{1}; i <= h_el_energy_sum_original->GetNbinsX(); ++ i)
+        {
+            if(f_el_energy_sum_original->GetBinContent(i) =! 0.0) ++ non_empty_bins;
+        }
+        std::cout << " degrees of freedom: " << non_empty_bins << std::endl;
+        std::cout << " chi square reduced: " << f_el_energy_sum_original->GetChisquare() / (Double_t)non_empty_bins << std::endl;
 
         // scale the red histogram using the amplitude parameter
         h_el_energy_sum_reweight->Scale(f_el_energy_sum_original->GetParameter(0));
@@ -942,11 +950,16 @@ int main(int argc, char* argv[])
         {
             sensitivity_chisquare = chi_square_test(h_el_energy_reweight, h_el_energy_original);
             std::cout << "chi square of single electron: " << sensitivity_chisquare << std::endl;
+            std::cout << " degrees of freedom: " << non_empty_bins << std::endl;
+            std::cout << " chi square reduced: " << sensitivity_chisquare / (Double_t)non_empty_bins << std::endl;
+
         }
         else if(fit_subrange == true)
         {
             sensitivity_chisquare = chi_square_test(h_el_energy_reweight, h_el_energy_original, 2.0, 4.0);
             std::cout << "chi square of single electron, 2.0 MeV - 4.0 MeV: " << sensitivity_chisquare << std::endl;
+            std::cout << " degrees of freedom: " << non_empty_bins << std::endl;
+            std::cout << " chi square reduced: " << sensitivity_chisquare / (Double_t)non_empty_bins << std::endl;
         }
     #endif
     
@@ -1070,8 +1083,8 @@ int main(int argc, char* argv[])
         c_test_single->SaveAs("c_test_single.pdf");
         delete c_test_single;
         // compute chi-square
-        std::cout << "chi1: " << chi_square_test(g_el_energy_single_0, h_test_single_original) / h_test_single_original->GetNbinsX() << std::endl;
-        std::cout << "chi2: " << chi_square_test(g_el_energy_single_2, h_test_single_reweight) / h_test_single_reweight->GetNbinsX() << std::endl;
+        //std::cout << "chi1: " << chi_square_test(g_el_energy_single_0, h_test_single_original) / h_test_single_original->GetNbinsX() << std::endl;
+        //std::cout << "chi2: " << chi_square_test(g_el_energy_single_2, h_test_single_reweight) / h_test_single_reweight->GetNbinsX() << std::endl;
         
         // print summed distribution test histograms
         TCanvas *c_test_sum = new TCanvas("c_test_sum", "c_test_sum", 800, 600);
@@ -1092,8 +1105,8 @@ int main(int argc, char* argv[])
         c_test_sum->SaveAs("c_test_sum.pdf");
         delete c_test_sum;
         // compute chi-square
-        std::cout << "chi3: " << chi_square_test(g_el_energy_sum_0, h_test_sum_original) / h_test_sum_original->GetNbinsX() << std::endl;
-        std::cout << "chi4: " << chi_square_test(g_el_energy_sum_2, h_test_sum_reweight) / h_test_sum_reweight->GetNbinsX() << std::endl;
+        //std::cout << "chi3: " << chi_square_test(g_el_energy_sum_0, h_test_sum_original) / h_test_sum_original->GetNbinsX() << std::endl;
+        //std::cout << "chi4: " << chi_square_test(g_el_energy_sum_2, h_test_sum_reweight) / h_test_sum_reweight->GetNbinsX() << std::endl;
 
     }
 
