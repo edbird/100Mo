@@ -1,5 +1,5 @@
 #!/bin/bash
-EPSILON_LIST=$(awk 'BEGIN{for(i=0.0;i<=2.0;i+=0.2)print i}')
+EPSILON_LIST=$(awk 'BEGIN{for(i=0.0;i<=1.0;i+=0.01)print i}')
 for EPSILON in $EPSILON_LIST
 do
     echo "Running: epsilon=$EPSILON"
