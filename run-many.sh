@@ -1,6 +1,7 @@
 #!/bin/bash
-EPSILON_LIST=$(awk 'BEGIN{for(i=0.2;i<=2.0;i+=0.01)print i}')
+EPSILON_LIST=$(awk 'BEGIN{for(i=0.0;i<=2.0;i+=0.2)print i}')
 for EPSILON in $EPSILON_LIST
 do
-    ./build/main --batch-mode true --epsilon $EPSILON
+    echo "Running: epsilon=$EPSILON"
+    ./build/main --batch-mode false --epsilon $EPSILON --fit-subrange false --energy-cut false --output-file "of_data_testing.txt" > "log_testing_EPS_"$EPSILON".txt"
 done

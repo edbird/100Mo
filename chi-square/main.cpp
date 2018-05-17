@@ -104,30 +104,30 @@ int main(int argc, char* argv[])
     // use in the test (40)
     // NOT DONE YET
 
-    Double_t scale_factor{1.0 / 40.0};
+    Double_t scale_factor{1.0}; //{1.0 / 40.0};
 
     for(std::size_t i{0}; i < data_size_0; ++ i)
     {
-        data_x_0[i] = data_FULLRANGE_CUT[i][1];
-        data_y_0[i] = scale_factor * data_FULLRANGE_CUT[i][3];
+        data_x_0[i] = data_FULLRANGE_CUT[i][0];
+        data_y_0[i] = scale_factor * data_FULLRANGE_CUT[i][4];
     }
 
     for(std::size_t i{0}; i < data_size_1; ++ i)
     {
-        data_x_1[i] = data_FULLRANGE_NOCUT[i][1];
-        data_y_1[i] = scale_factor * data_FULLRANGE_NOCUT[i][3];
+        data_x_1[i] = data_FULLRANGE_NOCUT[i][0];
+        data_y_1[i] = scale_factor * data_FULLRANGE_NOCUT[i][4];
     }
 
     for(std::size_t i{0}; i < data_size_2; ++ i)
     {
-        data_x_2[i] = data_SUBRANGE_CUT[i][1];
-        data_y_2[i] = scale_factor * data_SUBRANGE_CUT[i][3];
+        data_x_2[i] = data_SUBRANGE_CUT[i][0];
+        data_y_2[i] = scale_factor * data_SUBRANGE_CUT[i][4];
     }
 
     for(std::size_t i{0}; i < data_size_3; ++ i)
     {
-        data_x_3[i] = data_SUBRANGE_NOCUT[i][1];
-        data_y_3[i] = scale_factor * data_SUBRANGE_NOCUT[i][3];
+        data_x_3[i] = data_SUBRANGE_NOCUT[i][0];
+        data_y_3[i] = scale_factor * data_SUBRANGE_NOCUT[i][4];
     }
 
     TGraph *g_0 = new TGraph(data_size_0, data_x_0, data_y_0);
@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
     c_log->GetPad(0)->SetTicks(1, 2);
     c_log->SetLogy();
     //g_1->GetYaxis()->SetLimits(1.0e0, 1.0e5);
-    g_1->GetYaxis()->SetRangeUser(1.0e0, 1.0e4);
+    g_1->GetYaxis()->SetRangeUser(1.0e0, 1.0e5);
     g_1->Draw();
     g_0->Draw("same");
     g_2->Draw("same");

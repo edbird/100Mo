@@ -807,7 +807,7 @@ int main(int argc, char* argv[])
         if((ix * 10) / t->GetEntries() > prog_c)
         {
             prog_c = (ix * 10) / t->GetEntries();
-            std::cout << 10 * (ix * 10) / t->GetEntries() << " %" << std::endl;
+            //std::cout << 10 * (ix * 10) / t->GetEntries() << " %" << std::endl;
         }
 
     }
@@ -1131,8 +1131,10 @@ int main(int argc, char* argv[])
         Double_t lambda{h_el_energy_sum_reweight->GetBinContent(ix)};
         Double_t data{h_el_energy_data->GetBinContent(ix)};
         Double_t poi{TMath::Poisson(data, lambda)};
+        std::cout << "bin index = " << ix << ", poisson = " << poi << std::endl;
         likelihood *= poi;
     }
+    std::cout << "likelihood = " << likelihood << std::endl;
     Double_t log_likelihood{std::log(likelihood)};
 
     // print entries
