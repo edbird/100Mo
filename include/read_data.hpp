@@ -205,22 +205,27 @@ void write_data_helper_2(const std::string& filename_data,
     //write_data_2(buf, data_temp, delimiter);
     //write_data_2(buf, data, delimiter);
     //data = data_temp;
-    
+
+    std::cout << "data.size()=" << data.size() << std::endl;
     std::size_t j{1};
     if(j < data.size())
     {
         for(;;)
         {
+            std::cout << "data.at(j=" << j << ").size()=" << data.size() << std::endl;
             std::size_t i{0};
             if(i < data.at(j).size())
             {
                 for(;;)
                 {
+                    std::cout << "j=" << j << " i=" << i << std::endl;
                     ofs_data << data.at(j).at(i);
                     if(++ i < data.at(j).size()) ofs_data << ',';
+                    else break;
                 }
             }
             if(++ j < data.size()) ofs_data << '\n';
+            else break;
         }
     }
 

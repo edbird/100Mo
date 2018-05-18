@@ -57,13 +57,14 @@ int main(int argc, char* argv[])
     // the first line should be ignored
     
     // print output file with subset of data
-    if(arg_input_file == std::string("of_data_texting.txt"))
+    if(arg_input_file == std::string("of_data_testing.txt"))
     {
         std::vector<std::vector<double>> data_out;
         for(std::size_t j{1}; j < data.size() - 1; ++ j)
         {
             std::vector<double> temp;
-            for(std::size_t i{0}; i < data.at(j).size() && i < 100; ++ i)
+            temp.push_back(data.at(j).at(0));
+            for(std::size_t i{6}; i < data.at(j).size() && i < 100; ++ i)
             {
                 temp.push_back(data.at(j).at(i));
             }
@@ -80,8 +81,8 @@ int main(int argc, char* argv[])
     Double_t *data_y{new Double_t[data_size - 1]}; // I am now confused as fuck
 
     // start from 1, not 0 to avoid header line -------------VVV
-    // start from 1, not 0 ------VVV--- to avoid epsilon value
-    for(std::size_t experiment_ix{1}; experiment_ix < data.at(1).size(); ++ experiment_ix)
+    // start from 6, not 0 ------VVV--- to avoid epsilon value and other chi-square values
+    for(std::size_t experiment_ix{6}; experiment_ix < data.at(1).size(); ++ experiment_ix)
     {
         //std::cout << "experiment_ix=" << experiment_ix << std::endl;
         // "epsilon" ix
@@ -97,12 +98,17 @@ int main(int argc, char* argv[])
             //if(eps_ix >= 100) break;
         }
 
+        
         TGraph *g_temp = new TGraph(data_size - 1, data_x, data_y);
+        g_temp->Fit("pol2", "M");
         std::string canvas_name{std::string("sensitivity_") + std::to_string(experiment_ix)};
         TCanvas *c_temp = new TCanvas(canvas_name.c_str(), "", 800, 600);
         g_temp->Draw("ALP");
         c_temp->SaveAs((canvas_name + std::string(".png")).c_str());
         delete g_temp;
+        
+
+
 
     }
 
