@@ -1,7 +1,14 @@
 #ifndef READDATA_HPP
 #define READDATA_HPP
 
+
+#include "TH2.h"
+
+
 #include <fstream>
+#include <iostream>
+#include <vector>
+
 
 void read_phase_space_factor(const char* buffer, double &value)
 {
@@ -177,6 +184,53 @@ void read_data(const char* buffer, std::vector<std::vector<double>>& data, const
 
 }
 
+
+// write the data
+void write_data_helper_2(const std::string& filename_data,
+                         const std::vector<std::vector<double>> &data,
+                         const char delimiter = ' ')
+{
+
+    ////////////////////////////////////////////////////////////////////////////
+    // WRITE DATA OUT TO FILE
+    ////////////////////////////////////////////////////////////////////////////
+
+    std::ofstream ofs_data(filename_data.c_str());
+    //std::streampos ifs_size{ifs_data.tellg()};
+    //char * buf{new char[ifs_size + 1]};
+    //ifs_data.seekg(0);
+    //ifs_data.read(buf, ifs_size);
+    //ifs_data.close();
+    //std::vector<std::vector<double>> data_temp;
+    //write_data_2(buf, data_temp, delimiter);
+    //write_data_2(buf, data, delimiter);
+    //data = data_temp;
+    
+    std::size_t j{1};
+    if(j < data.size())
+    {
+        for(;;)
+        {
+            std::size_t i{0};
+            if(i < data.at(j).size())
+            {
+                for(;;)
+                {
+                    ofs_data << data.at(j).at(i);
+                    if(++ i < data.at(j).size()) ofs_data << ',';
+                }
+            }
+            if(++ j < data.size()) ofs_data << '\n';
+        }
+    }
+
+    ofs_data.flush();
+    ofs_data.close();
+
+
+    return;
+
+}
 
 // read the 1D data (data in electron single and sum energy histograms from paper)
 void read_data_helper_2(const std::string& filename_data,
