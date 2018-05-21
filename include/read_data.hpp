@@ -212,13 +212,13 @@ void write_data_helper_2(const std::string& filename_data,
     {
         for(;;)
         {
-            std::cout << "data.at(j=" << j << ").size()=" << data.size() << std::endl;
+            //std::cout << "data.at(j=" << j << ").size()=" << data.size() << std::endl;
             std::size_t i{0};
             if(i < data.at(j).size())
             {
                 for(;;)
                 {
-                    std::cout << "j=" << j << " i=" << i << std::endl;
+                    //std::cout << "j=" << j << " i=" << i << std::endl;
                     ofs_data << data.at(j).at(i);
                     if(++ i < data.at(j).size()) ofs_data << ',';
                     else break;
