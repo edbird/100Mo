@@ -1130,11 +1130,21 @@ int main(int argc, char* argv[])
         TH1I *h_el_energy_data = new TH1I(h_name.c_str(), "", num_bins, 0.0, 4.0);
         for(Int_t ix{1}; ix <= h_el_energy_sum_original->GetNbinsX(); ++ ix)
         {
-            Double_t content{h_el_energy_sum_original->GetBinContent(ix)};
+            // this is the input lambda value
+            //Double_t content{h_el_energy_sum_original->GetBinContent(ix)};
+            Double_t lambda{h_el_energy_sum_original->GetBinContent(ix)};
+            
+            // Note: before implementing full pseudo experiments,
+            // instead of drawing number randomly from a poisson with
+            // mean lambda (which returns an integer),
+            // instead did:
+            // round the lambda value and pretend it is data
             //content = std::round(content);
-            // Note: moved to pseudorandom data rather than rounding
-            Int_t poisson_result{gen.Poisson(content)};
+            //content = std::lround(content);
             //h_el_energy_data->SetBinContent(ix, content);
+
+            // Note: moved to pseudorandom data rather than rounding
+            Int_t poisson_result{gen.Poisson(lambda)};
             h_el_energy_data->SetBinContent(ix, poisson_result);
         }
 
@@ -1143,7 +1153,12 @@ int main(int argc, char* argv[])
         for(Int_t ix{1}; ix <= h_el_energy_sum_original->GetNbinsX(); ++ ix)
         {
             Double_t lambda{h_el_energy_sum_reweight->GetBinContent(ix)}; // reweighted
-            Int_t data{std::lround(h_el_energy_data->GetBinContent(ix))}; // rounded baseline
+            // NOTE: above lambda is the output lambda, it is for the other distribution
+            // rather than the input lambda in the previous code block
+
+            //Int_t data{std::lround(h_el_energy_data->GetBinContent(ix))}; // rounded data (not -> baseline <- ?)
+            Int_t data{h_el_energy_data->GetBinContent(ix)}; // rounded data, is already rounded, is integer
+            // TODO: do not need round?
             Double_t poi{TMath::Poisson(data, lambda)};
             //std::cout << "bin index = " << ix << ", poisson = " << poi << ", lambda = " << lambda << ", data = " << data << std::endl;
             likelihood *= poi;
