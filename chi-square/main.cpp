@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
         data_y_3[i] = scale_factor * data_SUBRANGE_NOCUT[i][4];
     }
 
-    TGraph *g_0 = new TGraph(data_size_0, data_x_0, data_y_0);
+    TGraph *g_0 = new TGraph(data_size_0, data_x_0, data_y_0); // FULL RANGE CUT
     g_0->SetTitle("");
     g_0->GetXaxis()->SetTitle("Parameter #xi");
     g_0->GetYaxis()->SetTitle("#chi^{2}");
@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
     g_0_tgaxis->SetMaxDigits(3);
     g_0->SetLineColor(2);
 
-    TGraph *g_1 = new TGraph(data_size_1, data_x_1, data_y_1);
+    TGraph *g_1 = new TGraph(data_size_1, data_x_1, data_y_1); // FULL RANGE NO CUT
     g_1->SetTitle("");
     g_1->GetXaxis()->SetTitle("Parameter #xi");
     g_1->GetYaxis()->SetTitle("#chi^{2}");
@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
     g_1_tgaxis->SetMaxDigits(3);
     g_1->SetLineColor(4);
 
-    TGraph *g_2 = new TGraph(data_size_2, data_x_2, data_y_2);
+    TGraph *g_2 = new TGraph(data_size_2, data_x_2, data_y_2); // SUB RANGE CUT
     g_2->SetTitle("");
     g_2->GetXaxis()->SetTitle("Parameter #xi");
     g_2->GetYaxis()->SetTitle("#chi^{2}");
@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
     g_2_tgaxis->SetMaxDigits(3);
     g_2->SetLineColor(6);
 
-    TGraph *g_3 = new TGraph(data_size_3, data_x_3, data_y_3);
+    TGraph *g_3 = new TGraph(data_size_3, data_x_3, data_y_3); // SUB RANGE NO CUT
     g_3->SetTitle("");
     g_3->GetXaxis()->SetTitle("Parameter #xi");
     g_3->GetYaxis()->SetTitle("#chi^{2}");
@@ -173,10 +173,10 @@ int main(int argc, char* argv[])
     std::cout << "Finished constructing intermediate data" << std::endl;
 
     TLegend *l = new TLegend(0.1, 0.7, 0.3, 0.9);
-    l->AddEntry(g_1, "Full range no cut", "l");
-    l->AddEntry(g_0, "Full range cut", "l");
-    l->AddEntry(g_2, "Sub range no cut", "l");
-    l->AddEntry(g_3, "Sub range cut", "l");
+    l->AddEntry(g_1, "Full range no cut", "l"); // FULL RANGE NO CUT
+    l->AddEntry(g_0, "Full range cut", "l"); // FULL RANGE CUT
+    l->AddEntry(g_3, "Sub range no cut", "l"); // SUB RANGE NO CUT
+    l->AddEntry(g_2, "Sub range cut", "l"); // SUB RANGE CUT
 
     ////////////////////////////////////////////////////////////////////////////
     // CREATE OUTPUT GRAPH
