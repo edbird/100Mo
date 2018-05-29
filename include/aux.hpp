@@ -1,6 +1,35 @@
 #ifndef AUX_HPP
 #define AUX_HPP
 
+#include <TF1.h>
+#include <TF2.h>
+
+
+/*
+Double_t fit_function_2d(Double_t *_x, Double_t *par)
+{
+
+    Double_t amplitude{par[0]};
+
+    Int_t number_of_bins{40};
+
+    // get x,y
+    Double_t x{_x[0]};
+    Double_t y{_x[1]};
+
+    // get histogram
+    char* p{(char*)par};
+    TH2D *histo{(TH2D*)(p + sizeof(Double_t))};
+
+    Int_t index{histo->FindBin(x, y)};
+    Double_t content{histo->GetBinContent(index)};
+
+    return (content * amplitude);
+}
+*/
+// TODO: this method for 1d fit
+
+
 // should the parameter go in the "function" or the "data"?
 // currently I have it in the data, not the function, which is weird?
 
@@ -348,5 +377,50 @@ void driver(const TH1* const histo_fit, const TH1* const histo_data, Double_t &p
     std::cout << "iteration converged after " << iterations << " iterations" << std::endl;
 
 }
+
+
+// histo_fit is the fit function
+// histo_data is the data
+// 2d version
+Double_t chi_square_test(const TH2* const histo_fit, const TH2* const histo_data)
+{
+    // number of bins
+    Int_t nbx{histo_fit->GetNbinsX()};
+    Int_t nby{histo_fit->GetNbinsY()};
+    
+    // check same number of bins in each histo
+    if(nbx != histo_data->GetNbinsX())
+        throw "bin number mismatch in function histo_histo_chisquare";
+    if(nby != histo_data->GetNbinsY())
+        throw "bin number mismatch in function histo_histo_chisquare";
+
+    Double_t chisquare{0.0};
+    for(Int_t iy{1}; iy <= nby; ++ iy)
+    {
+        for(Int_t ix{1}; ix <= nbx; ++ ix)
+        {
+            Double_t content_f{histo_fit->GetBinContent(ix, iy)};
+            Double_t content_d{histo_data->GetBinContent(ix, iy)};
+            Double_t delta{content_f - content_d};
+            Double_t error_d{histo_data->GetBinError(ix, iy)};
+            if(error_d <= 0.0)
+            {
+                if(content_d == 0.0)
+                {
+                    continue;
+                }
+                else
+                {
+                    std::cerr << "Warning: Skipping bin with index " << ix << " in chi_square_data, bin error is 0.0 but content != 0.0" << std::endl;
+                }
+            }
+            Double_t chi{std::pow(delta / error_d, 2.0)};
+            chisquare += chi;
+        }
+    }
+    //chisquare /= (Double_t)histo_fit->GetNbinsX();
+    return chisquare;
+}
+
 
 #endif

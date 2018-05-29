@@ -660,6 +660,19 @@ int main(int argc, char* argv[])
     h_el_energy_sum_reweight->SetLineColor(4);
     h_el_energy_sum_reweight->SetMarkerColor(4);
 
+    // 2d fit version of h_el_energy_sum_original
+    // instead of using a 1d histogram containing the sum of the 2 electron
+    // energies, use a 2d histogram containing both energies
+    // TODO: should I sort by energy?
+    TH2D *h_el_energy_2d_original = new TH2D("h_el_energy_2d_original", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+    h_el_energy_2d_original->SetStats(0);
+    
+    TH2D *h_el_energy_2d_reweight = new TH2D("h_el_energy_2d_reweight", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+    h_el_energy_2d_reweight->SetStats(0);
+
+    TH2D *h_el_energy_2d_diff = new TH2D("h_el_energy_2d_diff", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+    h_el_energy_2d_diff->SetStats(0);
+
     // test histograms
     // NEMO-3 data/MC: truth electron energy x2 (T1, T2) (2 in same histo)
     TH1D *h_test_single_original = new TH1D("h_test_single_original", "", num_bins, 0.0, 4.0);
@@ -772,6 +785,15 @@ int main(int argc, char* argv[])
         
         h_el_energy_sum_original->Fill(el_energy_[0] + el_energy_[1], 1.0 * gen_weight);
 
+        if(el_energy_[0] <= el_energy_[1])
+        {
+            h_el_energy_2d_original->Fill(el_energy_[0], el_energy_[1], 1.0 * gen_weight);
+        }
+        else
+        {
+            h_el_energy_2d_original->Fill(el_energy_[1], el_energy_[0], 1.0 * gen_weight);
+        }
+
         // test histograms
         h_test_single_original->Fill(trueT1, 1.0 * gen_weight);
         h_test_single_original->Fill(trueT2, 1.0 * gen_weight);
@@ -795,6 +817,15 @@ int main(int argc, char* argv[])
         h_el_energy_reweight->Fill(el_energy_[1], weight * gen_weight);
 
         h_el_energy_sum_reweight->Fill(el_energy_[0] + el_energy_[1], weight * gen_weight);
+
+        if(el_energy_[0] <= el_energy_[1])
+        {
+            h_el_energy_2d_reweight->Fill(el_energy_[0], el_energy_[1], weight * gen_weight);
+        }
+        else
+        {
+            h_el_energy_2d_reweight->Fill(el_energy_[1], el_energy_[0], weight * gen_weight);
+        }
 
         // test histograms
         h_test_single_reweight->Fill(trueT1, weight * gen_weight);
@@ -881,12 +912,19 @@ int main(int argc, char* argv[])
     #endif
 
     Double_t sensitivity_chisquare{0.0};
+    Double_t sensitivity_chisquare_2d{0.0};
     bool fit_subrange{false};
     if(arg_fit_subrange == std::string("true")) fit_subrange = true;
     // number of degrees of freedom
     Int_t non_empty_bins{0};
+    Int_t non_empty_bins_2d{0};
     #define FIT_METHOD_2 1
     #if FIT_METHOD_2
+
+        ////////////////////////////////////////////////////////////////////////
+        // 1d histogram fit
+        ////////////////////////////////////////////////////////////////////////
+
         TF1 *f_el_energy_sum_original = new TF1("f_el_energy_sum_original", fit_function, 0.0, 4.0, 1 + 2 * (h_el_energy_sum_reweight->GetNbinsX() + 1));
         f_el_energy_sum_original->SetParameter(0, 1.0); // set initial amplitude parameter to 1.0
         f_el_energy_sum_original->SetNpx(100000);
@@ -967,6 +1005,137 @@ int main(int argc, char* argv[])
             std::cout << " degrees of freedom: " << non_empty_bins << std::endl;
             std::cout << " chi square reduced: " << sensitivity_chisquare / (Double_t)non_empty_bins << std::endl;
         }
+
+        ////////////////////////////////////////////////////////////////////////
+        // 2d histogram fit
+        ////////////////////////////////////////////////////////////////////////
+
+        // NOTE TO SELF: There is no 2d fit, the 2d histogram is used to evaluate
+        // the sensitivity, therefore there is only a chi-square test
+
+        //TF2 *f_el_energy_2d_original = new TF2("f_el_energy_2d_original", fit_function_2d, 0.0, 4.0, 0.0, 4.0, 1 + 2 * (number_of_bins + 1) * 2 * (number_of_bins + 1));
+        //Int_t parameter_count{1 + ((sizeof(TH2D*) + sizeof(Double_t) - 1) / sizeof(Double_t))};
+        //std::cout << "parameter_count=" << parameter_count << std::endl;
+        //TF2 *f_el_energy_2d_original = new TF2("f_el_energy_2d_original", fit_function_2d, 0.0, 4.0, 0.0, 4.0, parameter_count);
+        //f_el_energy_2d_original->SetParameter(0, 1.0);
+        //f_el_energy_2d_original->FixParameter(1, 0.0);
+        //Double_t *parameters{f_el_energy_2d_original->GetParameters()};
+        //memcpy(&(parameters[1]), h_el_energy_2d_original, sizeof(h_el_energy_2d_original));
+        //f_el_energy_2d_original->SetNpx(100000);
+        // set the "parameters" (constants)
+        // these are the values from the histogram
+        //
+        // Parameters:
+        // 0 = amplitude parameter (free)
+        // all other parameters fixed:
+        // 1 = bin(1,1)
+        // 2 = bin(1,2)
+        // 3 = bin(1,3)
+        // ...
+        // 40 = bin(1,40) (number_of_bins=40)
+        // 41 = bin(2,1)
+        // ...
+        // 81 = bin(2,40)
+        // ...
+        // 40*40+1=1601 = bin(40,40)
+        // 40*40+1+1=1602 = x low edge 1
+        // 40*40+1+2=1603 = x low edge 2
+        // ...
+        // 40*40+1+40=1641 = x low edge 40
+        // 40*40+1+41=1642 = x low edge 41 (virtual bin, high edge of bin 40)
+        // 40*40+1+41+1=1643 = y low edge 1
+        // ...
+        // 40*40+1+41+40=1682 = y low edge 40
+        // 40*40+1+41+41=1683 = y low edge 41 (virtual bin, high edge of bin 40)
+        //{
+            /*
+            Int_t i_out{0};
+            ++ i_out;
+            Double_t par{0.0};
+
+            // loop over all bins and set values
+            Int_t nbx{h_el_energy_2d_reweight->GetNbinsX()};
+            Int_t nby{h_el_energy_2d_reweight->GetNbinsY()};
+            for(Int_t i{1}; i <= nbx; ++ i)
+            {
+                for(Int_t j{1}; j <= nbx; ++ j)
+                {
+                    Double_t content{h_el_energy_2d_reweight->GetBinContent(i, j)};
+                    f_el_energy_2d_original->FixParameter(i_out, content);
+                    ++ i_out;
+                }
+            }
+
+            // loop over x axis and set bin lower bounds
+            for(Int_t i{1}; i <= nbx; ++ i)
+            {
+                Double_t lower_bound{h_el_energy_2d_reweight->GetXaxis()->GetBinLowEdge(i)};
+                f_el_energy_2d_original->FixParameter(i_out, lower_bound);
+                ++ i_out;
+            }
+            // set final bin limit
+            Double_t lower_bound{h_el_energy_2d_reweight->GetXaxis()->GetBinLowEdge(nbx) + h_el_energy_2d_reweight->GetBinWidth(1)};
+            f_el_energy_2d_original->FixParameter(i_out, lower_bound);
+            ++ i_out;
+            // loop over y axis and set bin lower bounds
+            for(Int_t i{1}; i <= nby; ++ i)
+            {
+                Double_t lower_bound{h_el_energy_2d_reweight->GetYaxis()->GetBinLowEdge(i)};
+                f_el_energy_2d_original->FixParameter(i_out, lower_bound);
+                ++ i_out;
+            }
+            // set final bin limit
+            Double_t lower_bound{h_el_energy_2d_reweight->GetYaxis()->GetBinLowEdge(nby) + h_el_energy_2d_reweight->GetBinWidth(1)};
+            f_el_energy_2d_original->FixParameter(i_out, lower_bound);
+            ++ i_out;
+            */
+
+            //if(fit_subrange == false)
+            //{
+                //h_el_energy_2d_original->Fit("f_el_energy_2d_original", "0");
+            //}
+            //else if(fit_subrange == true)
+            //{
+            //    h_el_energy_2d_original->Fit("f_el_energy_2d_original", "0", "", 2.0, 4.0);
+            //}
+
+        //}
+        //std::cout << "Amplitude parameter: " << f_el_energy_2d_original->GetParameter(0) << std::endl;
+        //std::cout << "                err: " << f_el_energy_2d_original->GetParError(0) << std::endl;
+        //std::cout << "         chi square: " << f_el_energy_2d_original->GetChisquare() / h_el_energy_2d_original->GetNbinsX() << std::endl;
+        //std::cout << "         chi square: " << f_el_energy_2d_original->GetChisquare() << std::endl;
+        for(Int_t j{1}; j <= h_el_energy_2d_original->GetNbinsY(); ++ j)
+        {
+            for(Int_t i{1}; i <= h_el_energy_2d_original->GetNbinsX(); ++ i)
+            {
+                if(h_el_energy_2d_original->GetBinContent(i, j) != 0.0) ++ non_empty_bins_2d;
+            }
+        }
+        std::cout << " degrees of freedom (2d): " << non_empty_bins_2d << std::endl;
+        //std::cout << " chi square reduced: " << f_el_energy_2d_original->GetChisquare() / (Double_t)non_empty_bins_2d << std::endl;
+
+        // scale the red histogram using the amplitude parameter
+        h_el_energy_2d_reweight->Scale(f_el_energy_sum_original->GetParameter(0));
+
+        // get chi-square for single electron histograms
+        //if(fit_subrange == false)
+        //{
+            sensitivity_chisquare_2d = chi_square_test(h_el_energy_2d_reweight, h_el_energy_2d_original);
+            std::cout << "chi square of 2 electron: " << sensitivity_chisquare_2d << std::endl;
+            std::cout << " degrees of freedom: " << non_empty_bins_2d << std::endl;
+            std::cout << " chi square reduced: " << sensitivity_chisquare_2d / (Double_t)non_empty_bins_2d << std::endl;
+
+        //}
+        //else if(fit_subrange == true)
+        //{
+        //    sensitivity_chisquare_2d = chi_square_test(h_el_energy_reweight, h_el_energy_original, 2.0, 4.0);
+        //    std::cout << "chi square of single electron, 2.0 MeV - 4.0 MeV: " << sensitivity_chisquare_2d << std::endl;
+        //    std::cout << " degrees of freedom: " << non_empty_bins_2d << std::endl;
+        //    std::cout << " chi square reduced: " << sensitivity_chisquare_2d / (Double_t)non_empty_bins_2d << std::endl;
+        //}
+
+
+
     #endif
     
     // Note: never got this working
@@ -1068,6 +1237,45 @@ int main(int argc, char* argv[])
         factory_2.Canvas("el_energy_sum", dir, h_el_energy_sum_original, "Baseline", h_el_energy_sum_reweight, "Reweighted");
         // TODO: settings should be passed to canvas in case settings should be changed?
         // or setsettings function should be provided
+
+
+        // 2d original and reweight histograms
+        TCanvas *c_el_energy_2d_original = new TCanvas("c_el_energy_2d_original", "", 800, 600);
+        //c_el_energy_2d_original->SetLogz();
+        h_el_energy_2d_original->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
+        h_el_energy_2d_original->GetYaxis()->SetTitle("High Energy Electron [MeV]");
+        h_el_energy_2d_original->Draw("colz");
+        c_el_energy_2d_original->SaveAs("c_el_energy_2d_original.C");
+        c_el_energy_2d_original->SaveAs("c_el_energy_2d_original.png");
+        c_el_energy_2d_original->SaveAs("c_el_energy_2d_original.pdf");
+
+        TCanvas *c_el_energy_2d_reweight = new TCanvas("c_el_energy_2d_reweight", "", 800, 600);
+        //c_el_energy_2d_reweight->SetLogz();
+        h_el_energy_2d_reweight->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
+        h_el_energy_2d_reweight->GetYaxis()->SetTitle("High Energy Electron [MeV]");
+        h_el_energy_2d_reweight->Draw("colz");
+        c_el_energy_2d_reweight->SaveAs("c_el_energy_2d_reweight.C");
+        c_el_energy_2d_reweight->SaveAs("c_el_energy_2d_reweight.png");
+        c_el_energy_2d_reweight->SaveAs("c_el_energy_2d_reweight.pdf");
+
+        // create difference histogram
+        for(Int_t j{1}; j <= h_el_energy_2d_diff->GetNbinsY(); ++ j)
+        {
+            for(Int_t i{1}; i <= h_el_energy_2d_diff->GetNbinsX(); ++ i)
+            {
+                Double_t content{h_el_energy_2d_original->GetBinContent(i, j) - h_el_energy_2d_reweight->GetBinContent(i, j)};
+                h_el_energy_2d_diff->SetBinContent(i, j, content);
+            }
+        }
+        TCanvas *c_el_energy_2d_diff = new TCanvas("c_el_energy_2d_diff", "", 800, 600);
+        //c_el_energy_2d_diff->SetLogz();
+        h_el_energy_2d_diff->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
+        h_el_energy_2d_diff->GetYaxis()->SetTitle("High Energy Electron [MeV]");
+        h_el_energy_2d_diff->Draw("colz");
+        c_el_energy_2d_diff->SaveAs("c_el_energy_2d_diff.C");
+        c_el_energy_2d_diff->SaveAs("c_el_energy_2d_diff.png");
+        c_el_energy_2d_diff->SaveAs("c_el_energy_2d_diff.pdf");
+        
 
 
         // print single electron distribution test histograms
