@@ -670,6 +670,9 @@ int main(int argc, char* argv[])
     TH2D *h_el_energy_2d_diff = new TH2D("h_el_energy_2d_diff", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
     h_el_energy_2d_diff->SetStats(0);
 
+    TH2D *h_el_energy_2d_pull = new TH2D("h_el_energy_2d_pull", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+    h_el_energy_2d_pull->SetStats(0);
+
     // test histograms
     // NEMO-3 data/MC: truth electron energy x2 (T1, T2) (2 in same histo)
     TH1D *h_test_single_original = new TH1D("h_test_single_original", "", num_bins, 0.0, 4.0);
@@ -1072,6 +1075,7 @@ int main(int argc, char* argv[])
 
         // 2d original and reweight histograms
         TCanvas *c_el_energy_2d_original = new TCanvas("c_el_energy_2d_original", "", 800, 600);
+        c_el_energy_2d_original->SetRightMargin(0.15);
         //c_el_energy_2d_original->SetLogz();
         h_el_energy_2d_original->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
         h_el_energy_2d_original->GetYaxis()->SetTitle("High Energy Electron [MeV]");
@@ -1081,6 +1085,7 @@ int main(int argc, char* argv[])
         c_el_energy_2d_original->SaveAs("c_el_energy_2d_original.pdf");
 
         TCanvas *c_el_energy_2d_reweight = new TCanvas("c_el_energy_2d_reweight", "", 800, 600);
+        c_el_energy_2d_reweight->SetRightMargin(0.15);
         //c_el_energy_2d_reweight->SetLogz();
         h_el_energy_2d_reweight->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
         h_el_energy_2d_reweight->GetYaxis()->SetTitle("High Energy Electron [MeV]");
@@ -1094,11 +1099,19 @@ int main(int argc, char* argv[])
         {
             for(Int_t i{1}; i <= h_el_energy_2d_diff->GetNbinsX(); ++ i)
             {
-                Double_t content{h_el_energy_2d_original->GetBinContent(i, j) - h_el_energy_2d_reweight->GetBinContent(i, j)};
+                Double_t content1{h_el_energy_2d_original->GetBinContent(i, j)};
+                Double_t content2{h_el_energy_2d_reweight->GetBinContent(i, j)};
+                Double_t error1{h_el_energy_2d_original->GetBinError(i, j)};
+                // note: do not use error or reweighted
+                Double_t error2{0.0 * h_el_energy_2d_reweight->GetBinError(i, j)};
+                Double_t content{content1 - content2};
+                Double_t error{std::sqrt(error1 * error1 + error2 * error2)};
                 h_el_energy_2d_diff->SetBinContent(i, j, content);
+                h_el_energy_2d_diff->SetBinError(i, j, error);
             }
         }
         TCanvas *c_el_energy_2d_diff = new TCanvas("c_el_energy_2d_diff", "", 800, 600);
+        c_el_energy_2d_diff->SetRightMargin(0.12);
         //c_el_energy_2d_diff->SetLogz();
         h_el_energy_2d_diff->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
         h_el_energy_2d_diff->GetYaxis()->SetTitle("High Energy Electron [MeV]");
@@ -1106,6 +1119,48 @@ int main(int argc, char* argv[])
         c_el_energy_2d_diff->SaveAs("c_el_energy_2d_diff.C");
         c_el_energy_2d_diff->SaveAs("c_el_energy_2d_diff.png");
         c_el_energy_2d_diff->SaveAs("c_el_energy_2d_diff.pdf");
+        
+        // create pull histogram
+        for(Int_t j{1}; j <= h_el_energy_2d_pull->GetNbinsY(); ++ j)
+        {
+            for(Int_t i{1}; i <= h_el_energy_2d_pull->GetNbinsX(); ++ i)
+            {
+                Double_t content{h_el_energy_2d_diff->GetBinContent(i, j)};
+                Double_t error{h_el_energy_2d_diff->GetBinError(i, j)};
+                if(error == 0.0)
+                {
+                    //h_el_energy_2d_pull->SetBinContent(i, j, 0.0);
+                }
+                else
+                {
+                    h_el_energy_2d_pull->SetBinContent(i, j, content / error);
+                }
+            }
+        }
+        TCanvas *c_el_energy_2d_pull = new TCanvas("c_el_energy_2d_pull", "", 800, 600);
+        c_el_energy_2d_pull->SetRightMargin(0.12);
+        //c_el_energy_2d_pull->SetLogz();
+        h_el_energy_2d_pull->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
+        h_el_energy_2d_pull->GetYaxis()->SetTitle("High Energy Electron [MeV]");
+        h_el_energy_2d_pull->Draw("colz");
+        c_el_energy_2d_pull->SaveAs("c_el_energy_2d_pull.C");
+        c_el_energy_2d_pull->SaveAs("c_el_energy_2d_pull.png");
+        c_el_energy_2d_pull->SaveAs("c_el_energy_2d_pull.pdf");
+
+        // double check chi-squre result
+        // result: OK
+        /*
+        Double_t chisq{0.0};
+        for(Int_t j{1}; j <= h_el_energy_2d_pull->GetNbinsY(); ++ j)
+        {
+            for(Int_t i{1}; i <= h_el_energy_2d_pull->GetNbinsX(); ++ i)
+            {
+                Double_t content{h_el_energy_2d_pull->GetBinContent(i, j)};
+                chisq += content * content;
+            }
+        }
+        std::cout << chisq << std::endl;
+        */
         
 
 
