@@ -113,10 +113,7 @@ int main(int argc, char* argv[])
     std::cout << "Writing data to file " << arg_output_filename << " append mode" << std::endl;
 
     // process gathered argument data
-    //filename = arg_filename;
-    //std::string filename_default(arg_default_filename); // required for later if test
     bool gen_weight_enable{false};
-    //if(arg_filename != filename_default)
     if(filename != pa.GetDefault("filename"))
     {
         gen_weight_enable = true;
@@ -716,19 +713,6 @@ int main(int argc, char* argv[])
     h_gen_weight->SetStats(0);
     
     // read file using program arguments
-    //std::string filename_default("NewElectronNtuplizerExe_Int_ManDB_output.root");
-    //std::string filename(filename_default);
-    //bool gen_weight_enable{false};
-    //if(argc == 2)
-    //{
-    //    filename = std::string(argv[1]);
-    //    std::cout << "Specified filename: " << filename << std::endl;
-    //    if(filename != filename_default)
-    //    {
-    //        gen_weight_enable = true;
-    //    }
-    //}
-    //TFile *f = new TFile("NewElectronNtuplizerExe_Int_ManDB_output.root");
     TFile *f = new TFile(filename.c_str());
     TTree *t = (TTree*)f->Get("NewElectronNtuplizer/NewElectronNtuplizer");
 
@@ -768,11 +752,6 @@ int main(int argc, char* argv[])
             if(el_energy_[0] < 0.3) continue;
             if(el_energy_[1] < 0.3) continue;
         }
-
-        //std::cout << "trueT1=" << trueT1 << " trueT2=" << trueT2;
-        //std::cout << " -> " << ReWeight(trueT1 / bb_Q, trueT2 / bb_Q, 0.8, h_nEqNull, h_nEqTwo, psiN0, psiN2) << std::endl;
-
-        //const Double_t epsilon_31{0.8};
 
         Double_t T1{trueT1 / bb_Q};
         Double_t T2{trueT2 / bb_Q};
@@ -867,14 +846,6 @@ int main(int argc, char* argv[])
     h_el_energy_sum_reweight->Scale(scale_factor);
     */
     
-    //TH1D *h_el_energy_sum_reweight_clone = (TH1D*)h_el_energy_sum_reweight->Clone();
-    //h_el_energy_sum_reweight_clone->SetLineColor(6);
-    //h_el_energy_sum_reweight_clone->SetMarkerColor(6);
-    
-    //TH1D *h_el_energy_sum_original_clone = (TH1D*)h_el_energy_sum_original->Clone();
-    //h_el_energy_sum_original_clone->SetLineColor(7);
-    //h_el_energy_sum_original_clone->SetMarkerColor(7);
-
     h_test_single_original->Scale((1.0 / 0.1) / h_test_single_original->Integral());
     h_test_single_reweight->Scale((1.0 / 0.1) / h_test_single_reweight->Integral());
     h_test_sum_original->Scale((1.0 / 0.1) / h_test_sum_original->Integral());
@@ -900,17 +871,7 @@ int main(int argc, char* argv[])
         delete c_gen_weight;
     }
 
-    // scale the green histogram to match the red one (for sum energy histo) 
-    #define FIT_METHOD_1 0
-    #if FIT_METHOD_1
-        Double_t integral_1{h_el_energy_sum_original->Integral()};
-        Double_t integral_2{h_el_energy_sum_reweight->Integral()};
-        h_el_energy_sum_reweight->Scale(integral_1 / integral_2);
-        h_el_energy_reweight->Scale(integral_1 / integral_2);
-        Double_t chi_square{chi_square_test(h_el_energy_reweight, h_el_energy_original)};
-        std::cout << "chi_square=" << chi_square << std::endl;
-    #endif
-
+    
     Double_t sensitivity_chisquare{0.0};
     Double_t sensitivity_chisquare_2d{0.0};
     bool fit_subrange{false};
@@ -922,7 +883,7 @@ int main(int argc, char* argv[])
     #if FIT_METHOD_2
 
         ////////////////////////////////////////////////////////////////////////
-        // 1d histogram fit
+        // 1d histogram fit and sensitivity
         ////////////////////////////////////////////////////////////////////////
 
         TF1 *f_el_energy_sum_original = new TF1("f_el_energy_sum_original", fit_function, 0.0, 4.0, 1 + 2 * (h_el_energy_sum_reweight->GetNbinsX() + 1));
@@ -1007,103 +968,12 @@ int main(int argc, char* argv[])
         }
 
         ////////////////////////////////////////////////////////////////////////
-        // 2d histogram fit
+        // 2d histogram sensitivity
         ////////////////////////////////////////////////////////////////////////
 
         // NOTE TO SELF: There is no 2d fit, the 2d histogram is used to evaluate
         // the sensitivity, therefore there is only a chi-square test
 
-        //TF2 *f_el_energy_2d_original = new TF2("f_el_energy_2d_original", fit_function_2d, 0.0, 4.0, 0.0, 4.0, 1 + 2 * (number_of_bins + 1) * 2 * (number_of_bins + 1));
-        //Int_t parameter_count{1 + ((sizeof(TH2D*) + sizeof(Double_t) - 1) / sizeof(Double_t))};
-        //std::cout << "parameter_count=" << parameter_count << std::endl;
-        //TF2 *f_el_energy_2d_original = new TF2("f_el_energy_2d_original", fit_function_2d, 0.0, 4.0, 0.0, 4.0, parameter_count);
-        //f_el_energy_2d_original->SetParameter(0, 1.0);
-        //f_el_energy_2d_original->FixParameter(1, 0.0);
-        //Double_t *parameters{f_el_energy_2d_original->GetParameters()};
-        //memcpy(&(parameters[1]), h_el_energy_2d_original, sizeof(h_el_energy_2d_original));
-        //f_el_energy_2d_original->SetNpx(100000);
-        // set the "parameters" (constants)
-        // these are the values from the histogram
-        //
-        // Parameters:
-        // 0 = amplitude parameter (free)
-        // all other parameters fixed:
-        // 1 = bin(1,1)
-        // 2 = bin(1,2)
-        // 3 = bin(1,3)
-        // ...
-        // 40 = bin(1,40) (number_of_bins=40)
-        // 41 = bin(2,1)
-        // ...
-        // 81 = bin(2,40)
-        // ...
-        // 40*40+1=1601 = bin(40,40)
-        // 40*40+1+1=1602 = x low edge 1
-        // 40*40+1+2=1603 = x low edge 2
-        // ...
-        // 40*40+1+40=1641 = x low edge 40
-        // 40*40+1+41=1642 = x low edge 41 (virtual bin, high edge of bin 40)
-        // 40*40+1+41+1=1643 = y low edge 1
-        // ...
-        // 40*40+1+41+40=1682 = y low edge 40
-        // 40*40+1+41+41=1683 = y low edge 41 (virtual bin, high edge of bin 40)
-        //{
-            /*
-            Int_t i_out{0};
-            ++ i_out;
-            Double_t par{0.0};
-
-            // loop over all bins and set values
-            Int_t nbx{h_el_energy_2d_reweight->GetNbinsX()};
-            Int_t nby{h_el_energy_2d_reweight->GetNbinsY()};
-            for(Int_t i{1}; i <= nbx; ++ i)
-            {
-                for(Int_t j{1}; j <= nbx; ++ j)
-                {
-                    Double_t content{h_el_energy_2d_reweight->GetBinContent(i, j)};
-                    f_el_energy_2d_original->FixParameter(i_out, content);
-                    ++ i_out;
-                }
-            }
-
-            // loop over x axis and set bin lower bounds
-            for(Int_t i{1}; i <= nbx; ++ i)
-            {
-                Double_t lower_bound{h_el_energy_2d_reweight->GetXaxis()->GetBinLowEdge(i)};
-                f_el_energy_2d_original->FixParameter(i_out, lower_bound);
-                ++ i_out;
-            }
-            // set final bin limit
-            Double_t lower_bound{h_el_energy_2d_reweight->GetXaxis()->GetBinLowEdge(nbx) + h_el_energy_2d_reweight->GetBinWidth(1)};
-            f_el_energy_2d_original->FixParameter(i_out, lower_bound);
-            ++ i_out;
-            // loop over y axis and set bin lower bounds
-            for(Int_t i{1}; i <= nby; ++ i)
-            {
-                Double_t lower_bound{h_el_energy_2d_reweight->GetYaxis()->GetBinLowEdge(i)};
-                f_el_energy_2d_original->FixParameter(i_out, lower_bound);
-                ++ i_out;
-            }
-            // set final bin limit
-            Double_t lower_bound{h_el_energy_2d_reweight->GetYaxis()->GetBinLowEdge(nby) + h_el_energy_2d_reweight->GetBinWidth(1)};
-            f_el_energy_2d_original->FixParameter(i_out, lower_bound);
-            ++ i_out;
-            */
-
-            //if(fit_subrange == false)
-            //{
-                //h_el_energy_2d_original->Fit("f_el_energy_2d_original", "0");
-            //}
-            //else if(fit_subrange == true)
-            //{
-            //    h_el_energy_2d_original->Fit("f_el_energy_2d_original", "0", "", 2.0, 4.0);
-            //}
-
-        //}
-        //std::cout << "Amplitude parameter: " << f_el_energy_2d_original->GetParameter(0) << std::endl;
-        //std::cout << "                err: " << f_el_energy_2d_original->GetParError(0) << std::endl;
-        //std::cout << "         chi square: " << f_el_energy_2d_original->GetChisquare() / h_el_energy_2d_original->GetNbinsX() << std::endl;
-        //std::cout << "         chi square: " << f_el_energy_2d_original->GetChisquare() << std::endl;
         for(Int_t j{1}; j <= h_el_energy_2d_original->GetNbinsY(); ++ j)
         {
             for(Int_t i{1}; i <= h_el_energy_2d_original->GetNbinsX(); ++ i)
@@ -1111,8 +981,6 @@ int main(int argc, char* argv[])
                 if(h_el_energy_2d_original->GetBinContent(i, j) != 0.0) ++ non_empty_bins_2d;
             }
         }
-        std::cout << " degrees of freedom (2d): " << non_empty_bins_2d << std::endl;
-        //std::cout << " chi square reduced: " << f_el_energy_2d_original->GetChisquare() / (Double_t)non_empty_bins_2d << std::endl;
 
         // scale the red histogram using the amplitude parameter
         h_el_energy_2d_reweight->Scale(f_el_energy_sum_original->GetParameter(0));
@@ -1122,7 +990,7 @@ int main(int argc, char* argv[])
         //{
             sensitivity_chisquare_2d = chi_square_test(h_el_energy_2d_reweight, h_el_energy_2d_original);
             std::cout << "chi square of 2 electron: " << sensitivity_chisquare_2d << std::endl;
-            std::cout << " degrees of freedom: " << non_empty_bins_2d << std::endl;
+            std::cout << " degrees of freedom (2d): " << non_empty_bins_2d << std::endl;
             std::cout << " chi square reduced: " << sensitivity_chisquare_2d / (Double_t)non_empty_bins_2d << std::endl;
 
         //}
@@ -1137,14 +1005,6 @@ int main(int argc, char* argv[])
 
 
     #endif
-    
-    // Note: never got this working
-    #define FIT_METHOD_3 0
-    #if FIT_METHOD_3
-        Double_t amplitude{1.0};
-        driver(h_el_energy_sum_original, h_el_energy_sum_reweight, amplitude);
-    #endif
-
 
     /*
     TCanvas *c_el_energy_original = new TCanvas("c_el_energy_original", "c_el_energy_original", 800, 600);
@@ -1180,21 +1040,6 @@ int main(int argc, char* argv[])
 
 
         // print single electron distribution
-        //TCanvas *c_el_energy_both = new TCanvas("e_el_energy_both", "e_el_energy_both", 800, 600);
-        //c_el_energy_both->SetLogy(log_mode);
-        //h_el_energy_original->SetMaximum(220.0e3); // MC data
-        //h_el_energy_original->SetMaximum(1000.0e3); // MC data log mode
-        //h_el_energy_original->GetXaxis()->SetTitle("Energy [MeV]");
-        //h_el_energy_original->GetYaxis()->SetTitle("Events");
-        //h_el_energy_reweight->SetMaximum(1000.0e3);
-        //h_el_energy_reweight->GetXaxis()->SetTitle("Energy [MeV]");
-        //h_el_energy_reweight->GetYaxis()->SetTitle("Events");
-        //h_el_energy_original->Draw("E");
-        //h_el_energy_reweight->Draw("Esame");
-        //c_el_energy_both->SaveAs("c_el_energy_both.C");
-        //c_el_energy_both->SaveAs("c_el_energy_both.png");
-        //c_el_energy_both->SaveAs("c_el_energy_both.pdf");
-        //delete c_el_energy_both;
         const Double_t max_log_mode{1000.0e3};
         const Double_t max_nolog_mode{220.0e3};
         Double_t max{0.0};
@@ -1211,20 +1056,6 @@ int main(int argc, char* argv[])
 
 
         // print summed distribution
-        //TCanvas *c_el_energy_sum_both = new TCanvas("e_el_energy_sum_both", "e_el_energy_sum_both", 800, 600);
-        //c_el_energy_sum_both->SetLogy(log_mode);
-        //h_el_energy_sum_original->SetMaximum(80.0e3); // MC data
-        //h_el_energy_sum_original->SetMaximum(100.0e3); // MC data log mode
-        //h_el_energy_sum_original->GetXaxis()->SetTitle("Energy [MeV]");
-        //h_el_energy_sum_original->GetYaxis()->SetTitle("Events");
-        //h_el_energy_sum_original->Draw("E");
-        //h_el_energy_sum_reweight->Draw("Esame");
-        //h_el_energy_sum_original_clone->Draw("Esame");
-        //h_el_energy_sum_reweight_clone->Draw("Esame");
-        //c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.C");
-        //c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.png");
-        //c_el_energy_sum_both->SaveAs("c_el_energy_sum_both.pdf");
-        //delete c_el_energy_sum_both; 
         const Double_t max_log_mode_2{100.0e3};
         const Double_t max_nolog_mode_2{80.0e3};
         const std::string dir_log_mode_2("el_energy_sum_log_dir");
