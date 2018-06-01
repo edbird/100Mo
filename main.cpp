@@ -1212,58 +1212,133 @@ int main(int argc, char* argv[])
 
     // distribution of log-likelihoods
     std::vector<Double_t> vec_ll;
+    std::vector<Double_t> vec_ll_2d;
     TRandom3 gen;
     
-    const Int_t number_of_pseudo_experiments{1000000};
+    const Int_t number_of_pseudo_experiments{1}; //{1000000};
     for(Int_t count{0}; count < number_of_pseudo_experiments; ++ count)
     {
+        ////////////////////////////////////////////////////////////////////////
+        // SINGLE ELECTRON ENERGY
+        ////////////////////////////////////////////////////////////////////////
 
-        // log likelihood method
-        // create "data" histogram - rounded original histogram
-        std::string h_name{std::string("h_el_energy_data_") + std::to_string(count)};
-        TH1I *h_el_energy_data = new TH1I(h_name.c_str(), "", num_bins, 0.0, 4.0);
-        for(Int_t ix{1}; ix <= h_el_energy_sum_original->GetNbinsX(); ++ ix)
         {
-            // this is the input lambda value
-            //Double_t content{h_el_energy_sum_original->GetBinContent(ix)};
-            Double_t lambda{h_el_energy_sum_original->GetBinContent(ix)};
-            
-            // Note: before implementing full pseudo experiments,
-            // instead of drawing number randomly from a poisson with
-            // mean lambda (which returns an integer),
-            // instead did:
-            // round the lambda value and pretend it is data
-            //content = std::round(content);
-            //content = std::lround(content);
-            //h_el_energy_data->SetBinContent(ix, content);
+            // TODO: name of histograms which we iterate over
+            // log likelihood method
+            // create "data" histogram - poisson generated data
+            std::string h_name{std::string("h_el_energy_data_") + std::to_string(count)};
+            TH1I *h_el_energy_data = new TH1I(h_name.c_str(), "", num_bins, 0.0, 4.0);
+            for(Int_t ix{1}; ix <= h_el_energy_sum_original->GetNbinsX(); ++ ix)
+            {
+                // this is the input lambda value
+                //Double_t content{h_el_energy_sum_original->GetBinContent(ix)};
+                Double_t lambda{h_el_energy_sum_original->GetBinContent(ix)};
+                
+                // Note: before implementing full pseudo experiments,
+                // instead of drawing number randomly from a poisson with
+                // mean lambda (which returns an integer),
+                // instead did:
+                // round the lambda value and pretend it is data
+                //content = std::round(content);
+                //content = std::lround(content);
+                //h_el_energy_data->SetBinContent(ix, content);
 
-            // Note: moved to pseudorandom data rather than rounding
-            Int_t poisson_result{gen.Poisson(lambda)};
-            h_el_energy_data->SetBinContent(ix, poisson_result);
+                // Note: moved to pseudorandom data rather than rounding
+                Int_t poisson_result{gen.Poisson(lambda)};
+                h_el_energy_data->SetBinContent(ix, poisson_result);
+            }
+
+            // compute poisson likelihood for each bin
+            Double_t likelihood{1.0};
+            std::string h_name_prob{std::string("h_el_energy_prob_") + std::to_string(count)}; 
+            TH1D *h_el_energy_prob = new TH1D(h_name_prob.c_str(), "", num_bins, 0.0, 4.0);
+            for(Int_t ix{1}; ix <= h_el_energy_sum_original->GetNbinsX(); ++ ix)
+            {
+                Double_t lambda{h_el_energy_sum_reweight->GetBinContent(ix)}; // reweighted
+                // NOTE: above lambda is the output lambda, it is for the other distribution
+                // rather than the input lambda in the previous code block
+
+                //Int_t data{std::lround(h_el_energy_data->GetBinContent(ix))}; // rounded data (not -> baseline <- ?)
+                Int_t data{h_el_energy_data->GetBinContent(ix)}; // rounded data, is already rounded, is integer
+                // TODO: do not need round?
+                Double_t poi{TMath::Poisson(data, lambda)};
+                //std::cout << "bin index = " << ix << ", poisson = " << poi << ", lambda = " << lambda << ", data = " << data << std::endl;
+                likelihood *= poi;
+
+                h_el_energy_prob->SetBinContent(ix, poi);
+            }
+            //std::cout << "likelihood = " << likelihood << std::endl;
+            Double_t log_likelihood{std::log(likelihood)};
+            vec_ll.push_back(-2.0 * log_likelihood);
+
+            ////////////////////////////////////////////////////////////////////
+            // CANVAS OUTPUT
+            ////////////////////////////////////////////////////////////////////
+
+            const Double_t canvas_max{1.0e5};
+            const Double_t canvas_min{0.0};
+            const std::string canvas_dir(".");
+            CanvasFactorySettings settings("Energy [MeV]", "Events", canvas_min, canvas_max, false);
+            settings.SetDrawOption("E");
+            CanvasFactory factory(settings);
+            factory.Canvas("el_energy_data", canvas_dir, h_el_energy_original, "Baseline", h_el_energy_reweight, "Reweighted", h_el_energy_data, "Pseudodata");
+
+            settings.SetMax(1.1);
+            settings.SetDrawOption("hist");
+            factory.Settings(settings);
+            factory.Canvas("el_energy_prob", canvas_dir, h_el_energy_prob, "Probability");
         }
 
-        // compute poisson likelihood for each bin
-        Double_t likelihood{1.0};
-        for(Int_t ix{1}; ix <= h_el_energy_sum_original->GetNbinsX(); ++ ix)
+        
+        ////////////////////////////////////////////////////////////////////////
+        // INDEPENDENT SINGLE ELECTRON ENERGY
+        ////////////////////////////////////////////////////////////////////////
+
         {
-            Double_t lambda{h_el_energy_sum_reweight->GetBinContent(ix)}; // reweighted
-            // NOTE: above lambda is the output lambda, it is for the other distribution
-            // rather than the input lambda in the previous code block
+            // log likelihood method
+            // create 2d "data" histogram - poisson generated data
+            std::string h_name_2d{std::string("h_el_energy_2d_data_") + std::to_string(count)};
+            TH2I *h_el_energy_2d_data = new TH2I(h_name_2d.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+            for(Int_t jx{1}; jx <= h_el_energy_2d_original->GetNbinsY(); ++ jx)
+            {
+                for(Int_t ix{1}; ix <= h_el_energy_2d_original->GetNbinsX(); ++ ix)
+                {
+                    // this is the input lambda value
+                    Double_t lambda{h_el_energy_2d_original->GetBinContent(ix, jx)};
+                    
+                    // pseudorandom data
+                    Int_t poisson_result{gen.Poisson(lambda)};
+                    h_el_energy_2d_data->SetBinContent(ix, jx, poisson_result);
+                }
+            }
 
-            //Int_t data{std::lround(h_el_energy_data->GetBinContent(ix))}; // rounded data (not -> baseline <- ?)
-            Int_t data{h_el_energy_data->GetBinContent(ix)}; // rounded data, is already rounded, is integer
-            // TODO: do not need round?
-            Double_t poi{TMath::Poisson(data, lambda)};
-            //std::cout << "bin index = " << ix << ", poisson = " << poi << ", lambda = " << lambda << ", data = " << data << std::endl;
-            likelihood *= poi;
+            // compute poisson likelihood for each bin
+            Double_t likelihood_2d{1.0};
+            for(Int_t jx{1}; jx <= h_el_energy_2d_original->GetNbinsY(); ++ jx)
+            {
+                for(Int_t ix{1}; ix <= h_el_energy_2d_original->GetNbinsX(); ++ ix)
+                {
+                    Double_t lambda{h_el_energy_2d_reweight->GetBinContent(ix)}; // reweighted
+                    // NOTE: above lambda is the output lambda, it is for the other distribution
+                    // rather than the input lambda in the previous code block
+
+                    //Int_t data{std::lround(h_el_energy_data->GetBinContent(ix))}; // rounded data (not -> baseline <- ?)
+                    Int_t data{h_el_energy_2d_data->GetBinContent(ix, jx)};
+                    Double_t poi{TMath::Poisson(data, lambda)};
+                    likelihood_2d *= poi;
+                }
+            }
+            std::cout << "likelihood (2d) = " << likelihood_2d << std::endl;
+            Double_t log_likelihood_2d{std::log(likelihood_2d)};
+            vec_ll_2d.push_back(-2.0 * log_likelihood_2d);
         }
-        //std::cout << "likelihood = " << likelihood << std::endl;
-        Double_t log_likelihood{std::log(likelihood)};
 
-        vec_ll.push_back(-2.0 * log_likelihood);
-    
     }
     
+    ////////////////////////////////////////////////////////////////////////////
+    // SINGLE
+    ////////////////////////////////////////////////////////////////////////////
+
     //Double_t min{std::min_element(vec_ll.begin(), vec_ll.end())};
     //Double_t max{std::max_element(vec_ll.begin(), vec_ll.end())};
     std::pair<std::vector<Double_t>::iterator, std::vector<Double_t>::iterator> min_max_pair{std::minmax_element(vec_ll.begin(), vec_ll.end())};
@@ -1278,38 +1353,73 @@ int main(int argc, char* argv[])
         h_ll->Fill(*it);
     }
 
-    /*
     TCanvas *c_ll = new TCanvas("c_ll", "", 800, 600);
     h_ll->Draw("E");
     c_ll->SaveAs("c_ll.png");
     delete c_ll;
-    */
+ 
+
+    ////////////////////////////////////////////////////////////////////////////
+    // INDEPENDENT
+    ////////////////////////////////////////////////////////////////////////////
+
+    std::pair<std::vector<Double_t>::iterator, std::vector<Double_t>::iterator> min_max_pair_2d{std::minmax_element(vec_ll_2d.begin(), vec_ll_2d.end())};
+    Double_t min_2d{*min_max_pair_2d.first};
+    Double_t max_2d{*min_max_pair_2d.second};
+    TH1D *h_ll_2d = new TH1D("h_ll_2d", "", 100, min_2d, max_2d);
+    h_ll_2d->GetXaxis()->SetTitle("Log Likelihood Value");
+    h_ll_2d->GetYaxis()->SetTitle("Number of Pseudo Experiments");
+    // fill the histogram
+    for(std::vector<Double_t>::const_iterator it{vec_ll_2d.cbegin()}; it != vec_ll_2d.cend(); ++ it)
+    {
+        h_ll_2d->Fill(*it);
+    }
+
+    
+    TCanvas *c_ll_2d = new TCanvas("c_ll_2d", "", 800, 600);
+    h_ll_2d->Draw("E");
+    c_ll_2d->SaveAs("c_ll_2d.png");
+    delete c_ll_2d;
+    
 
 
     // print entries
     //std::cout << "Number of entries in each histogram: h_el_energy_original: " << h_el_energy_original->GetEntries() << " h_el_energy_reweight: " << h_el_energy_reweight->GetEntries() << std::endl;
 
 
-    // add data to data output file
-    std::ofstream of_data(arg_output_filename.c_str(), std::ios::app);
-    if(of_data.tellp() == 0)
     {
-        of_data << "epsilon_31, chisquare (fit), degrees of freedom, chisquare (fit reduced), chisquare (sensitivity), chisquare (sensitivity reduced), -2log(l)" << std::endl;
+        // add data to data output file
+        std::ofstream of_data(arg_output_filename.c_str(), std::ios::app);
+        if(of_data.tellp() == 0)
+        {
+            of_data << "epsilon_31, chisquare (fit), degrees of freedom, chisquare (fit reduced), chisquare (sensitivity), chisquare (sensitivity reduced), -2log(l)" << std::endl;
+        }
+        of_data << epsilon_31 << ','
+                << f_el_energy_sum_original->GetChisquare() << ','
+                << non_empty_bins << ','
+                << f_el_energy_sum_original->GetChisquare() / (Double_t)non_empty_bins << ','
+                << sensitivity_chisquare << ','
+                << sensitivity_chisquare / (Double_t)non_empty_bins; //<< ','
+                //<< -2.0 * log_likelihood
+                // TODO what goes here
+        for(std::vector<Double_t>::const_iterator it{vec_ll.cbegin()}; it != vec_ll.cend(); ++ it)
+        {
+            of_data << ',' << *it;
+        }
+        of_data << std::endl;
     }
-    of_data << epsilon_31 << ','
-            << f_el_energy_sum_original->GetChisquare() << ','
-            << non_empty_bins << ','
-            << f_el_energy_sum_original->GetChisquare() / (Double_t)non_empty_bins << ','
-            << sensitivity_chisquare << ','
-            << sensitivity_chisquare / (Double_t)non_empty_bins; //<< ','
-            //<< -2.0 * log_likelihood
-            // TODO what goes here
-    for(std::vector<Double_t>::const_iterator it{vec_ll.cbegin()}; it != vec_ll.cend(); ++ it)
-    {
-        of_data << ',' << *it;
-    }
-    of_data << std::endl;
 
+    {
+        // 2d ll data
+        std::string filename_ll_2d(arg_output_filename + std::string("_ll_2d"));
+        std::ofstream of_data_ll_2d(filename_ll_2d.c_str(), std::ios::app);
+        for(std::vector<Double_t>::const_iterator it{vec_ll_2d.cbegin()}; it != vec_ll_2d.cend(); ++ it)
+        {
+            of_data_ll_2d << *it;
+            if(it + 1 != vec_ll_2d.cend()) of_data_ll_2d << ',';
+        }
+        of_data_ll_2d << std::endl;
+    }
 
 
     return 0;
