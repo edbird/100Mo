@@ -41,12 +41,14 @@ int main()
     std::streampos ifs_psiN0_size{ifs_psiN0.tellg()};
     std::streampos ifs_psiN2_size{ifs_psiN2.tellg()};
 
+    std::streamoff ifs_extra{1};
+
     // allocate buffers
-    char* buf_nEqNull{new char[ifs_nEqNull_size + 1]};
-    char* buf_nEqTwo{new char[ifs_nEqTwo_size + 1]};
+    char* buf_nEqNull{new char[ifs_nEqNull_size + ifs_extra]};
+    char* buf_nEqTwo{new char[ifs_nEqTwo_size + ifs_extra]};
     
-    char* buf_psiN0{new char[ifs_psiN0_size + 1]};
-    char* buf_psiN2{new char[ifs_psiN2_size + 1]};
+    char* buf_psiN0{new char[ifs_psiN0_size + ifs_extra]};
+    char* buf_psiN2{new char[ifs_psiN2_size + ifs_extra]};
 
     // seek
     ifs_nEqNull.seekg(0);

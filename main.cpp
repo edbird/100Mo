@@ -193,7 +193,7 @@ int main(int argc, char* argv[])
     // CONVERT INPUT DATA TO GRAPH FORMAT
     ////////////////////////////////////////////////////////////////////////////
 
-    Int_t data_size{data_electron_energy_single_0_0.size()};
+    Int_t data_size{(Int_t)data_electron_energy_single_0_0.size()};
 
     if(data_electron_energy_single_0_4.size() != data_size)
         throw "error: size";
@@ -1320,7 +1320,8 @@ int main(int argc, char* argv[])
                 // rather than the input lambda in the previous code block
 
                 //Int_t data{std::lround(h_el_energy_data->GetBinContent(ix))}; // rounded data (not -> baseline <- ?)
-                Int_t data{h_el_energy_data->GetBinContent(ix)}; // rounded data, is already rounded, is integer
+                Int_t data{(Int_t)std::lround(h_el_energy_data->GetBinContent(ix))}; // rounded data, is already rounded, is integer
+                // Note: lround required as GetBinContent returns Double_t
                 // TODO: do not need round?
                 Double_t poi{TMath::Poisson(data, lambda)};
                 //std::cout << "bin index = " << ix << ", poisson = " << poi << ", lambda = " << lambda << ", data = " << data << std::endl;
@@ -1402,7 +1403,8 @@ int main(int argc, char* argv[])
                     // rather than the input lambda in the previous code block
 
                     //Int_t data{std::lround(h_el_energy_data->GetBinContent(ix))}; // rounded data (not -> baseline <- ?)
-                    Int_t data{h_el_energy_2d_data->GetBinContent(ix, jx)};
+                    Int_t data{(Int_t)std::lround(h_el_energy_2d_data->GetBinContent(ix, jx))};
+                    // Note: lround required because function returns Double_t
                     Double_t poi{TMath::Poisson(data, lambda)};
                     likelihood_2d *= poi;
 
@@ -1552,7 +1554,7 @@ int main(int argc, char* argv[])
         std::ofstream of_data(arg_output_filename.c_str(), std::ios::app);
         if(of_data.tellp() == 0)
         {
-            of_data << "epsilon_31, chisquare (fit), degrees of freedom, chisquare (fit reduced), chisquare (sensitivity), chisquare (sensitivity reduced), -2log(l)" << std::endl;
+            of_data << "epsilon_31,chisquare (fit),degrees of freedom,chisquare (fit reduced),chisquare (sensitivity),chisquare (sensitivity reduced),-2log(l)" << std::endl;
         }
         of_data << epsilon_31 << ','
                 << f_el_energy_sum_original->GetChisquare() << ','
@@ -1570,11 +1572,12 @@ int main(int argc, char* argv[])
 
 
         // new output format, do not change above - will break chi-square code
-        std::string filename_chisq(arg_output_filename + std::string("_chisq"));
+        std::string filename_chisq(arg_output_filename.substr(0, arg_output_filename.find(".txt")) + std::string("_chisq") + std::string(".txt"));
+        std::cout << filename_chisq << std::endl;
         std::ofstream of_data_chisq(filename_chisq.c_str(), std::ios::app);
         if(of_data_chisq.tellp() == 0)
         {
-            of_data_chisq << "epsilon_31, fit (summed): chisq, reduced chisq, dof, sensitivity (1d single): chisq, reduced chisq, dof, sensitivity (2d single): chisq, reduced chisq, dof" << std::endl;
+            of_data_chisq << "epsilon_31,fit (summed): chisq,reduced chisq,dof,sensitivity (1d single): chisq,reduced chisq,dof,sensitivity (2d single): chisq,reduced chisq,dof" << std::endl;
         }
         of_data_chisq << epsilon_31 << ','
                       << f_el_energy_sum_original->GetChisquare() << ','
@@ -1591,7 +1594,8 @@ int main(int argc, char* argv[])
 
     {
         // 2d ll data
-        std::string filename_ll_2d(arg_output_filename + std::string("_ll_2d"));
+        std::string filename_ll_2d(arg_output_filename.substr(0, arg_output_filename.find(".txt")) + std::string("_ll_2d") + std::string(".txt"));
+        std::cout << filename_ll_2d << std::endl;
         std::ofstream of_data_ll_2d(filename_ll_2d.c_str(), std::ios::app);
         for(std::vector<Double_t>::const_iterator it{vec_ll_2d.cbegin()}; it != vec_ll_2d.cend(); ++ it)
         {

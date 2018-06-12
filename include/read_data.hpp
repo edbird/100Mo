@@ -249,7 +249,8 @@ void read_data_helper_2(const std::string& filename_data,
 
     std::ifstream ifs_data(filename_data.c_str(), std::ios::ate);
     std::streampos ifs_size{ifs_data.tellg()};
-    char * buf{new char[ifs_size + 1]};
+    std::streamoff ifs_extra{1};
+    char * buf{new char[ifs_size + ifs_extra]};
     ifs_data.seekg(0);
     ifs_data.read(buf, ifs_size);
     ifs_data.close();
@@ -292,12 +293,14 @@ void read_data_helper(const std::string& filename_nEqNull, const std::string& fi
     std::streampos ifs_psiN0_size{ifs_psiN0.tellg()};
     std::streampos ifs_psiN2_size{ifs_psiN2.tellg()};
 
+    std::streamoff ifs_extra{1};
+
     // allocate buffers
-    char* buf_nEqNull{new char[ifs_nEqNull_size + 1]};
-    char* buf_nEqTwo{new char[ifs_nEqTwo_size + 1]};
+    char* buf_nEqNull{new char[ifs_nEqNull_size + ifs_extra]};
+    char* buf_nEqTwo{new char[ifs_nEqTwo_size + ifs_extra]};
     
-    char* buf_psiN0{new char[ifs_psiN0_size + 1]};
-    char* buf_psiN2{new char[ifs_psiN2_size + 1]};
+    char* buf_psiN0{new char[ifs_psiN0_size + ifs_extra]};
+    char* buf_psiN2{new char[ifs_psiN2_size + ifs_extra]};
 
     // seek
     ifs_nEqNull.seekg(0);

@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
     }
 
 
-    Int_t data_size{data.size() - 2};
+    Int_t data_size{(Int_t)(data.size() - 2)};
     std::cout << "data_size=" << data_size << std::endl;
     Double_t *data_x{new Double_t[data_size - 1]};
     Double_t *data_y{new Double_t[data_size - 1]}; // I am now confused as fuck
