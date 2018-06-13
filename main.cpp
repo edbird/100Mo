@@ -1271,12 +1271,72 @@ int main(int argc, char* argv[])
     std::vector<Double_t> vec_ll;
     std::vector<Double_t> vec_ll_2d;
     TRandom3 gen;
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    // SINGLE ELECTRON ENERGY CHISQUARE METHOD
+    ////////////////////////////////////////////////////////////////////////////
     
+    ////////////////////////////////////////////////////////////////////////
+    // CREATE DIFFERENCE AND PULL HISTOGRAMS AND CANVAS OUTPUT
+    ////////////////////////////////////////////////////////////////////////
+
+    // create difference histogram
+    TH1D *h_el_energy_diff = new TH1D("h_el_energy_diff", "", num_bins, 0.0, 4.0);
+    for(Int_t i{1}; i <= h_el_energy_diff->GetNbinsX(); ++ i)
+    {
+        Double_t content1{h_el_energy_original->GetBinContent(i)};
+        Double_t content2{h_el_energy_reweight->GetBinContent(i)};
+        Double_t error1{h_el_energy_original->GetBinError(i)};
+        // note: do not use error or reweighted
+        Double_t error2{0.0 * h_el_energy_reweight->GetBinError(i)};
+        Double_t content{content1 - content2};
+        Double_t error{std::sqrt(error1 * error1 + error2 * error2)};
+        h_el_energy_diff->SetBinContent(i, content);
+        h_el_energy_diff->SetBinError(i, error);
+    }
+    TCanvas *c_el_energy_diff = new TCanvas("c_el_energy_diff", "", 800, 600);
+    //c_el_energy_diff->SetRightMargin(0.12);
+    //c_el_energy_diff->SetLogz();
+    h_el_energy_diff->GetXaxis()->SetTitle("Energy [MeV]");
+    h_el_energy_diff->GetYaxis()->SetTitle("Events");
+    h_el_energy_diff->Draw("E");
+    c_el_energy_diff->SaveAs("c_el_energy_diff.C");
+    c_el_energy_diff->SaveAs("c_el_energy_diff.png");
+    c_el_energy_diff->SaveAs("c_el_energy_diff.pdf");
+    
+    // create pull histogram
+    TH1D *h_el_energy_pull = new TH1D("h_el_energy_pull", "", num_bins, 0.0, 4.0);
+    for(Int_t i{1}; i <= h_el_energy_pull->GetNbinsX(); ++ i)
+    {
+        Double_t content{h_el_energy_diff->GetBinContent(i)};
+        Double_t error{h_el_energy_diff->GetBinError(i)};
+        if(error == 0.0)
+        {
+            //h_el_energy_pull->SetBinContent(i, j, 0.0);
+        }
+        else
+        {
+            h_el_energy_pull->SetBinContent(i, content / error);
+        }
+    }
+    TCanvas *c_el_energy_pull = new TCanvas("c_el_energy_pull", "", 800, 600);
+    c_el_energy_pull->SetRightMargin(0.12);
+    //c_el_energy_pull->SetLogz();
+    h_el_energy_pull->GetXaxis()->SetTitle("Energy [MeV]");
+    h_el_energy_pull->GetYaxis()->SetTitle("Events");
+    h_el_energy_pull->Draw("E");
+    c_el_energy_pull->SaveAs("c_el_energy_pull.C");
+    c_el_energy_pull->SaveAs("c_el_energy_pull.png");
+    c_el_energy_pull->SaveAs("c_el_energy_pull.pdf");
+
+    
+
     const Int_t number_of_pseudo_experiments{1}; //{1000000};
     for(Int_t count{0}; count < number_of_pseudo_experiments; ++ count)
     {
         ////////////////////////////////////////////////////////////////////////
-        // SINGLE ELECTRON ENERGY
+        // SINGLE ELECTRON ENERGY PSEUDODATA METHOD
         ////////////////////////////////////////////////////////////////////////
 
         {
@@ -1350,7 +1410,7 @@ int main(int argc, char* argv[])
             factory.Canvas("el_energy_data", canvas_dir, h_el_energy_original, "Baseline", h_el_energy_reweight, "Reweighted", h_el_energy_data, "Pseudodata");
 
             settings.SetMax(1.1);
-            settings.SetMin(1.0e-35);
+            settings.SetMin(1.0e-5); // 1.0e-35
             settings.SetDrawOption("hist");
             settings.SetLogMode(true);
             factory.Settings(settings);
@@ -1411,7 +1471,10 @@ int main(int argc, char* argv[])
                     h_el_energy_2d_prob->SetBinContent(ix, jx, poi);
                     if(poi != 1.0)
                     {
-                        //std::cout << ix << ", " << jx << " -> " << poi << " data=" << data << " lambda=" << lambda << std::endl;
+                        if(poi < 1.0e-14 || poi > 1.0)
+                        {
+                        //    std::cout << ix << ", " << jx << " -> " << poi << " data=" << data << " lambda=" << lambda << std::endl;
+                        }
                     }
                 }
             }
@@ -1464,7 +1527,7 @@ int main(int argc, char* argv[])
             TCanvas *c_el_energy_2d_prob = new TCanvas("c_el_energy_2d_prob", "", 800, 600);
             c_el_energy_2d_prob->SetRightMargin(0.12);
             c_el_energy_2d_prob->SetLogz();
-            h_el_energy_2d_prob->SetMinimum(1.0e-15);
+            h_el_energy_2d_prob->SetMinimum(1.0e-4);
             h_el_energy_2d_prob->SetMaximum(1.0e0);
             h_el_energy_2d_prob->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
             h_el_energy_2d_prob->GetYaxis()->SetTitle("High Energy Electron [MeV]");
@@ -1589,6 +1652,20 @@ int main(int argc, char* argv[])
                       << sensitivity_chisquare_2d << ','
                       << sensitivity_chisquare_2d / (Double_t)non_empty_bins_2d << ','
                       << non_empty_bins_2d << std::endl;
+
+    }
+
+    {
+        // 1d ll data
+        std::string filename_ll(arg_output_filename.substr(0, arg_output_filename.find(".txt")) + std::string("_ll") + std::string(".txt"));
+        std::cout << filename_ll << std::endl;
+        std::ofstream of_data_ll(filename_ll.c_str(), std::ios::app);
+        for(std::vector<Double_t>::const_iterator it{vec_ll.cbegin()}; it != vec_ll.cend(); ++ it)
+        {
+            of_data_ll << *it;
+            if(it + 1 != vec_ll.cend()) of_data_ll << ',';
+        }
+        of_data_ll << std::endl;
 
     }
 
