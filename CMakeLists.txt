@@ -4,7 +4,7 @@ SET(CMAKE_CXX_STANDARD 11)
 
 PROJECT(main)
 
-ADD_EXECUTABLE(main main.cpp)
+ADD_EXECUTABLE(main Analysis.cpp main.cpp)
 ADD_EXECUTABLE(createtree createtree.cpp)
 ADD_EXECUTABLE(sensitivity sensitivity.cpp)
 
