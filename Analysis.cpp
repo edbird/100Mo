@@ -51,12 +51,20 @@ Analysis::Analysis(const std::string& filename, const std::string& output_filena
     , h_el_energy_reweight{nullptr}
     , h_el_energy_sum_original{nullptr}
     , h_el_energy_sum_reweight{nullptr}
+    , h_el_energy_diff{nullptr}
+    , h_el_energy_pull{nullptr}
+    , h_el_energy_data{nullptr}
+    , h_el_energy_prob{nullptr}
     , h_el_energy_2d_original{nullptr}
     , h_el_energy_2d_reweight{nullptr}
     , h_el_energy_2d_diff{nullptr}
     , h_el_energy_2d_pull{nullptr}
+    , h_el_energy_2d_data{nullptr}
+    , h_el_energy_2d_prob{nullptr}
     , h_el_energy_2d_diff_data_rw{nullptr}
     , h_el_energy_2d_diff_data_orig{nullptr}
+    , h_ll{nullptr}
+    , h_ll_2d{nullptr}
     , h_gen_weight{nullptr}
     , c_nEqNull{nullptr}
     , c_nEqTwo{nullptr}
@@ -366,44 +374,39 @@ void Analysis::CanvasDecayRate()
     {
         if(_canvas_enable_raw_data_)
         {
-            TCanvas *c_nEqNull = new TCanvas("c_nEqNull", "", 4000, 3000);
+            c_nEqNull = new TCanvas("c_nEqNull", "", 4000, 3000);
             h_nEqNull->Draw("colz");
             c_nEqNull->SaveAs("c_nEqNull.png");
             c_nEqNull->SaveAs("c_nEqNull.pdf");
             c_nEqNull->SaveAs("c_nEqNull.C");
-            delete c_nEqNull;
 
-            TCanvas *c_nEqTwo = new TCanvas("c_nEqTwo", "", 4000, 3000);
+            c_nEqTwo = new TCanvas("c_nEqTwo", "", 4000, 3000);
             h_nEqTwo->Draw("colz");
             c_nEqTwo->SaveAs("c_nEqTwo.png");
             c_nEqTwo->SaveAs("c_nEqTwo.pdf");
             c_nEqTwo->SaveAs("c_nEqTwo.C");
-            delete c_nEqTwo;
         }
 
 
         if(_canvas_enable_decay_rate_)
         {
-            TCanvas *c_data_0 = new TCanvas("c_data_0", "", 4000, 3000);
+            c_data_0 = new TCanvas("c_data_0", "", 4000, 3000);
             h_data_0->Draw("colz");
             c_data_0->SaveAs("c_data_0.png");
             c_data_0->SaveAs("c_data_0.pdf");
             c_data_0->SaveAs("c_data_0.C");
-            delete c_data_0;
 
-            TCanvas *c_data_1 = new TCanvas("c_data_1", "", 4000, 3000);
+            c_data_1 = new TCanvas("c_data_1", "", 4000, 3000);
             h_data_1->Draw("colz");
             c_data_1->SaveAs("c_data_1.png");
             c_data_1->SaveAs("c_data_1.pdf");
             c_data_1->SaveAs("c_data_1.C");
-            delete c_data_1;
 
-            TCanvas *c_data_2 = new TCanvas("c_data_2", "", 4000, 3000);
+            c_data_2 = new TCanvas("c_data_2", "", 4000, 3000);
             h_data_2->Draw("colz");
             c_data_2->SaveAs("c_data_2.png");
             c_data_2->SaveAs("c_data_2.pdf");
             c_data_2->SaveAs("c_data_2.C");
-            delete c_data_2;
         }
     }
 
@@ -483,7 +486,7 @@ void Analysis::CanvasSingleElectronProjection()
     {
         if(_canvas_enable_single_electron_projection_)
         {
-            TCanvas *c_single_electron = new TCanvas("c_single_electron", "", 4000, 3000);
+            c_single_electron = new TCanvas("c_single_electron", "", 4000, 3000);
             h_single_electron_0->SetMaximum(3.5);
             h_single_electron_0->GetXaxis()->SetTitle("Energy [MeV]");
             h_single_electron_0->GetYaxis()->SetTitle("Events");
@@ -493,7 +496,6 @@ void Analysis::CanvasSingleElectronProjection()
             c_single_electron->SaveAs("c_single_electron.png");
             c_single_electron->SaveAs("c_single_electron.pdf");
             c_single_electron->SaveAs("c_single_electron.C");
-            delete c_single_electron;
         }
     }
 
@@ -567,10 +569,35 @@ void Analysis::CanvasSingleElectronProjection()
 void Analysis::CanvasSingleElectronTest()
 {
 
+    // test histograms
+    // NEMO-3 data/MC: truth electron energy x2 (T1, T2) (2 in same histo)
+    h_test_single_original = new TH1D("h_test_single_original", "", num_bins, 0.0, 4.0);
+    h_test_single_original->SetStats(0);
+    h_test_single_original->SetLineColor(2);
+    h_test_single_original->SetMarkerColor(2);
+    // re-weighted
+    h_test_single_reweight = new TH1D("h_test_single_reweight", "", num_bins, 0.0, 4.0);
+    h_test_single_reweight->SetStats(0);
+    h_test_single_reweight->SetLineColor(4);
+    h_test_single_reweight->SetMarkerColor(4);
+
+    // test histograms
+    // NEMO-3 data/MC: reconstructed electron energy x2 (2 in same histo)
+    h_test_sum_original = new TH1D("h_test_sum_original", "", num_bins, 0.0, 4.0);
+    h_test_sum_original->SetStats(0);
+    h_test_sum_original->SetLineColor(2);
+    h_test_sum_original->SetMarkerColor(2);
+    // re-weighted
+    h_test_sum_reweight = new TH1D("h_test_sum_reweight", "", num_bins, 0.0, 4.0);
+    h_test_sum_reweight->SetStats(0);
+    h_test_sum_reweight->SetLineColor(4);
+    h_test_sum_reweight->SetMarkerColor(4);
+
+
     if(_batch_mode_ == false)
     {
         // print single electron distribution test histograms
-        TCanvas *c_test_single = new TCanvas("c_test_single", "c_test_single", 800, 600);
+        c_test_single = new TCanvas("c_test_single", "c_test_single", 800, 600);
         c_test_single->SetLogy(log_mode);
         //h_test_single_original->SetMaximum(1.4); // MC data
         //h_test_single_original->SetMaximum(1.2); // createtree data
@@ -586,13 +613,12 @@ void Analysis::CanvasSingleElectronTest()
         c_test_single->SaveAs("c_test_single.C");
         c_test_single->SaveAs("c_test_single.png");
         c_test_single->SaveAs("c_test_single.pdf");
-        delete c_test_single;
         // compute chi-square
         //std::cout << "chi1: " << chi_square_test(g_el_energy_single_0, h_test_single_original) / h_test_single_original->GetNbinsX() << std::endl;
         //std::cout << "chi2: " << chi_square_test(g_el_energy_single_2, h_test_single_reweight) / h_test_single_reweight->GetNbinsX() << std::endl;
         
         // print summed distribution test histograms
-        TCanvas *c_test_sum = new TCanvas("c_test_sum", "c_test_sum", 800, 600);
+        c_test_sum = new TCanvas("c_test_sum", "c_test_sum", 800, 600);
         c_test_sum->SetLogy(log_mode);
         //h_test_sum_original->SetMaximum(1.0); // MC data
         //h_test_sum_original->SetMaximum(0.8); // createtree data
@@ -608,7 +634,6 @@ void Analysis::CanvasSingleElectronTest()
         c_test_sum->SaveAs("c_test_sum.C");
         c_test_sum->SaveAs("c_test_sum.png");
         c_test_sum->SaveAs("c_test_sum.pdf");
-        delete c_test_sum;
         // compute chi-square
         //std::cout << "chi3: " << chi_square_test(g_el_energy_sum_0, h_test_sum_original) / h_test_sum_original->GetNbinsX() << std::endl;
         //std::cout << "chi4: " << chi_square_test(g_el_energy_sum_2, h_test_sum_reweight) / h_test_sum_reweight->GetNbinsX() << std::endl;
@@ -682,36 +707,13 @@ void Analysis::InitEventLoop()
 //    h_el_energy_2d_prob->SetStats(0);
 //#endif
 
-    // test histograms
-    // NEMO-3 data/MC: truth electron energy x2 (T1, T2) (2 in same histo)
-    h_test_single_original = new TH1D("h_test_single_original", "", num_bins, 0.0, 4.0);
-    h_test_single_original->SetStats(0);
-    h_test_single_original->SetLineColor(2);
-    h_test_single_original->SetMarkerColor(2);
-    // re-weighted
-    h_test_single_reweight = new TH1D("h_test_single_reweight", "", num_bins, 0.0, 4.0);
-    h_test_single_reweight->SetStats(0);
-    h_test_single_reweight->SetLineColor(4);
-    h_test_single_reweight->SetMarkerColor(4);
-
-    // test histograms
-    // NEMO-3 data/MC: reconstructed electron energy x2 (2 in same histo)
-    h_test_sum_original = new TH1D("h_test_sum_original", "", num_bins, 0.0, 4.0);
-    h_test_sum_original->SetStats(0);
-    h_test_sum_original->SetLineColor(2);
-    h_test_sum_original->SetMarkerColor(2);
-    // re-weighted
-    h_test_sum_reweight = new TH1D("h_test_sum_reweight", "", num_bins, 0.0, 4.0);
-    h_test_sum_reweight->SetStats(0);
-    h_test_sum_reweight->SetLineColor(4);
-    h_test_sum_reweight->SetMarkerColor(4);
 
 
 
     // NEMO-3 data/MC read from tree
     // input file
 
-    TH2D *h_gen_weight = new TH2D("h_gen_weight", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+    h_gen_weight = new TH2D("h_gen_weight", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
     h_gen_weight->SetStats(0);
 
 
@@ -886,12 +888,11 @@ void Analysis::PostProcess()
 
     if(_batch_mode_ == false)
     {
-        TCanvas *c_gen_weight = new TCanvas("c_gen_weight", "", 800, 600);
+        c_gen_weight = new TCanvas("c_gen_weight", "", 800, 600);
         h_gen_weight->Draw("colz");
         c_gen_weight->SaveAs("c_gen_weight.C");
         c_gen_weight->SaveAs("c_gen_weight.png");
         c_gen_weight->SaveAs("c_gen_weight.pdf");
-        delete c_gen_weight;
     }
 
 
@@ -1107,7 +1108,7 @@ void Analysis::SensitivityMeasurementChisquare1()
         CanvasFactory factory(settings);
         factory.Canvas("el_energy", dir, h_el_energy_original, "Baseline", h_el_energy_reweight, "Reweighted");
 
-        TCanvas *c_el_energy_diff = new TCanvas("c_el_energy_diff", "", 800, 600);
+        c_el_energy_diff = new TCanvas("c_el_energy_diff", "", 800, 600);
         //c_el_energy_diff->SetRightMargin(0.12);
         //c_el_energy_diff->SetLogz();
         h_el_energy_diff->GetXaxis()->SetTitle("Energy [MeV]");
@@ -1117,7 +1118,7 @@ void Analysis::SensitivityMeasurementChisquare1()
         c_el_energy_diff->SaveAs("c_el_energy_diff.png");
         c_el_energy_diff->SaveAs("c_el_energy_diff.pdf");
         
-        TCanvas *c_el_energy_pull = new TCanvas("c_el_energy_pull", "", 800, 600);
+        c_el_energy_pull = new TCanvas("c_el_energy_pull", "", 800, 600);
         c_el_energy_pull->SetRightMargin(0.12);
         //c_el_energy_pull->SetLogz();
         h_el_energy_pull->GetXaxis()->SetTitle("Energy [MeV]");
@@ -1179,7 +1180,7 @@ void Analysis::SensitivityMeasurementChisquare2()
         ////////////////////////////////////////////////////////////////////////
 
         // 2d original and reweight histograms
-        TCanvas *c_el_energy_2d_original = new TCanvas("c_el_energy_2d_original", "", 800, 600);
+        c_el_energy_2d_original = new TCanvas("c_el_energy_2d_original", "", 800, 600);
         c_el_energy_2d_original->SetRightMargin(0.15);
         //c_el_energy_2d_original->SetLogz();
         h_el_energy_2d_original->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
@@ -1189,7 +1190,7 @@ void Analysis::SensitivityMeasurementChisquare2()
         c_el_energy_2d_original->SaveAs("c_el_energy_2d_original.png");
         c_el_energy_2d_original->SaveAs("c_el_energy_2d_original.pdf");
 
-        TCanvas *c_el_energy_2d_reweight = new TCanvas("c_el_energy_2d_reweight", "", 800, 600);
+        c_el_energy_2d_reweight = new TCanvas("c_el_energy_2d_reweight", "", 800, 600);
         c_el_energy_2d_reweight->SetRightMargin(0.15);
         //c_el_energy_2d_reweight->SetLogz();
         h_el_energy_2d_reweight->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
@@ -1220,7 +1221,7 @@ void Analysis::SensitivityMeasurementChisquare2()
                 h_el_energy_2d_diff->SetBinError(i, j, error);
             }
         }
-        TCanvas *c_el_energy_2d_diff = new TCanvas("c_el_energy_2d_diff", "", 800, 600);
+        c_el_energy_2d_diff = new TCanvas("c_el_energy_2d_diff", "", 800, 600);
         c_el_energy_2d_diff->SetRightMargin(0.12);
         //c_el_energy_2d_diff->SetLogz();
         h_el_energy_2d_diff->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
@@ -1247,7 +1248,7 @@ void Analysis::SensitivityMeasurementChisquare2()
                 }
             }
         }
-        TCanvas *c_el_energy_2d_pull = new TCanvas("c_el_energy_2d_pull", "", 800, 600);
+        c_el_energy_2d_pull = new TCanvas("c_el_energy_2d_pull", "", 800, 600);
         c_el_energy_2d_pull->SetRightMargin(0.12);
         //c_el_energy_2d_pull->SetLogz();
         h_el_energy_2d_pull->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
@@ -1312,7 +1313,7 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
             // log likelihood method
             // create "data" histogram - poisson generated data
             std::string h_name{std::string("h_el_energy_data_") + std::to_string(count)};
-            TH1I *h_el_energy_data = new TH1I(h_name.c_str(), "", num_bins, 0.0, 4.0);
+            h_el_energy_data = new TH1I(h_name.c_str(), "", num_bins, 0.0, 4.0);
             for(Int_t ix{1}; ix <= h_el_energy_sum_original->GetNbinsX(); ++ ix)
             {
                 // this is the input lambda value
@@ -1338,7 +1339,7 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
             // compute poisson likelihood for each bin
             Double_t likelihood{1.0};
             std::string h_name_prob{std::string("h_el_energy_prob_") + std::to_string(count)}; 
-            TH1D *h_el_energy_prob = new TH1D(h_name_prob.c_str(), "", num_bins, 0.0, 4.0);
+            h_el_energy_prob = new TH1D(h_name_prob.c_str(), "", num_bins, 0.0, 4.0);
             for(Int_t ix{1}; ix <= h_el_energy_sum_original->GetNbinsX(); ++ ix)
             {
                 //Double_t lambda{h_el_energy_sum_reweight->GetBinContent(ix)}; // reweighted
@@ -1397,7 +1398,7 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
     std::pair<std::vector<Double_t>::iterator, std::vector<Double_t>::iterator> min_max_pair{std::minmax_element(vec_ll.begin(), vec_ll.end())};
     Double_t min{*min_max_pair.first};
     Double_t max{*min_max_pair.second};
-    TH1D *h_ll = new TH1D("h_ll", "", 100, min, max);
+    h_ll = new TH1D("h_ll", "", 100, min, max);
     h_ll->GetXaxis()->SetTitle("Log Likelihood Value");
     h_ll->GetYaxis()->SetTitle("Number of Pseudo Experiments");
     // fill the histogram
@@ -1406,10 +1407,9 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
         h_ll->Fill(*it);
     }
 
-    TCanvas *c_ll = new TCanvas("c_ll", "", 800, 600);
+    c_ll = new TCanvas("c_ll", "", 800, 600);
     h_ll->Draw("E");
     c_ll->SaveAs("c_ll.png");
-    delete c_ll;
         
 }
 
@@ -1436,7 +1436,7 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
             // TODO which one
 
             std::string h_name_2d{std::string("h_el_energy_2d_data_") + std::to_string(count)};
-            TH2I *h_el_energy_2d_data = new TH2I(h_name_2d.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+            h_el_energy_2d_data = new TH2I(h_name_2d.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
             h_el_energy_2d_data->SetStats(0);
             for(Int_t jx{1}; jx <= h_el_energy_2d_original->GetNbinsY(); ++ jx)
             {
@@ -1454,7 +1454,7 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
             // compute poisson likelihood for each bin
             Double_t likelihood_2d{1.0};
             std::string h_name_prob_2d{std::string("h_el_energy_2d_prob_") + std::to_string(count)}; 
-            TH2D *h_el_energy_2d_prob = new TH2D(h_name_prob_2d.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+            h_el_energy_2d_prob = new TH2D(h_name_prob_2d.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
             h_el_energy_2d_prob->SetStats(0);
             for(Int_t jx{1}; jx <= h_el_energy_2d_original->GetNbinsY(); ++ jx)
             {
@@ -1525,7 +1525,7 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
 
             // TODO: multiple experiemnts problem
             // if statement for batch mode
-            TCanvas *c_el_energy_2d_data = new TCanvas("c_el_energy_2d_data", "", 800, 600);
+            c_el_energy_2d_data = new TCanvas("c_el_energy_2d_data", "", 800, 600);
             c_el_energy_2d_data->SetRightMargin(0.12);
             //c_el_energy_2d_data->SetLogz();
             h_el_energy_2d_data->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
@@ -1535,7 +1535,7 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
             c_el_energy_2d_data->SaveAs("c_el_energy_2d_data.png");
             c_el_energy_2d_data->SaveAs("c_el_energy_2d_data.pdf");
 
-            TCanvas *c_el_energy_2d_prob = new TCanvas("c_el_energy_2d_prob", "", 800, 600);
+            c_el_energy_2d_prob = new TCanvas("c_el_energy_2d_prob", "", 800, 600);
             c_el_energy_2d_prob->SetRightMargin(0.12);
             c_el_energy_2d_prob->SetLogz();
             h_el_energy_2d_prob->SetMinimum(1.0e-4);
@@ -1547,7 +1547,7 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
             c_el_energy_2d_prob->SaveAs("c_el_energy_2d_prob.png");
             c_el_energy_2d_prob->SaveAs("c_el_energy_2d_prob.pdf");
 
-            TCanvas *c_el_energy_2d_diff_data_rw = new TCanvas("c_el_energy_2d_diff_data_rw", "", 800, 600);
+            c_el_energy_2d_diff_data_rw = new TCanvas("c_el_energy_2d_diff_data_rw", "", 800, 600);
             c_el_energy_2d_diff_data_rw->SetRightMargin(0.12);
             //c_el_energy_2d_diff_data_rw->SetLogz();
             h_el_energy_2d_diff_data_rw->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
@@ -1557,7 +1557,7 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
             c_el_energy_2d_diff_data_rw->SaveAs("c_el_energy_2d_diff_data_rw.png");
             c_el_energy_2d_diff_data_rw->SaveAs("c_el_energy_2d_diff_data_rw.pdf");
 
-            TCanvas *c_el_energy_2d_diff_data_orig = new TCanvas("c_el_energy_2d_diff_data_orig", "", 800, 600);
+            c_el_energy_2d_diff_data_orig = new TCanvas("c_el_energy_2d_diff_data_orig", "", 800, 600);
             c_el_energy_2d_diff_data_orig->SetRightMargin(0.12);
             //c_el_energy_2d_diff_data_orig->SetLogz();
             h_el_energy_2d_diff_data_orig->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
@@ -1597,7 +1597,7 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
     std::pair<std::vector<Double_t>::iterator, std::vector<Double_t>::iterator> min_max_pair_2d{std::minmax_element(vec_ll_2d.begin(), vec_ll_2d.end())};
     Double_t min_2d{*min_max_pair_2d.first};
     Double_t max_2d{*min_max_pair_2d.second};
-    TH1D *h_ll_2d = new TH1D("h_ll_2d", "", 100, min_2d, max_2d);
+    h_ll_2d = new TH1D("h_ll_2d", "", 100, min_2d, max_2d);
     h_ll_2d->GetXaxis()->SetTitle("Log Likelihood Value");
     h_ll_2d->GetYaxis()->SetTitle("Number of Pseudo Experiments");
     // fill the histogram
@@ -1607,10 +1607,9 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
     }
 
     
-    TCanvas *c_ll_2d = new TCanvas("c_ll_2d", "", 800, 600);
+    c_ll_2d = new TCanvas("c_ll_2d", "", 800, 600);
     h_ll_2d->Draw("E");
     c_ll_2d->SaveAs("c_ll_2d.png");
-    delete c_ll_2d;
 
 }
 

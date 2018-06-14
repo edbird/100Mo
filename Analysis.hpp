@@ -222,6 +222,10 @@ class Analysis
     // pull
     TH1D *h_el_energy_pull;
 
+    // log likelihood pseudoexperiments method
+    TH1I *h_el_energy_data;
+    TH1D *h_el_energy_prob;
+
     // 2d single original electron energy
     TH2D *h_el_energy_2d_original;
     // 2d reweighted single electron energy
@@ -232,10 +236,18 @@ class Analysis
     // chisquare pull
     TH2D *h_el_energy_2d_pull;
 
+    // log likelihood pseudoexperiments method
+    TH2I *h_el_energy_2d_data;
+    TH2D *h_el_energy_2d_prob;
+
     // 2d data (poisson log likelihood method) - 2d reweight
     TH2D *h_el_energy_2d_diff_data_rw;
     // 2d data (poisson log likelihood method) - 2d original
     TH2D *h_el_energy_2d_diff_data_orig;
+
+    // log likelihood histograms
+    TH1D *h_ll;
+    TH1D *h_ll_2d;
 
     // general weight histogram
     TH2D *h_gen_weight;

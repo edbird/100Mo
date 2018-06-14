@@ -106,6 +106,11 @@ int main(int argc, char* argv[])
     if(filename != pa.GetDefault("filename"))
     {
         gen_weight_enable = true;
+        std::cout << "gen_weight_enable" << std::endl;
+    }
+    else
+    {
+        std::cout << "gen_weight_enable = false" << std::endl;
     }
     // TODO: check filename exists!
 
