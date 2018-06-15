@@ -108,10 +108,45 @@ Analysis::~Analysis()
 // ANALYSIS FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+/*
 void Analysis::SetEpsilon31(const Double_t epsilon)
 {
     epsilon_31 = epsilon;
 }
+*/
+
+void Analysis::AddEpsilonValue(const Double_t epsilon)
+{
+    vec_epsilon_31.push_back(epsilon);
+}
+
+void Analysis::RunOverEpsilonVector()
+{
+
+    ReadData();
+    CanvasDecayRate();
+    CanvasSingleEnergyProjection();
+    CanvasSingleEnergyTest();
+
+    std::vector<Double_t>::const_iterator it{vec_epsilon_31.cbegin()};
+    for(; it != vec_epsilon_31.cend(); ++ it)
+    {
+        epsilon_31 = *it;
+
+        InitEventLoop();
+        EventLoop();
+        PostProcess();
+        SummedEnergyFit();
+        SensitivityMeasurementChisquare1();
+        SensitivityMeasurementChisquare2();
+        SensitivityMeasurementLoglikelihood1();
+
+        PrintOutputToFile();
+    }
+
+
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // READ DATA IN FROM FILES
@@ -889,6 +924,7 @@ void Analysis::PostProcess()
     if(_batch_mode_ == false)
     {
         c_gen_weight = new TCanvas("c_gen_weight", "", 800, 600);
+        c_gen_weight->SetRightMargin(0.15);
         h_gen_weight->Draw("colz");
         c_gen_weight->SaveAs("c_gen_weight.C");
         c_gen_weight->SaveAs("c_gen_weight.png");
@@ -1046,6 +1082,7 @@ void Analysis::SensitivityMeasurementChisquare1()
 
     // create difference histogram
     h_el_energy_diff = new TH1D("h_el_energy_diff", "", num_bins, 0.0, 4.0);
+    h_el_energy_diff->SetStats(0);
     for(Int_t i{1}; i <= h_el_energy_diff->GetNbinsX(); ++ i)
     {
         Double_t content1{h_el_energy_original->GetBinContent(i)};
@@ -1061,6 +1098,7 @@ void Analysis::SensitivityMeasurementChisquare1()
 
     // create pull histogram
     h_el_energy_pull = new TH1D("h_el_energy_pull", "", num_bins, 0.0, 4.0);
+    h_el_energy_pull->SetStats(0);
     for(Int_t i{1}; i <= h_el_energy_pull->GetNbinsX(); ++ i)
     {
         Double_t content{h_el_energy_diff->GetBinContent(i)};
@@ -1068,10 +1106,12 @@ void Analysis::SensitivityMeasurementChisquare1()
         if(error == 0.0)
         {
             //h_el_energy_pull->SetBinContent(i, j, 0.0);
+            h_el_energy_pull->SetBinError(i, 0.0);
         }
         else
         {
             h_el_energy_pull->SetBinContent(i, content / error);
+            h_el_energy_pull->SetBinError(i, 0.0);
         }
     }
 
@@ -1123,7 +1163,7 @@ void Analysis::SensitivityMeasurementChisquare1()
         //c_el_energy_pull->SetLogz();
         h_el_energy_pull->GetXaxis()->SetTitle("Energy [MeV]");
         h_el_energy_pull->GetYaxis()->SetTitle("Events");
-        h_el_energy_pull->Draw("E");
+        h_el_energy_pull->Draw("hist");
         c_el_energy_pull->SaveAs("c_el_energy_pull.C");
         c_el_energy_pull->SaveAs("c_el_energy_pull.png");
         c_el_energy_pull->SaveAs("c_el_energy_pull.pdf");
@@ -1222,7 +1262,7 @@ void Analysis::SensitivityMeasurementChisquare2()
             }
         }
         c_el_energy_2d_diff = new TCanvas("c_el_energy_2d_diff", "", 800, 600);
-        c_el_energy_2d_diff->SetRightMargin(0.12);
+        c_el_energy_2d_diff->SetRightMargin(0.15);
         //c_el_energy_2d_diff->SetLogz();
         h_el_energy_2d_diff->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
         h_el_energy_2d_diff->GetYaxis()->SetTitle("High Energy Electron [MeV]");
@@ -1249,7 +1289,7 @@ void Analysis::SensitivityMeasurementChisquare2()
             }
         }
         c_el_energy_2d_pull = new TCanvas("c_el_energy_2d_pull", "", 800, 600);
-        c_el_energy_2d_pull->SetRightMargin(0.12);
+        c_el_energy_2d_pull->SetRightMargin(0.15);
         //c_el_energy_2d_pull->SetLogz();
         h_el_energy_2d_pull->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
         h_el_energy_2d_pull->GetYaxis()->SetTitle("High Energy Electron [MeV]");
@@ -1357,10 +1397,48 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
                 likelihood *= poi;
 
                 h_el_energy_prob->SetBinContent(ix, poi);
+
+                if(h_el_energy_sum_original->GetBinCenter(ix) > 2.0)
+                {
+                    //std::cout << "Bin center: " << h_el_energy_sum_original->GetBinCenter(ix) << " lambda=" << lambda << " data=" << data << " prob=" << poi << std::endl; 
+                }
             }
             //std::cout << "likelihood = " << likelihood << std::endl;
             Double_t log_likelihood{std::log(likelihood)};
             vec_ll.push_back(-2.0 * log_likelihood);
+
+
+            // create difference histogram, data - reweight
+            h_el_energy_diff_data_rw = new TH1D("h_el_energy_diff_data_rw", "", num_bins, 0.0, 4.0);
+            h_el_energy_diff_data_rw->SetStats(0);
+            for(Int_t i{1}; i <= h_el_energy_diff_data_rw->GetNbinsX(); ++ i)
+            {
+                Double_t content1{h_el_energy_data->GetBinContent(i)};
+                Double_t content2{h_el_energy_reweight->GetBinContent(i)};
+                Double_t error1{h_el_energy_data->GetBinError(i)};
+                // note: do not use error or reweighted
+                Double_t error2{0.0 * h_el_energy_reweight->GetBinError(i)};
+                Double_t content{content1 - content2};
+                Double_t error{std::sqrt(error1 * error1 + error2 * error2)};
+                h_el_energy_diff_data_rw->SetBinContent(i, content);
+                h_el_energy_diff_data_rw->SetBinError(i, error);
+            }
+
+            // create difference histogram, data - original
+            h_el_energy_diff_data_orig = new TH1D("h_el_energy_diff_data_orig", "", num_bins, 0.0, 4.0);
+            h_el_energy_diff_data_orig->SetStats(0);
+            for(Int_t i{1}; i <= h_el_energy_diff_data_orig->GetNbinsX(); ++ i)
+            {
+                Double_t content1{h_el_energy_data->GetBinContent(i)};
+                Double_t content2{h_el_energy_original->GetBinContent(i)};
+                Double_t error1{h_el_energy_data->GetBinError(i)};
+                // note: do not use error or reweighted
+                Double_t error2{0.0 * h_el_energy_original->GetBinError(i)};
+                Double_t content{content1 - content2};
+                Double_t error{std::sqrt(error1 * error1 + error2 * error2)};
+                h_el_energy_diff_data_orig->SetBinContent(i, content);
+                h_el_energy_diff_data_orig->SetBinError(i, error);
+            }
 
 
             ////////////////////////////////////////////////////////////////////
@@ -1379,11 +1457,32 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
             factory.Canvas("el_energy_data", canvas_dir, h_el_energy_original, "Baseline", h_el_energy_reweight, "Reweighted", h_el_energy_data, "Pseudodata");
 
             settings.SetMax(1.1);
-            settings.SetMin(1.0e-5); // 1.0e-35
+            settings.SetMin(1.0e-10); // 1.0e-35
             settings.SetDrawOption("hist");
             settings.SetLogMode(true);
             factory.Settings(settings);
             factory.Canvas("el_energy_prob", canvas_dir, h_el_energy_prob, "Probability");
+
+
+            c_el_energy_diff_data_rw = new TCanvas("c_el_energy_diff_data_rw", "", 800, 600);
+            //c_el_energy_diff_data_rw->SetRightMargin(0.12);
+            //c_el_energy_diff_data_rw->SetLogz();
+            h_el_energy_diff_data_rw->GetXaxis()->SetTitle("Energy [MeV]");
+            h_el_energy_diff_data_rw->GetYaxis()->SetTitle("Events");
+            h_el_energy_diff_data_rw->Draw("E");
+            c_el_energy_diff_data_rw->SaveAs("c_el_energy_diff_data_rw.C");
+            c_el_energy_diff_data_rw->SaveAs("c_el_energy_diff_data_rw.png");
+            c_el_energy_diff_data_rw->SaveAs("c_el_energy_diff_data_rw.pdf");
+
+            c_el_energy_diff_data_orig = new TCanvas("c_el_energy_diff_data_orig", "", 800, 600);
+            //c_el_energy_diff_data_orig->SetRightMargin(0.12);
+            //c_el_energy_diff_data_orig->SetLogz();
+            h_el_energy_diff_data_orig->GetXaxis()->SetTitle("Energy [MeV]");
+            h_el_energy_diff_data_orig->GetYaxis()->SetTitle("Events");
+            h_el_energy_diff_data_orig->Draw("E");
+            c_el_energy_diff_data_orig->SaveAs("c_el_energy_diff_data_orig.C");
+            c_el_energy_diff_data_orig->SaveAs("c_el_energy_diff_data_orig.png");
+            c_el_energy_diff_data_orig->SaveAs("c_el_energy_diff_data_orig.pdf");
         }
 
     }
@@ -1508,10 +1607,10 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
                 for(Int_t i{1}; i <= h_el_energy_2d_diff_data_orig->GetNbinsX(); ++ i)
                 {
                     Double_t content1{h_el_energy_2d_data->GetBinContent(i, j)};
-                    Double_t content2{h_el_energy_2d_reweight->GetBinContent(i, j)};
+                    Double_t content2{h_el_energy_2d_original->GetBinContent(i, j)};
                     Double_t error1{h_el_energy_2d_data->GetBinError(i, j)};
                     // note: do not use error or reweighted
-                    Double_t error2{0.0 * h_el_energy_2d_reweight->GetBinError(i, j)};
+                    Double_t error2{0.0 * h_el_energy_2d_original->GetBinError(i, j)};
                     Double_t content{content1 - content2};
                     Double_t error{std::sqrt(error1 * error1 + error2 * error2)};
                     h_el_energy_2d_diff_data_orig->SetBinContent(i, j, content);
@@ -1526,7 +1625,7 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
             // TODO: multiple experiemnts problem
             // if statement for batch mode
             c_el_energy_2d_data = new TCanvas("c_el_energy_2d_data", "", 800, 600);
-            c_el_energy_2d_data->SetRightMargin(0.12);
+            c_el_energy_2d_data->SetRightMargin(0.14);
             //c_el_energy_2d_data->SetLogz();
             h_el_energy_2d_data->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
             h_el_energy_2d_data->GetYaxis()->SetTitle("High Energy Electron [MeV]");
@@ -1536,9 +1635,9 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
             c_el_energy_2d_data->SaveAs("c_el_energy_2d_data.pdf");
 
             c_el_energy_2d_prob = new TCanvas("c_el_energy_2d_prob", "", 800, 600);
-            c_el_energy_2d_prob->SetRightMargin(0.12);
+            c_el_energy_2d_prob->SetRightMargin(0.14);
             c_el_energy_2d_prob->SetLogz();
-            h_el_energy_2d_prob->SetMinimum(1.0e-4);
+            h_el_energy_2d_prob->SetMinimum(1.0e-6);
             h_el_energy_2d_prob->SetMaximum(1.0e0);
             h_el_energy_2d_prob->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
             h_el_energy_2d_prob->GetYaxis()->SetTitle("High Energy Electron [MeV]");
@@ -1548,7 +1647,7 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
             c_el_energy_2d_prob->SaveAs("c_el_energy_2d_prob.pdf");
 
             c_el_energy_2d_diff_data_rw = new TCanvas("c_el_energy_2d_diff_data_rw", "", 800, 600);
-            c_el_energy_2d_diff_data_rw->SetRightMargin(0.12);
+            c_el_energy_2d_diff_data_rw->SetRightMargin(0.15);
             //c_el_energy_2d_diff_data_rw->SetLogz();
             h_el_energy_2d_diff_data_rw->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
             h_el_energy_2d_diff_data_rw->GetYaxis()->SetTitle("High Energy Electron [MeV]");
@@ -1558,7 +1657,7 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
             c_el_energy_2d_diff_data_rw->SaveAs("c_el_energy_2d_diff_data_rw.pdf");
 
             c_el_energy_2d_diff_data_orig = new TCanvas("c_el_energy_2d_diff_data_orig", "", 800, 600);
-            c_el_energy_2d_diff_data_orig->SetRightMargin(0.12);
+            c_el_energy_2d_diff_data_orig->SetRightMargin(0.15);
             //c_el_energy_2d_diff_data_orig->SetLogz();
             h_el_energy_2d_diff_data_orig->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
             h_el_energy_2d_diff_data_orig->GetYaxis()->SetTitle("High Energy Electron [MeV]");

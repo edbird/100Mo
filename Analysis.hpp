@@ -37,7 +37,9 @@ class Analysis
     // ANALYSIS FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////
 
-    void SetEpsilon31(const Double_t);
+    //void SetEpsilon31(const Double_t);
+    void AddEpsilonValue(const Double_t epsilon);
+    void RunOverEpsilonVector();
 
     void ReadData();
     //void CanvasRawData();
@@ -101,6 +103,7 @@ class Analysis
     // DATA
     ////////////////////////////////////////////////////////////////////////////
 
+    std::vector<Double_t> vec_epsilon_31;
     Double_t epsilon_31;
 
     TFile *f;
@@ -223,6 +226,8 @@ class Analysis
     TH1D *h_el_energy_pull;
 
     // log likelihood pseudoexperiments method
+    TH1D *h_el_energy_diff_data_rw; // data - reweighted
+    TH1D *h_el_energy_diff_data_orig; // data - original
     TH1I *h_el_energy_data;
     TH1D *h_el_energy_prob;
 
@@ -268,6 +273,8 @@ class Analysis
     TCanvas *c_gen_weight;
     TCanvas *c_el_energy_diff;
     TCanvas *c_el_energy_pull;
+    TCanvas *c_el_energy_diff_data_rw;
+    TCanvas *c_el_energy_diff_data_orig;
     TCanvas *c_el_energy_2d_original;
     TCanvas *c_el_energy_2d_reweight;
     TCanvas *c_el_energy_2d_diff;
