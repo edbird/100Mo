@@ -1,0 +1,3 @@
+put loop to loop over epsilon values
+get multiple pseudoexperiment working, disable output for > 1 experiment
+store data for 1d pseudoexperiment for cut, no cut, full range, sub range
