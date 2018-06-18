@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
     // this argument is a string
     std::string filename{pa.Get("filename")};
     // this argument is to be converted to a double
-    std::string arg_epsilon_31{pa.Get("epsilon")};
+    /*std::string arg_epsilon_31{pa.Get("epsilon")};*/
     // this argument is to be converted to a bool
     std::string arg_batch_mode{pa.Get("batch_mode")};
     std::string arg_energy_cut{pa.Get("energy_cut")};
@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
     std::string arg_log_mode{pa.Get("log_mode")};
     std::string arg_output_filename{pa.Get("output_filename")};
 
-    double epsilon_31{std::stod(arg_epsilon_31)};
+    /*double epsilon_31{std::stod(arg_epsilon_31)};*/
     bool batch_mode{false};
     if(arg_batch_mode == std::string("true"))
     {
@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
 
     //epsilon_31 = std::stod(arg_epsilon_31);
     // todo: check valid
-    if(0.0 <= epsilon_31 && epsilon_31 <= 10.0)
+    /*if(0.0 <= epsilon_31 && epsilon_31 <= 10.0)
     {
         std::cout << "[ INFO ] : Set epsilon_31 = " << epsilon_31 << std::endl;
     }
@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
     {
         std::cout << "invalid epsilon_31 value" << std::endl;
         throw "invalid epsilon_31 value";
-    }
+    }*/
 
     /*
     if(arg_batch_mode == std::string("true"))
@@ -166,6 +166,7 @@ int main(int argc, char* argv[])
     }
 
 
+    /*
     analysis.SetEpsilon31(epsilon_31);
 
     // run analysis
@@ -183,7 +184,16 @@ int main(int argc, char* argv[])
     analysis.SensitivityMeasurementLoglikelihood1();
     analysis.SensitivityMeasurementLoglikelihood2();
     analysis.PrintOutputToFile();
+    */
 
+
+    Double_t eps_incr{0.01};
+    for(Double_t eps{0.0}; eps <= 0.8 + 0.5 * eps_incr; eps += eps_incr)
+    {
+        analysis.AddEpsilonValue(eps);
+    }
+
+    analysis.RunOverEpsilonVector();
 
 
 

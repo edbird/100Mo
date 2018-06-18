@@ -125,8 +125,8 @@ void Analysis::RunOverEpsilonVector()
 
     ReadData();
     CanvasDecayRate();
-    CanvasSingleEnergyProjection();
-    CanvasSingleEnergyTest();
+    CanvasSingleElectronProjection();
+    CanvasSingleElectronTest();
 
     std::vector<Double_t>::const_iterator it{vec_epsilon_31.cbegin()};
     for(; it != vec_epsilon_31.cend(); ++ it)
