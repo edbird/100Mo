@@ -46,7 +46,8 @@ class Analysis
     void CanvasDecayRate();
     void CanvasSingleElectronProjection(); // TODO: note this creates histograms as well as canvas output, misleading name
     void CanvasSingleElectronTest(); // graphs of data from theory paper 
-    void InitEventLoop();
+    void InitEventLoopTree();
+    void InitEventLoopHistogram();
     void EventLoop();
     void PostProcess();
     void SummedEnergyFit();
@@ -72,7 +73,7 @@ class Analysis
 
 
     void SetFitSubrange(const bool);
-    void SetNumberPseudoExperiments(const Int_t, const Int_t);
+    void SetNumberOfPseudoexperiments(const Int_t, const Int_t);
 
 
     ////////////////////////////////////////////////////////////////////////////

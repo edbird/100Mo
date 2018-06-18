@@ -175,7 +175,8 @@ int main(int argc, char* argv[])
     analysis.CanvasDecayRate();
     analysis.CanvasSingleElectronProjection();
     analysis.CanvasSingleElectronTest();
-    analysis.InitEventLoop();
+    analysis.InitEventLoopTree();
+    analysis.InitEventLoopHistogram();
     analysis.EventLoop();
     analysis.PostProcess();
     analysis.SummedEnergyFit();
@@ -187,12 +188,17 @@ int main(int argc, char* argv[])
     */
 
 
-    Double_t eps_incr{0.01};
+    analysis.SetNumberOfPseudoexperiments(10000, 1);
+
+    Double_t eps_incr{0.005};
     for(Double_t eps{0.0}; eps <= 0.8 + 0.5 * eps_incr; eps += eps_incr)
     {
+        std::cout << "Running: eps=" << eps << std::endl;
         analysis.AddEpsilonValue(eps);
     }
 
+    //analysis.AddEpsilonValue(0.368);
+    //analysis.AddEpsilonValue(0.5);
     analysis.RunOverEpsilonVector();
 
 

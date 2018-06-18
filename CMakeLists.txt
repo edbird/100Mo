@@ -4,8 +4,8 @@ SET(CMAKE_CXX_STANDARD 11)
 
 PROJECT(main)
 
-ADD_EXECUTABLE(main Analysis.cpp main.cpp)
-ADD_EXECUTABLE(createtree createtree.cpp)
+ADD_EXECUTABLE(main aux.cpp ReWeight.cpp Analysis.cpp Analysis_ReadData.cpp Analysis_CanvasFunctions.cpp Analysis_EventLoopFunctions.cpp Analysis_SensitivityFunctions.cpp main.cpp)
+ADD_EXECUTABLE(createtree ReWeight.cpp createtree.cpp)
 ADD_EXECUTABLE(sensitivity sensitivity.cpp)
 
 FIND_PACKAGE(ROOT REQUIRED)
