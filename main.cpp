@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     //pa.Add("300 keV energy cut", "--energy-cut", "false");
     pa.Add("energy_cut", "--energy-cut", "false");
     pa.Add("fit_subrange", "--fit-subrange", "false");
-    pa.Add("log_mode", "--log-mode", "true");
+    pa.Add("log_mode", "--log-mode", "false");
     pa.Add("output_filename", "--output-file", "of_data.txt");
     pa.Print();
     pa.Process(argc, argv);
@@ -194,11 +194,11 @@ int main(int argc, char* argv[])
     for(Double_t eps{0.0}; eps <= 0.8 + 0.5 * eps_incr; eps += eps_incr)
     {
         std::cout << "Running: eps=" << eps << std::endl;
-        analysis.AddEpsilonValue(eps);
+        //analysis.AddEpsilonValue(eps);
     }
 
     //analysis.AddEpsilonValue(0.368);
-    //analysis.AddEpsilonValue(0.5);
+    analysis.AddEpsilonValue(0.5);
     analysis.RunOverEpsilonVector();
 
 

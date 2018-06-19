@@ -103,7 +103,7 @@ void Analysis::SummedEnergyFit()
     const Double_t max_nolog_mode_2{80.0e3};
     const std::string dir_log_mode_2("el_energy_sum_log_dir");
     const std::string dir_nolog_mode_2("el_energy_sum_nolog_dir");
-    std::string dir;
+    std::string dir; //{std::to_string(epsilon_31)};
     if(log_mode) { min = 0.1; max = max_log_mode_2; dir = dir_log_mode_2; }
     else { min = 0.0; max = max_nolog_mode_2; dir = dir_nolog_mode_2; }
     CanvasFactorySettings settings_2("Energy [MeV]", "Events", min, max, log_mode);
@@ -223,7 +223,7 @@ void Analysis::SensitivityMeasurementChisquare1()
         Double_t min{0.0};
         const std::string dir_log_mode("el_energy_log_dir");
         const std::string dir_nolog_mode("el_energy_nolog_dir");
-        std::string dir;
+        std::string dir; //{std::to_string(epsilon_31)};
         if(log_mode) { min = 0.1; max = max_log_mode; dir = dir_log_mode; }
         else { min = 0.0; max = max_nolog_mode; dir = dir_nolog_mode; }
         CanvasFactorySettings settings("Energy [MeV]", "Events", min, max, log_mode);
