@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
 
     analysis.SetNumberOfPseudoexperiments(10000, 1);
 
-    Double_t eps_incr{0.005};
+    Double_t eps_incr{0.025};
     for(Double_t eps{0.0}; eps <= 0.8 + 0.5 * eps_incr; eps += eps_incr)
     {
         std::cout << "Running: eps=" << eps << std::endl;

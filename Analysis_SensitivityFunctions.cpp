@@ -19,6 +19,9 @@
 void Analysis::SummedEnergyFit()
 {
 
+    // reset
+    non_empty_bins_fit = 0;
+
     ////////////////////////////////////////////////////////////////////////
     // 1d histogram fit and sensitivity
     ////////////////////////////////////////////////////////////////////////
@@ -119,6 +122,9 @@ void Analysis::SummedEnergyFit()
 
 void Analysis::SensitivityMeasurementChisquare1()
 {
+
+    // reset
+    non_empty_bins = 0;
 
     ////////////////////////////////////////////////////////////////////////////
     // SINGLE ELECTRON ENERGY CHISQUARE METHOD
@@ -258,6 +264,8 @@ void Analysis::SensitivityMeasurementChisquare1()
 void Analysis::SensitivityMeasurementChisquare2()
 {
 
+    // reset
+    non_empty_bins_2d = 0;
 
     // NOTE TO SELF: There is no 2d fit, the 2d histogram is used to evaluate
     // the sensitivity, therefore there is only a chi-square test
