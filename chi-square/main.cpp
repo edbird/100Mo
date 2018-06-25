@@ -172,7 +172,26 @@ int main(int argc, char* argv[])
 
     std::cout << "Finished constructing intermediate data" << std::endl;
 
-    TLegend *l = new TLegend(0.1, 0.7, 0.3, 0.9);
+    Double_t l_x{0.7 - 0.05};
+    Double_t l_y{0.15};
+    Double_t l_h{0.15};
+    Double_t l_w{0.2};
+    if(false)
+    {
+        l_x = 0.7 - 0.05;
+        l_y = 0.15;
+        l_h = 0.15;
+        l_w = 0.2;
+    }
+    else
+    {
+        l_x = 0.65;
+        l_y = 0.9 - 0.2;
+        l_h = 0.15;
+        l_w = 0.2;
+    }
+
+    TLegend *l = new TLegend(l_x, l_y, l_x + l_w, l_y + l_h);
     l->AddEntry(g_1, "Full range no cut", "l"); // FULL RANGE NO CUT
     l->AddEntry(g_0, "Full range cut", "l"); // FULL RANGE CUT
     l->AddEntry(g_3, "Sub range no cut", "l"); // SUB RANGE NO CUT
@@ -186,6 +205,7 @@ int main(int argc, char* argv[])
 
     TCanvas *c = new TCanvas("c", "", 804, 628);
     c->GetPad(0)->SetTicks(1, 2);
+    g_1->GetYaxis()->SetRangeUser(0.0, 20.0);
     g_1->Draw();
     g_0->Draw("same");
     g_2->Draw("same");
@@ -201,7 +221,7 @@ int main(int argc, char* argv[])
     c_log->GetPad(0)->SetTicks(1, 2);
     c_log->SetLogy();
     //g_1->GetYaxis()->SetLimits(1.0e0, 1.0e5);
-    g_1->GetYaxis()->SetRangeUser(1.0e0, 1.0e5);
+    g_1->GetYaxis()->SetRangeUser(1.0e-2, 1.0e3);
     g_1->Draw();
     g_0->Draw("same");
     g_2->Draw("same");

@@ -190,15 +190,16 @@ int main(int argc, char* argv[])
 
     analysis.SetNumberOfPseudoexperiments(10000, 1);
 
-    Double_t eps_incr{0.025};
-    for(Double_t eps{0.0}; eps <= 0.8 + 0.5 * eps_incr; eps += eps_incr)
+    //Double_t eps_incr{0.025};
+    Double_t eps_incr{0.01};
+    for(Double_t eps{0.1}; eps <= 0.7 + 0.5 * eps_incr; eps += eps_incr)
     {
         std::cout << "Running: eps=" << eps << std::endl;
-        //analysis.AddEpsilonValue(eps);
+        analysis.AddEpsilonValue(eps);
     }
 
     //analysis.AddEpsilonValue(0.368);
-    analysis.AddEpsilonValue(0.5);
+    //analysis.AddEpsilonValue(0.5);
     analysis.RunOverEpsilonVector();
 
 
