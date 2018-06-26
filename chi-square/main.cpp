@@ -98,6 +98,11 @@ int main(int argc, char* argv[])
     Double_t *data_y_2 = new Double_t[data_size_2];
     Double_t *data_y_3 = new Double_t[data_size_3];
 
+    Double_t *data_y_0_2d = new Double_t[data_size_0];
+    Double_t *data_y_1_2d = new Double_t[data_size_1];
+    Double_t *data_y_2_2d = new Double_t[data_size_2];
+    Double_t *data_y_3_2d = new Double_t[data_size_3];
+
 
     // NOTE: chi-square value is calculated as chi-square not chi-square
     // reduced, to obtain chi-square reduced divide by the number of bins
@@ -110,25 +115,31 @@ int main(int argc, char* argv[])
     {
         data_x_0[i] = data_FULLRANGE_CUT[i][0];
         data_y_0[i] = scale_factor * data_FULLRANGE_CUT[i][4];
+        data_y_0_2d[i] = scale_factor * data_FULLRANGE_CUT[i][7];
     }
 
     for(std::size_t i{0}; i < data_size_1; ++ i)
     {
         data_x_1[i] = data_FULLRANGE_NOCUT[i][0];
         data_y_1[i] = scale_factor * data_FULLRANGE_NOCUT[i][4];
+        data_y_1_2d[i] = scale_factor * data_FULLRANGE_NOCUT[i][7];
     }
 
     for(std::size_t i{0}; i < data_size_2; ++ i)
     {
         data_x_2[i] = data_SUBRANGE_CUT[i][0];
         data_y_2[i] = scale_factor * data_SUBRANGE_CUT[i][4];
+        data_y_2_2d[i] = scale_factor * data_SUBRANGE_CUT[i][7];
     }
 
     for(std::size_t i{0}; i < data_size_3; ++ i)
     {
         data_x_3[i] = data_SUBRANGE_NOCUT[i][0];
         data_y_3[i] = scale_factor * data_SUBRANGE_NOCUT[i][4];
+        data_y_3_2d[i] = scale_factor * data_SUBRANGE_NOCUT[i][7];
     }
+
+
 
     TGraph *g_0 = new TGraph(data_size_0, data_x_0, data_y_0); // FULL RANGE CUT
     g_0->SetTitle("");
@@ -237,6 +248,97 @@ int main(int argc, char* argv[])
     g_1->Write();
     g_2->Write();
     g_3->Write();
+
+
+
+    TGraph *g_0_2d = new TGraph(data_size_0, data_x_0, data_y_0_2d); // FULL RANGE CUT 2D
+    g_0_2d->SetTitle("");
+    g_0_2d->GetXaxis()->SetTitle("Parameter #xi");
+    g_0_2d->GetYaxis()->SetTitle("#chi^{2}");
+    //g_0_2d->GetYaxis()->SetTitleOffset(1.75);
+    //g_0_2d->GetYaxis()->SetMaxDigits(3);
+    TGaxis* g_0_2d_tgaxis = (TGaxis*)g_0_2d->GetYaxis();
+    g_0_2d_tgaxis->SetMaxDigits(3);
+    g_0_2d->SetLineColor(2);
+
+    TGraph *g_1_2d = new TGraph(data_size_1, data_x_1, data_y_1_2d); // FULL RANGE NO CUT 2D
+    g_1_2d->SetTitle("");
+    g_1_2d->GetXaxis()->SetTitle("Parameter #xi");
+    g_1_2d->GetYaxis()->SetTitle("#chi^{2}");
+    //g_1_2d->GetYaxis()->SetTitleOffset(1.75);
+    //g_1_2d->GetYaxis()->SetMaxDigits(3);
+    TGaxis* g_1_2d_tgaxis = (TGaxis*)g_1_2d->GetYaxis();
+    g_1_2d_tgaxis->SetMaxDigits(3);
+    g_1_2d->SetLineColor(4);
+
+    TGraph *g_2_2d = new TGraph(data_size_2, data_x_2, data_y_2_2d); // SUB RANGE CUT 2D
+    g_2_2d->SetTitle("");
+    g_2_2d->GetXaxis()->SetTitle("Parameter #xi");
+    g_2_2d->GetYaxis()->SetTitle("#chi^{2}");
+    //g_2_2d->GetYaxis()->SetTitleOffset(1.75);
+    //g_2_2d->GetYaxis()->SetMaxDigits(3);
+    TGaxis* g_2_2d_tgaxis = (TGaxis*)g_2_2d->GetYaxis();
+    g_2_2d_tgaxis->SetMaxDigits(3);
+    g_2_2d->SetLineColor(6);
+
+    TGraph *g_3_2d = new TGraph(data_size_3, data_x_3, data_y_3_2d); // SUB RANGE NO CUT 2D
+    g_3_2d->SetTitle("");
+    g_3_2d->GetXaxis()->SetTitle("Parameter #xi");
+    g_3_2d->GetYaxis()->SetTitle("#chi^{2}");
+    //g_3_2d->GetYaxis()->SetTitleOffset(1.75);
+    //((TGAxis*)(g_3_2d->GetYaxis()))->SetMaxDigits(3);
+    TGaxis* g_3_2d_tgaxis = (TGaxis*)g_3_2d->GetYaxis();
+    g_3_2d_tgaxis->SetMaxDigits(3);
+    g_3_2d->SetLineColor(3);
+
+
+    TLegend *l_2d = new TLegend(0.15, 0.15, 0.35, 0.30);
+    l_2d->AddEntry(g_1_2d, "Ful_2dl_2d range no cut", "l_2d"); // FULL RANGE NO CUT
+    l_2d->AddEntry(g_0_2d, "Ful_2dl_2d range cut", "l_2d"); // FULL RANGE CUT
+    l_2d->AddEntry(g_3_2d, "Sub range no cut", "l_2d"); // SUB RANGE NO CUT
+    l_2d->AddEntry(g_2_2d, "Sub range cut", "l_2d"); // SUB RANGE CUT
+
+    TCanvas *c_2d = new TCanvas("c_2d", "", 804, 628);
+    c_2d->GetPad(0)->SetTicks(1, 2);
+    g_1_2d->GetYaxis()->SetRangeUser(0.0, 20.0);
+    g_1_2d->Draw();
+    g_0_2d->Draw("same");
+    g_2_2d->Draw("same");
+    g_3_2d->Draw("same");
+    l_2d->Draw();
+    c_2d->SaveAs("c_out_2d.png");
+    c_2d->SaveAs("c_out_2d.pdf");
+    c_2d->SaveAs("c_out_2d.eps");
+    c_2d->SaveAs("c_out_2d.C");
+    c_2d->Write();
+    
+
+    TLegend *l_log_2d = new TLegend(0.15, 0.15, 0.35, 0.30);
+    l_log_2d->AddEntry(g_1_2d, "Ful_log_2dl_log_2d range no cut", "l_log_2d"); // FULL RANGE NO CUT
+    l_log_2d->AddEntry(g_0_2d, "Ful_log_2dl_log_2d range cut", "l_log_2d"); // FULL RANGE CUT
+    l_log_2d->AddEntry(g_3_2d, "Sub range no cut", "l_log_2d"); // SUB RANGE NO CUT
+    l_log_2d->AddEntry(g_2_2d, "Sub range cut", "l_log_2d"); // SUB RANGE CUT
+
+    TCanvas *c_log_2d = new TCanvas("c_log_2d", "", 804, 628);
+    c_log_2d->GetPad(0)->SetTicks(1, 2);
+    c_log_2d->SetLogy();
+    //g_1_2d->GetYaxis()->SetLimits(1.0e0, 1.0e5);
+    g_1_2d->GetYaxis()->SetRangeUser(1.0e-2, 1.0e3);
+    g_1_2d->Draw();
+    g_0_2d->Draw("same");
+    g_2_2d->Draw("same");
+    g_3_2d->Draw("same");
+    l_log_2d->Draw();
+    c_log_2d->SaveAs("c_log_2d_out_2d.png");
+    c_log_2d->SaveAs("c_log_2d_out_2d.pdf");
+    c_log_2d->SaveAs("c_log_2d_out_2d.eps");
+    c_log_2d->SaveAs("c_log_2d_out_2d.C");
+    c_log_2d->Write();
+
+    g_0_2d->Write();
+    g_1_2d->Write();
+    g_2_2d->Write();
+    g_3_2d->Write();
 
     f_out->Close();
    
