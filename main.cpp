@@ -44,8 +44,12 @@ int main(int argc, char* argv[])
     pa.Add("fit_subrange", "--fit-subrange", "false");
     pa.Add("log_mode", "--log-mode", "false");
     pa.Add("output_filename", "--output-file", "of_data.txt");
+    pa.Add("eps_min", "--epsilon-min", "0.0");
+    pa.Add("eps_max", "--epsilon-max", "1.0");
+    pa.Add("eps_num", "--epsilon-num", "100");
     pa.Print();
     pa.Process(argc, argv);
+
 
     // this argument is a string
     std::string help{pa.Get("help")};
@@ -59,6 +63,10 @@ int main(int argc, char* argv[])
     std::string arg_fit_subrange{pa.Get("fit_subrange")};
     std::string arg_log_mode{pa.Get("log_mode")};
     std::string arg_output_filename{pa.Get("output_filename")};
+    std::string arg_eps_min{pa.Get("eps_min")};
+    std::string arg_eps_max{pa.Get("eps_max")};
+    std::string arg_eps_num{pa.Get("eps_num")};
+
 
     /*double epsilon_31{std::stod(arg_epsilon_31)};*/
     bool batch_mode{false};
@@ -191,8 +199,11 @@ int main(int argc, char* argv[])
     analysis.SetNumberOfPseudoexperiments(10000, 1);
 
     //Double_t eps_incr{0.025};
-    Double_t eps_incr{0.01};
-    for(Double_t eps{0.1}; eps <= 0.7 + 0.5 * eps_incr; eps += eps_incr)
+    Double_t eps_min{std::stod(arg_eps_min)};
+    Double_t eps_max{std::stod(arg_eps_max)};
+    Int_t eps_num{std::stoi(arg_eps_num)};
+    Double_t eps_incr{(eps_max - eps_min) / (Double_t)eps_num};
+    for(Double_t eps{eps_min}; eps <= eps_max + 0.5 * eps_incr; eps += eps_incr)
     {
         std::cout << "Running: eps=" << eps << std::endl;
         analysis.AddEpsilonValue(eps);
