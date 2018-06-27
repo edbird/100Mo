@@ -33,7 +33,7 @@ Analysis::Analysis(const std::string& filename, const std::string& output_filena
     , psiN2{0.0}
     , sensitivity_chisquare{0.0}
     , sensitivity_chisquare_2d{0.0}
-    , fit_subrange{true} // fit subrange flag
+    , fit_subrange{false} // fit subrange flag
     , number_of_pseudo_experiments{1}
     , number_of_pseudo_experiments_2d{1}
     , h_data_0{nullptr}
