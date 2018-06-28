@@ -257,7 +257,7 @@ void Analysis::CanvasSingleElectronProjection()
 // THEORY DATA COMPARISON CANVAS OUTPUT
 ////////////////////////////////////////////////////////////////////////////////
 
-void Analysis::CanvasSingleElectronTest()
+void Analysis::InitSingleElectronTest()
 {
 
     // test histograms
@@ -284,47 +284,97 @@ void Analysis::CanvasSingleElectronTest()
     h_test_sum_reweight->SetLineColor(4);
     h_test_sum_reweight->SetMarkerColor(4);
 
+}
 
+
+void Analysis::CanvasSingleElectronTest()
+{
+
+    // create file with test histogerams and graph data
+    TFile *f_test_histos = new TFile("f_test_histos.root", "RECREATE");
+    h_test_single_original->Write();
+    h_test_single_reweight->Write();
+    h_test_sum_original->Write();
+    h_test_sum_reweight->Write();
+    g_el_energy_single_0->SetName("g_el_energy_single_0");
+    g_el_energy_single_1->SetName("g_el_energy_single_1");
+    g_el_energy_single_2->SetName("g_el_energy_single_2");
+    g_el_energy_single_0->Write();
+    g_el_energy_single_1->Write();
+    g_el_energy_single_2->Write();
+    g_el_energy_sum_0->SetName("g_el_energy_sum_0");
+    g_el_energy_sum_1->SetName("g_el_energy_sum_1");
+    g_el_energy_sum_2->SetName("g_el_energy_sum_2");
+    g_el_energy_sum_0->Write();
+    g_el_energy_sum_1->Write();
+    g_el_energy_sum_2->Write();
+    f_test_histos->Close();
+
+
+    // NOTE: development of this section has been moved to a different file
+    // (program)
     if(_batch_mode_ == false)
     {
+
+        TLegend *l_test_single = new TLegend(0.65, 0.63, 0.85, 0.78);
+        l_test_single->SetBorderSize(0);
+        l_test_single->AddEntry(g_el_energy_single_0, " #xi = 0.0", "l");
+        l_test_single->AddEntry(g_el_energy_single_1, " #xi = 0.4", "l");
+        l_test_single->AddEntry(g_el_energy_single_2, " #xi = 0.8", "l");
+
         // print single electron distribution test histograms
         c_test_single = new TCanvas("c_test_single", "c_test_single", 800, 600);
         c_test_single->SetLogy(log_mode);
         //h_test_single_original->SetMaximum(1.4); // MC data
-        //h_test_single_original->SetMaximum(1.2); // createtree data
-        h_test_single_original->SetMaximum(10.0); // createtree data log mode
+        h_test_single_original->SetMaximum(1.2); // createtree data
+        //h_test_single_original->SetMaximum(10.0); // createtree data log mode
         h_test_single_original->GetXaxis()->SetTitle("Energy [MeV]");
         h_test_single_original->GetYaxis()->SetTitle("Events");
         h_test_single_original->Draw("E");
         h_test_single_reweight->Draw("Esame");
-        g_el_energy_single_0->Draw("same");
-        g_el_energy_single_1->Draw("same");
-        g_el_energy_single_2->Draw("same");
+        g_el_energy_single_0->Draw("Lsame");
+        g_el_energy_single_1->Draw("Lsame");
+        g_el_energy_single_2->Draw("Lsame");
         //h_test_single_reweight->Draw("E");
+        l_test_single->Draw();
         c_test_single->SaveAs("c_test_single.C");
         c_test_single->SaveAs("c_test_single.png");
         c_test_single->SaveAs("c_test_single.pdf");
+        c_test_single->SaveAs("c_test_single.eps");
         // compute chi-square
         //std::cout << "chi1: " << chi_square_test(g_el_energy_single_0, h_test_single_original) / h_test_single_original->GetNbinsX() << std::endl;
         //std::cout << "chi2: " << chi_square_test(g_el_energy_single_2, h_test_single_reweight) / h_test_single_reweight->GetNbinsX() << std::endl;
-        
+    }
+
+    if(_batch_mode_ == false)
+    {
+
+        TLegend *l_test_sum = new TLegend(0.65, 0.63, 0.85, 0.78);
+        l_test_sum->SetBorderSize(0);
+        l_test_sum->AddEntry(g_el_energy_sum_0, " #xi = 0.0", "l");
+        l_test_sum->AddEntry(g_el_energy_sum_1, " #xi = 0.4", "l");
+        l_test_sum->AddEntry(g_el_energy_sum_2, " #xi = 0.8", "l");
+
         // print summed distribution test histograms
         c_test_sum = new TCanvas("c_test_sum", "c_test_sum", 800, 600);
-        c_test_sum->SetLogy(log_mode);
+        //c_test_sum->SetLogy(log_mode);
         //h_test_sum_original->SetMaximum(1.0); // MC data
-        //h_test_sum_original->SetMaximum(0.8); // createtree data
-        h_test_sum_original->SetMaximum(1.0); // createtree data log mode
+        h_test_sum_original->SetMaximum(0.8); // createtree data
+        //h_test_sum_original->SetMaximum(1.0); // createtree data log mode
         h_test_sum_original->GetXaxis()->SetTitle("Energy [MeV]");
         h_test_sum_original->GetYaxis()->SetTitle("Events");
         h_test_sum_original->Draw("E");
         h_test_sum_reweight->Draw("Esame");
-        g_el_energy_sum_0->Draw("same");
-        g_el_energy_sum_1->Draw("same");
-        g_el_energy_sum_2->Draw("same");
+        //g_el_energy_sum_0->Draw("AL");
+        g_el_energy_sum_0->Draw("Lsame");
+        g_el_energy_sum_1->Draw("Lsame");
+        g_el_energy_sum_2->Draw("Lsame");
         //h_test_sum_reweight->Draw("E");
+        l_test_sum->Draw();
         c_test_sum->SaveAs("c_test_sum.C");
         c_test_sum->SaveAs("c_test_sum.png");
         c_test_sum->SaveAs("c_test_sum.pdf");
+        c_test_sum->SaveAs("c_test_sum.eps");
         // compute chi-square
         //std::cout << "chi3: " << chi_square_test(g_el_energy_sum_0, h_test_sum_original) / h_test_sum_original->GetNbinsX() << std::endl;
         //std::cout << "chi4: " << chi_square_test(g_el_energy_sum_2, h_test_sum_reweight) / h_test_sum_reweight->GetNbinsX() << std::endl;

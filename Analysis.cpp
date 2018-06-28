@@ -109,12 +109,10 @@ Analysis::~Analysis()
 // ANALYSIS FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-/*
 void Analysis::SetEpsilon31(const Double_t epsilon)
 {
     epsilon_31 = epsilon;
 }
-*/
 
 void Analysis::AddEpsilonValue(const Double_t epsilon)
 {
@@ -127,7 +125,7 @@ void Analysis::RunOverEpsilonVector()
     ReadData();
     CanvasDecayRate();
     CanvasSingleElectronProjection();
-    CanvasSingleElectronTest();
+    //CanvasSingleElectronTest(); // must be done after Fill in event loop
 
     InitEventLoopTree();
 

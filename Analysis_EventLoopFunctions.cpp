@@ -137,9 +137,6 @@ void Analysis::EventLoop()
     for(Long64_t ix{0}; ix < t->GetEntries(); ++ ix)
     {
 
-        // TODO remove
-        //if(ix == 1000) break;
-
         t->GetEntry(ix);
 
         if(nElectrons != 2) continue;
@@ -156,6 +153,7 @@ void Analysis::EventLoop()
 
         // ReWeight = baseline 0.0, ReWeight2 = baseline = 0.382
         Double_t weight{ReWeight2(T1, T2, epsilon_31, h_nEqNull, h_nEqTwo, psiN0, psiN2, "true")};
+        //Double_t weight{ReWeight(T1, T2, epsilon_31, h_nEqNull, h_nEqTwo, psiN0, psiN2, "true")};
 
         h_el_energy_original->Fill(el_energy_[0], 1.0 * gen_weight);
         h_el_energy_original->Fill(el_energy_[1], 1.0 * gen_weight);

@@ -255,7 +255,8 @@ void read_data_helper_2(const std::string& filename_data,
     ifs_data.read(buf, ifs_size);
     ifs_data.close();
     std::vector<std::vector<double>> data_temp;
-    read_data_2(buf, data_temp, delimiter);
+    //read_data_2(buf, data_temp, delimiter);
+    read_data(buf, data_temp, delimiter);
     data = data_temp;
     
     return;

@@ -37,7 +37,7 @@ class Analysis
     // ANALYSIS FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////
 
-    //void SetEpsilon31(const Double_t);
+    void SetEpsilon31(const Double_t);
     void AddEpsilonValue(const Double_t epsilon);
     void RunOverEpsilonVector();
 
@@ -46,6 +46,7 @@ class Analysis
     void CanvasDecayRate();
     void CanvasSingleElectronProjection(); // TODO: note this creates histograms as well as canvas output, misleading name
     void CanvasSingleElectronTest(); // graphs of data from theory paper 
+    void InitSingleElectronTest();
     void InitEventLoopTree();
     void InitEventLoopHistogram();
     void EventLoop();

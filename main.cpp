@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
     ProgramArguments pa;
     pa.Add("help", "--help", "false");
     pa.Add("filename", "--filename", "NewElectronNtuplizerExe_Int_ManDB_output.root");
-    pa.Add("epsilon", "--epsilon", "0.0");
+    pa.Add("epsilon", "--epsilon", "0.8");
     pa.Add("batch_mode", "--batch-mode", "false");
     //pa.Add("300 keV energy cut", "--energy-cut", "false");
     pa.Add("energy_cut", "--energy-cut", "false");
@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
     pa.Add("output_filename", "--output-file", "of_data.txt");
     pa.Add("eps_min", "--epsilon-min", "0.0");
     pa.Add("eps_max", "--epsilon-max", "1.0");
-    pa.Add("eps_num", "--epsilon-num", "100");
+    pa.Add("eps_num", "--epsilon-num", "1");
     pa.Print();
     pa.Process(argc, argv);
 
@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
     // this argument is a string
     std::string filename{pa.Get("filename")};
     // this argument is to be converted to a double
-    /*std::string arg_epsilon_31{pa.Get("epsilon")};*/
+    std::string arg_epsilon_31{pa.Get("epsilon")};
     // this argument is to be converted to a bool
     std::string arg_batch_mode{pa.Get("batch_mode")};
     std::string arg_energy_cut{pa.Get("energy_cut")};
@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
     std::string arg_eps_num{pa.Get("eps_num")};
 
 
-    /*double epsilon_31{std::stod(arg_epsilon_31)};*/
+    double epsilon_31{std::stod(arg_epsilon_31)};
     bool batch_mode{false};
     if(arg_batch_mode == std::string("true"))
     {
@@ -174,7 +174,10 @@ int main(int argc, char* argv[])
     }
 
 
-    /*
+    // THIS CODE FOR PRODUCING THE TEST HISTOGRAMS
+
+#if 0
+    
     analysis.SetEpsilon31(epsilon_31);
 
     // run analysis
@@ -182,11 +185,13 @@ int main(int argc, char* argv[])
     //analysis.CanvasRawData();
     analysis.CanvasDecayRate();
     analysis.CanvasSingleElectronProjection();
-    analysis.CanvasSingleElectronTest();
+    analysis.InitSingleElectronTest();
     analysis.InitEventLoopTree();
     analysis.InitEventLoopHistogram();
     analysis.EventLoop();
     analysis.PostProcess();
+    analysis.CanvasSingleElectronTest();
+    /*
     analysis.SummedEnergyFit();
     analysis.SensitivityMeasurementChisquare1();
     analysis.SensitivityMeasurementChisquare2();
@@ -195,7 +200,12 @@ int main(int argc, char* argv[])
     analysis.PrintOutputToFile();
     */
 
+#endif
 
+
+    // THIS CODE FOR REGULAR DATA ANALYSIS RUN
+
+#if 1
     analysis.SetNumberOfPseudoexperiments(10000, 1);
 
     //Double_t eps_incr{0.025};
@@ -212,7 +222,7 @@ int main(int argc, char* argv[])
     //analysis.AddEpsilonValue(0.368);
     //analysis.AddEpsilonValue(0.5);
     analysis.RunOverEpsilonVector();
-
+#endif
 
 
     ////////////////////////////////////////////////////////////////////////////
