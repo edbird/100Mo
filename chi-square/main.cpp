@@ -240,10 +240,10 @@ int main(int argc, char* argv[])
             
 
     TLegend *l_log = new TLegend(0.65, 0.15, 0.85, 0.30);
-    l_log->AddEntry(g_1, "Full range no cut", "l_log"); // FULL RANGE NO CUT
-    l_log->AddEntry(g_0, "Full range cut", "l_log"); // FULL RANGE CUT
-    l_log->AddEntry(g_3, "Sub range no cut", "l_log"); // SUB RANGE NO CUT
-    l_log->AddEntry(g_2, "Sub range cut", "l_log"); // SUB RANGE CUT
+    l_log->AddEntry(g_1, "Full range no cut", "l"); // FULL RANGE NO CUT
+    l_log->AddEntry(g_0, "Full range cut", "l"); // FULL RANGE CUT
+    l_log->AddEntry(g_3, "Sub range no cut", "l"); // SUB RANGE NO CUT
+    l_log->AddEntry(g_2, "Sub range cut", "l"); // SUB RANGE CUT
 
     TCanvas *c_log = new TCanvas("c_log", "", 804, 628);
     c_log->GetPad(0)->SetTicks(1, 2);
@@ -309,15 +309,16 @@ int main(int argc, char* argv[])
     g_3_2d->SetLineColor(3);
 
 
-    TLegend *l_2d = new TLegend(0.15, 0.15, 0.35, 0.30);
-    l_2d->AddEntry(g_1_2d, "Ful_2dl_2d range no cut", "l_2d"); // FULL RANGE NO CUT
-    l_2d->AddEntry(g_0_2d, "Ful_2dl_2d range cut", "l_2d"); // FULL RANGE CUT
-    l_2d->AddEntry(g_3_2d, "Sub range no cut", "l_2d"); // SUB RANGE NO CUT
-    l_2d->AddEntry(g_2_2d, "Sub range cut", "l_2d"); // SUB RANGE CUT
+    TLegend *l_2d = new TLegend(0.40, 0.60, 0.60, 0.75);
+    l_2d->AddEntry(g_1_2d, "Full range no cut", "l"); // FULL RANGE NO CUT
+    l_2d->AddEntry(g_0_2d, "Full range cut", "l"); // FULL RANGE CUT
+    l_2d->AddEntry(g_3_2d, "Sub range no cut", "l"); // SUB RANGE NO CUT
+    l_2d->AddEntry(g_2_2d, "Sub range cut", "l"); // SUB RANGE CUT
 
     TCanvas *c_2d = new TCanvas("c_2d", "", 804, 628);
     c_2d->GetPad(0)->SetTicks(1, 2);
     g_1_2d->GetYaxis()->SetRangeUser(0.0, 20.0);
+    g_1_2d->GetXaxis()->SetRangeUser(0.29, 0.45);
     g_1_2d->Draw("AL");
     g_0_2d->Draw("same");
     g_2_2d->Draw("same");
@@ -330,11 +331,11 @@ int main(int argc, char* argv[])
     c_2d->Write();
     
 
-    TLegend *l_log_2d = new TLegend(0.15, 0.15, 0.35, 0.30);
-    l_log_2d->AddEntry(g_1_2d, "Ful_log_2dl_log_2d range no cut", "l_log_2d"); // FULL RANGE NO CUT
-    l_log_2d->AddEntry(g_0_2d, "Ful_log_2dl_log_2d range cut", "l_log_2d"); // FULL RANGE CUT
-    l_log_2d->AddEntry(g_3_2d, "Sub range no cut", "l_log_2d"); // SUB RANGE NO CUT
-    l_log_2d->AddEntry(g_2_2d, "Sub range cut", "l_log_2d"); // SUB RANGE CUT
+    TLegend *l_log_2d = new TLegend(0.65, 0.15, 0.85, 0.30);
+    l_log_2d->AddEntry(g_1_2d, "Full range no cut", "l"); // FULL RANGE NO CUT
+    l_log_2d->AddEntry(g_0_2d, "Full range cut", "l"); // FULL RANGE CUT
+    l_log_2d->AddEntry(g_3_2d, "Sub range no cut", "l"); // SUB RANGE NO CUT
+    l_log_2d->AddEntry(g_2_2d, "Sub range cut", "l"); // SUB RANGE CUT
 
     TCanvas *c_log_2d = new TCanvas("c_log_2d", "", 804, 628);
     c_log_2d->GetPad(0)->SetTicks(1, 2);
@@ -346,10 +347,10 @@ int main(int argc, char* argv[])
     g_2_2d->Draw("same");
     g_3_2d->Draw("same");
     l_log_2d->Draw();
-    c_log_2d->SaveAs("c_log_2d_out_2d.png");
-    c_log_2d->SaveAs("c_log_2d_out_2d.pdf");
-    c_log_2d->SaveAs("c_log_2d_out_2d.eps");
-    c_log_2d->SaveAs("c_log_2d_out_2d.C");
+    c_log_2d->SaveAs("c_log_out_2d.png");
+    c_log_2d->SaveAs("c_log_out_2d.pdf");
+    c_log_2d->SaveAs("c_log_out_2d.eps");
+    c_log_2d->SaveAs("c_log_out_2d.C");
     c_log_2d->Write();
 
     g_0_2d->Write();
