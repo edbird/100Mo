@@ -183,6 +183,7 @@ int main(int argc, char* argv[])
 
     std::cout << "Finished constructing intermediate data" << std::endl;
 
+    /*
     Double_t l_x{0.7 - 0.05};
     Double_t l_y{0.15};
     Double_t l_h{0.15};
@@ -201,12 +202,15 @@ int main(int argc, char* argv[])
         l_h = 0.15;
         l_w = 0.2;
     }
+    */
 
+    /*
     TLegend *l = new TLegend(l_x, l_y, l_x + l_w, l_y + l_h);
     l->AddEntry(g_1, "Full range no cut", "l"); // FULL RANGE NO CUT
     l->AddEntry(g_0, "Full range cut", "l"); // FULL RANGE CUT
     l->AddEntry(g_3, "Sub range no cut", "l"); // SUB RANGE NO CUT
     l->AddEntry(g_2, "Sub range cut", "l"); // SUB RANGE CUT
+    */
 
     ////////////////////////////////////////////////////////////////////////////
     // CREATE OUTPUT GRAPH
@@ -214,10 +218,16 @@ int main(int argc, char* argv[])
     
     TFile *f_out = new TFile("f_out.root", "RECREATE");
 
+    TLegend *l = new TLegend(0.65, 0.70, 0.85, 0.85);
+    l->AddEntry(g_1, "Full range no cut", "l"); // FULL RANGE NO CUT
+    l->AddEntry(g_0, "Full range cut", "l"); // FULL RANGE CUT
+    l->AddEntry(g_3, "Sub range no cut", "l"); // SUB RANGE NO CUT
+    l->AddEntry(g_2, "Sub range cut", "l"); // SUB RANGE CUT
+
     TCanvas *c = new TCanvas("c", "", 804, 628);
     c->GetPad(0)->SetTicks(1, 2);
     g_1->GetYaxis()->SetRangeUser(0.0, 20.0);
-    g_1->Draw();
+    g_1->Draw("AL");
     g_0->Draw("same");
     g_2->Draw("same");
     g_3->Draw("same");
@@ -228,16 +238,23 @@ int main(int argc, char* argv[])
     c->SaveAs("c_out.C");
     c->Write();
             
+
+    TLegend *l_log = new TLegend(0.65, 0.15, 0.85, 0.30);
+    l_log->AddEntry(g_1, "Full range no cut", "l_log"); // FULL RANGE NO CUT
+    l_log->AddEntry(g_0, "Full range cut", "l_log"); // FULL RANGE CUT
+    l_log->AddEntry(g_3, "Sub range no cut", "l_log"); // SUB RANGE NO CUT
+    l_log->AddEntry(g_2, "Sub range cut", "l_log"); // SUB RANGE CUT
+
     TCanvas *c_log = new TCanvas("c_log", "", 804, 628);
     c_log->GetPad(0)->SetTicks(1, 2);
     c_log->SetLogy();
     //g_1->GetYaxis()->SetLimits(1.0e0, 1.0e5);
     g_1->GetYaxis()->SetRangeUser(1.0e-2, 1.0e3);
-    g_1->Draw();
+    g_1->Draw("AL");
     g_0->Draw("same");
     g_2->Draw("same");
     g_3->Draw("same");
-    l->Draw();
+    l_log->Draw();
     c_log->SaveAs("c_log_out.png");
     c_log->SaveAs("c_log_out.pdf");
     c_log->SaveAs("c_log_out.eps");
@@ -301,7 +318,7 @@ int main(int argc, char* argv[])
     TCanvas *c_2d = new TCanvas("c_2d", "", 804, 628);
     c_2d->GetPad(0)->SetTicks(1, 2);
     g_1_2d->GetYaxis()->SetRangeUser(0.0, 20.0);
-    g_1_2d->Draw();
+    g_1_2d->Draw("AL");
     g_0_2d->Draw("same");
     g_2_2d->Draw("same");
     g_3_2d->Draw("same");
@@ -324,7 +341,7 @@ int main(int argc, char* argv[])
     c_log_2d->SetLogy();
     //g_1_2d->GetYaxis()->SetLimits(1.0e0, 1.0e5);
     g_1_2d->GetYaxis()->SetRangeUser(1.0e-2, 1.0e3);
-    g_1_2d->Draw();
+    g_1_2d->Draw("AL");
     g_0_2d->Draw("same");
     g_2_2d->Draw("same");
     g_3_2d->Draw("same");
