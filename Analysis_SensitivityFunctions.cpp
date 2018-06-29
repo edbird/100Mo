@@ -267,34 +267,58 @@ void Analysis::SensitivityMeasurementChisquare2()
     // reset
     non_empty_bins_2d = 0;
 
-    // NOTE TO SELF: There is no 2d fit, the 2d histogram is used to evaluate
-    // the sensitivity, therefore there is only a chi-square test
-
-    for(Int_t j{1}; j <= h_el_energy_2d_original->GetNbinsY(); ++ j)
+    // get chi-square for single electron histograms
+    if(fit_subrange == false)
     {
-        for(Int_t i{1}; i <= h_el_energy_2d_original->GetNbinsX(); ++ i)
+
+        for(Int_t j{1}; j <= h_el_energy_2d_original->GetNbinsY(); ++ j)
         {
-            if(h_el_energy_2d_original->GetBinContent(i, j) != 0.0) ++ non_empty_bins_2d;
+            for(Int_t i{1}; i <= h_el_energy_2d_original->GetNbinsX(); ++ i)
+            {
+                if(h_el_energy_2d_original->GetBinContent(i, j) != 0.0) ++ non_empty_bins_2d;
+            }
         }
+
+        // get chi-square for single electron histograms
+        // Note: no subrange for 2d histogram
+        //if(fit_subrange == false)
+        //{
+        sensitivity_chisquare_2d = chi_square_test(h_el_energy_2d_reweight, h_el_energy_2d_original);
+        std::cout << "chi square of 2 electron: " << sensitivity_chisquare_2d << std::endl;
+        std::cout << " degrees of freedom (2d): " << non_empty_bins_2d << std::endl;
+        std::cout << " chi square reduced: " << sensitivity_chisquare_2d / (Double_t)non_empty_bins_2d << std::endl;
+
+    }
+    else if(fit_subrange == true)
+    {
+
+        for(Int_t j{1}; j <= h_el_energy_2d_original->GetNbinsY(); ++ j)
+        {
+            for(Int_t i{1}; i <= h_el_energy_2d_original->GetNbinsX(); ++ i)
+            {
+                if(h_el_energy_2d_original->GetYaxis()->GetBinCenter(j) >= 2.0)
+                {
+                    if(h_el_energy_2d_original->GetXaxis()->GetBinCenter(i) >= 2.0)
+                    {
+                        if(h_el_energy_2d_original->GetBinContent(i, j) != 0.0) ++ non_empty_bins_2d;
+                    }
+                }
+            }
+        }
+
+        // get chi-square for single electron histograms
+        // Note: no subrange for 2d histogram
+        //if(fit_subrange == false)
+        //{
+        sensitivity_chisquare_2d = chi_square_test(h_el_energy_2d_reweight, h_el_energy_2d_original, 2.0, 4.0);
+        std::cout << "chi square of 2 electron, 2.0 MeV - 2.0 MeV: " << sensitivity_chisquare_2d << std::endl;
+        std::cout << " degrees of freedom (2d): " << non_empty_bins_2d << std::endl;
+        std::cout << " chi square reduced: " << sensitivity_chisquare_2d / (Double_t)non_empty_bins_2d << std::endl;
+        
     }
 
-    // get chi-square for single electron histograms
-    // Note: no subrange for 2d histogram
-    //if(fit_subrange == false)
-    //{
-    sensitivity_chisquare_2d = chi_square_test(h_el_energy_2d_reweight, h_el_energy_2d_original);
-    std::cout << "chi square of 2 electron: " << sensitivity_chisquare_2d << std::endl;
-    std::cout << " degrees of freedom (2d): " << non_empty_bins_2d << std::endl;
-    std::cout << " chi square reduced: " << sensitivity_chisquare_2d / (Double_t)non_empty_bins_2d << std::endl;
-    //}
-    //else if(fit_subrange == true)
-    //{
-    //    sensitivity_chisquare_2d = chi_square_test(h_el_energy_reweight, h_el_energy_original, 2.0, 4.0);
-    //    std::cout << "chi square of single electron, 2.0 MeV - 4.0 MeV: " << sensitivity_chisquare_2d << std::endl;
-    //    std::cout << " degrees of freedom: " << non_empty_bins_2d << std::endl;
-    //    std::cout << " chi square reduced: " << sensitivity_chisquare_2d / (Double_t)non_empty_bins_2d << std::endl;
-    //}
-
+    // NOTE TO SELF: There is no 2d fit, the 2d histogram is used to evaluate
+    // the sensitivity, therefore there is only a chi-square test
 
 
     if(_batch_mode_ == false)

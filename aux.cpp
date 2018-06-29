@@ -425,3 +425,54 @@ Double_t chi_square_test(const TH2* const histo_fit, const TH2* const histo_data
 }
 
 
+// histo_fit is the fit function
+// histo_data is the data
+// 2d version
+Double_t chi_square_test(const TH2* const histo_fit, const TH2* const histo_data, const Double_t min, const Double_t max)
+{
+    // number of bins
+    Int_t nbx{histo_fit->GetNbinsX()};
+    Int_t nby{histo_fit->GetNbinsY()};
+    
+    // check same number of bins in each histo
+    if(nbx != histo_data->GetNbinsX())
+        throw "bin number mismatch in function histo_histo_chisquare";
+    if(nby != histo_data->GetNbinsY())
+        throw "bin number mismatch in function histo_histo_chisquare";
+
+    Double_t chisquare{0.0};
+    for(Int_t iy{1}; iy <= nby; ++ iy)
+    {
+        for(Int_t ix{1}; ix <= nbx; ++ ix)
+        {
+            Double_t bin_center_x{histo_fit->GetXaxis()->GetBinCenter(ix)};
+            Double_t bin_center_y{histo_fit->GetYaxis()->GetBinCenter(iy)};
+            if(bin_center_x < min) continue;
+            if(bin_center_x > max) continue;
+            if(bin_center_y < min) continue;
+            if(bin_center_y > max) continue;
+            Double_t content_f{histo_fit->GetBinContent(ix, iy)};
+            Double_t content_d{histo_data->GetBinContent(ix, iy)};
+            Double_t delta{content_f - content_d};
+            Double_t error_d{histo_data->GetBinError(ix, iy)};
+            if(error_d <= 0.0)
+            {
+                if(content_d == 0.0)
+                {
+                    continue;
+                }
+                else
+                {
+                    std::cerr << "Warning: Skipping bin with index " << ix << " in chi_square_data, bin error is 0.0 but content != 0.0" << std::endl;
+                }
+            }
+            Double_t chi{std::pow(delta / error_d, 2.0)};
+            chisquare += chi;
+        }
+    }
+    //chisquare /= (Double_t)histo_fit->GetNbinsX();
+    return chisquare;
+}
+
+
+

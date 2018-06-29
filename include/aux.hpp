@@ -47,6 +47,7 @@ void driver(const TH1* const histo_fit, const TH1* const histo_data, Double_t &p
 // histo_data is the data
 // 2d version
 Double_t chi_square_test(const TH2* const histo_fit, const TH2* const histo_data);
+Double_t chi_square_test(const TH2* const histo_fit, const TH2* const histo_data, const Double_t min, const Double_t max);
 
 
 #endif
