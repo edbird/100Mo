@@ -328,7 +328,7 @@ void Analysis::CanvasSingleElectronTest()
         //h_test_single_original->SetMaximum(1.4); // MC data
         h_test_single_original->SetMaximum(1.2); // createtree data
         //h_test_single_original->SetMaximum(10.0); // createtree data log mode
-        h_test_single_original->GetXaxis()->SetTitle("Energy [MeV]");
+        h_test_single_original->GetXaxis()->SetTitle("Single Electron Energy [MeV]");
         h_test_single_original->GetYaxis()->SetTitle("Events");
         h_test_single_original->Draw("E");
         h_test_single_reweight->Draw("Esame");
@@ -361,7 +361,7 @@ void Analysis::CanvasSingleElectronTest()
         //h_test_sum_original->SetMaximum(1.0); // MC data
         h_test_sum_original->SetMaximum(0.8); // createtree data
         //h_test_sum_original->SetMaximum(1.0); // createtree data log mode
-        h_test_sum_original->GetXaxis()->SetTitle("Energy [MeV]");
+        h_test_sum_original->GetXaxis()->SetTitle("Sum Electron Energy [MeV]");
         h_test_sum_original->GetYaxis()->SetTitle("Events");
         h_test_sum_original->Draw("E");
         h_test_sum_reweight->Draw("Esame");
