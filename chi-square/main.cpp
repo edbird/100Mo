@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
 
     TGraph *g_0 = new TGraph(data_size_0, data_x_0, data_y_0); // FULL RANGE CUT
     g_0->SetTitle("");
-    g_0->GetXaxis()->SetTitle("Parameter #xi");
+    g_0->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
     g_0->GetYaxis()->SetTitle("#chi^{2}");
     //g_0->GetYaxis()->SetTitleOffset(1.75);
     //g_0->GetYaxis()->SetMaxDigits(3);
@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
 
     TGraph *g_1 = new TGraph(data_size_1, data_x_1, data_y_1); // FULL RANGE NO CUT
     g_1->SetTitle("");
-    g_1->GetXaxis()->SetTitle("Parameter #xi");
+    g_1->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
     g_1->GetYaxis()->SetTitle("#chi^{2}");
     //g_1->GetYaxis()->SetTitleOffset(1.75);
     //g_1->GetYaxis()->SetMaxDigits(3);
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
 
     TGraph *g_2 = new TGraph(data_size_2, data_x_2, data_y_2); // SUB RANGE CUT
     g_2->SetTitle("");
-    g_2->GetXaxis()->SetTitle("Parameter #xi");
+    g_2->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
     g_2->GetYaxis()->SetTitle("#chi^{2}");
     //g_2->GetYaxis()->SetTitleOffset(1.75);
     //g_2->GetYaxis()->SetMaxDigits(3);
@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
 
     TGraph *g_3 = new TGraph(data_size_3, data_x_3, data_y_3); // SUB RANGE NO CUT
     g_3->SetTitle("");
-    g_3->GetXaxis()->SetTitle("Parameter #xi");
+    g_3->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
     g_3->GetYaxis()->SetTitle("#chi^{2}");
     //g_3->GetYaxis()->SetTitleOffset(1.75);
     //((TGAxis*)(g_3->GetYaxis()))->SetMaxDigits(3);
@@ -270,7 +270,7 @@ int main(int argc, char* argv[])
 
     TGraph *g_0_2d = new TGraph(data_size_0, data_x_0, data_y_0_2d); // FULL RANGE CUT 2D
     g_0_2d->SetTitle("");
-    g_0_2d->GetXaxis()->SetTitle("Parameter #xi");
+    g_0_2d->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
     g_0_2d->GetYaxis()->SetTitle("#chi^{2}");
     //g_0_2d->GetYaxis()->SetTitleOffset(1.75);
     //g_0_2d->GetYaxis()->SetMaxDigits(3);
@@ -280,7 +280,7 @@ int main(int argc, char* argv[])
 
     TGraph *g_1_2d = new TGraph(data_size_1, data_x_1, data_y_1_2d); // FULL RANGE NO CUT 2D
     g_1_2d->SetTitle("");
-    g_1_2d->GetXaxis()->SetTitle("Parameter #xi");
+    g_1_2d->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
     g_1_2d->GetYaxis()->SetTitle("#chi^{2}");
     //g_1_2d->GetYaxis()->SetTitleOffset(1.75);
     //g_1_2d->GetYaxis()->SetMaxDigits(3);
@@ -290,7 +290,7 @@ int main(int argc, char* argv[])
 
     TGraph *g_2_2d = new TGraph(data_size_2, data_x_2, data_y_2_2d); // SUB RANGE CUT 2D
     g_2_2d->SetTitle("");
-    g_2_2d->GetXaxis()->SetTitle("Parameter #xi");
+    g_2_2d->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
     g_2_2d->GetYaxis()->SetTitle("#chi^{2}");
     //g_2_2d->GetYaxis()->SetTitleOffset(1.75);
     //g_2_2d->GetYaxis()->SetMaxDigits(3);
@@ -300,7 +300,7 @@ int main(int argc, char* argv[])
 
     TGraph *g_3_2d = new TGraph(data_size_3, data_x_3, data_y_3_2d); // SUB RANGE NO CUT 2D
     g_3_2d->SetTitle("");
-    g_3_2d->GetXaxis()->SetTitle("Parameter #xi");
+    g_3_2d->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
     g_3_2d->GetYaxis()->SetTitle("#chi^{2}");
     //g_3_2d->GetYaxis()->SetTitleOffset(1.75);
     //((TGAxis*)(g_3_2d->GetYaxis()))->SetMaxDigits(3);
