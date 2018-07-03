@@ -195,8 +195,9 @@ int main(int argc, char* argv[])
     for(Double_t eps{0.1}; eps <= 0.7 + 0.5 * eps_incr; eps += eps_incr)
     {
         std::cout << "Running: eps=" << eps << std::endl;
-        analysis.AddEpsilonValue(eps);
+        //analysis.AddEpsilonValue(eps);
     }
+    analysis.AddEpsilonValue(0.5);
 
     //analysis.AddEpsilonValue(0.368);
     //analysis.AddEpsilonValue(0.5);
