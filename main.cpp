@@ -176,9 +176,10 @@ int main(int argc, char* argv[])
 
     // THIS CODE FOR PRODUCING THE TEST HISTOGRAMS
 
-#if 0
+#if 1
     
-    analysis.SetEpsilon31(epsilon_31);
+    //analysis.SetEpsilon31(epsilon_31);
+    analysis.SetEpsilon31(0.5);
 
     // run analysis
     analysis.ReadData();
@@ -191,21 +192,29 @@ int main(int argc, char* argv[])
     analysis.EventLoop();
     analysis.PostProcess();
     analysis.CanvasSingleElectronTest();
-    /*
+    
     analysis.SummedEnergyFit();
     analysis.SensitivityMeasurementChisquare1();
     analysis.SensitivityMeasurementChisquare2();
     analysis.SensitivityMeasurementLoglikelihood1();
     analysis.SensitivityMeasurementLoglikelihood2();
     analysis.PrintOutputToFile();
-    */
+    
 
 #endif
 
 
     // THIS CODE FOR REGULAR DATA ANALYSIS RUN
 
-#if 1
+#if 0
+    // run analysis
+    analysis.ReadData();
+    //analysis.CanvasRawData();
+    analysis.CanvasDecayRate();
+    analysis.CanvasSingleElectronProjection();
+    analysis.InitSingleElectronTest();
+    analysis.InitEventLoopTree();
+    analysis.InitEventLoopHistogram();
     analysis.SetNumberOfPseudoexperiments(10000, 1);
 
     //Double_t eps_incr{0.025};
@@ -222,6 +231,14 @@ int main(int argc, char* argv[])
     //analysis.AddEpsilonValue(0.368);
     //analysis.AddEpsilonValue(0.5);
     analysis.RunOverEpsilonVector();
+    
+    
+    analysis.SummedEnergyFit();
+    analysis.SensitivityMeasurementChisquare1();
+    analysis.SensitivityMeasurementChisquare2();
+    analysis.SensitivityMeasurementLoglikelihood1();
+    analysis.SensitivityMeasurementLoglikelihood2();
+    analysis.PrintOutputToFile();
 #endif
 
 
