@@ -291,6 +291,7 @@ void Analysis::SensitivityMeasurementChisquare2()
     else if(fit_subrange == true)
     {
 
+        /*
         for(Int_t j{1}; j <= h_el_energy_2d_original->GetNbinsY(); ++ j)
         {
             for(Int_t i{1}; i <= h_el_energy_2d_original->GetNbinsX(); ++ i)
@@ -304,12 +305,13 @@ void Analysis::SensitivityMeasurementChisquare2()
                 }
             }
         }
+        */
 
         // get chi-square for single electron histograms
         // Note: no subrange for 2d histogram
         //if(fit_subrange == false)
         //{
-        sensitivity_chisquare_2d = chi_square_test(h_el_energy_2d_reweight, h_el_energy_2d_original, 2.0, 4.0);
+        sensitivity_chisquare_2d = chi_square_test(h_el_energy_2d_reweight, h_el_energy_2d_original, 2.0, 4.0, non_empty_bins_2d);
         std::cout << "chi square of 2 electron, 2.0 MeV - 2.0 MeV: " << sensitivity_chisquare_2d << std::endl;
         std::cout << " degrees of freedom (2d): " << non_empty_bins_2d << std::endl;
         std::cout << " chi square reduced: " << sensitivity_chisquare_2d / (Double_t)non_empty_bins_2d << std::endl;
@@ -458,178 +460,208 @@ void Analysis::SensitivityMeasurementChisquare2()
 void Analysis::SensitivityMeasurementLoglikelihood1()
 {
 
+    // TODO: move histograms which are intrinsic to this function (measurement)
+    // to this function - avoids "replacing existing th1" error
+    // do not need these histos elsewhere
 
-    delete h_el_energy_data;
-    delete h_el_energy_prob;
-    delete h_el_energy_diff_data_rw;
-    delete h_el_energy_diff_data_orig;
-    delete h_ll;
+    const std::string eps_string{std::to_string(epsilon_31)};
+
+    /*
+    h_el_energy_data->Reset("ICESM");
+    h_el_energy_prob->Reset("ICESM");
+    h_el_energy_diff_data_orig->Reset("ICESM");
+    h_el_energy_diff_data_rw->Reset("ICESM");
+    h_el_energy_ll->Reset("ICESM");
+    */
 
 
     for(Int_t count{0}; count < number_of_pseudo_experiments; ++ count)
     {
+
+        delete h_el_energy_data;
+        delete h_el_energy_prob;
+        delete h_el_energy_diff_data_rw;
+        delete h_el_energy_diff_data_orig;
+        delete h_ll;
+
+
         ////////////////////////////////////////////////////////////////////////
         // SINGLE ELECTRON ENERGY PSEUDODATA METHOD
         ////////////////////////////////////////////////////////////////////////
 
+        // TODO: name of histograms which we iterate over
+        // log likelihood method
+        // create "data" histogram - poisson generated data
+        std::string h_name{std::string("h_el_energy_data_") + eps_string + std::string("_") + std::to_string(count)};
+        h_el_energy_data = new TH1I(h_name.c_str(), "", num_bins, 0.0, 4.0);
+        for(Int_t ix{1}; ix <= h_el_energy_sum_original->GetNbinsX(); ++ ix)
         {
-            // TODO: name of histograms which we iterate over
-            // log likelihood method
-            // create "data" histogram - poisson generated data
-            std::string h_name{std::string("h_el_energy_data_") + std::to_string(count)};
-            h_el_energy_data = new TH1I(h_name.c_str(), "", num_bins, 0.0, 4.0);
-            for(Int_t ix{1}; ix <= h_el_energy_sum_original->GetNbinsX(); ++ ix)
+            // this is the input lambda value
+            //Double_t content{h_el_energy_sum_original->GetBinContent(ix)};
+            //Double_t lambda{h_el_energy_sum_original->GetBinContent(ix)};
+            // NOTE: changed 2018-06-12: lambda was obtained from wrong distribution
+            Double_t lambda{h_el_energy_original->GetBinContent(ix)};
+            
+            // Note: before implementing full pseudo experiments,
+            // instead of drawing number randomly from a poisson with
+            // mean lambda (which returns an integer),
+            // instead did:
+            // round the lambda value and pretend it is data
+            //content = std::round(content);
+            //content = std::lround(content);
+            //h_el_energy_data->SetBinContent(ix, content);
+
+            // Note: moved to pseudorandom data rather than rounding
+            Int_t poisson_result{gen.Poisson(lambda)};
+            h_el_energy_data->SetBinContent(ix, poisson_result);
+        }
+
+        // compute poisson likelihood for each bin
+        Double_t likelihood{1.0};
+        Double_t likelihood_sum{0.0};
+        std::vector<Double_t> likelihood_sum_vec;
+        std::string h_name_prob{std::string("h_el_energy_prob_") + eps_string + std::string("_") + std::to_string(count)}; 
+        h_el_energy_prob = new TH1D(h_name_prob.c_str(), "", num_bins, 0.0, 4.0);
+        for(Int_t ix{1}; ix <= h_el_energy_sum_original->GetNbinsX(); ++ ix)
+        {
+            //Double_t lambda{h_el_energy_sum_reweight->GetBinContent(ix)}; // reweighted
+            Double_t lambda{h_el_energy_reweight->GetBinContent(ix)}; // reweighted
+            // NOTE: changed 2018-06-12: lambda was obtained from wrong distribution
+            // NOTE: above lambda is the output lambda, it is for the other distribution
+            // rather than the input lambda in the previous code block
+
+            //Int_t data{std::lround(h_el_energy_data->GetBinContent(ix))}; // rounded data (not -> baseline <- ?)
+            Int_t data{(Int_t)std::lround(h_el_energy_data->GetBinContent(ix))}; // rounded data, is already rounded, is integer
+            // Note: lround required as GetBinContent returns Double_t
+            // TODO: do not need round?
+            Double_t poi{TMath::Poisson(data, lambda)};
+            //std::cout << "bin index = " << ix << ", poisson = " << poi << ", lambda = " << lambda << ", data = " << data << std::endl;
+            likelihood *= poi;
+
+            Double_t poi_log{std::log(poi)};
+            likelihood_sum += poi_log;
+            likelihood_sum_vec.push_back(poi_log);
+
+            h_el_energy_prob->SetBinContent(ix, poi);
+
+            if(h_el_energy_sum_original->GetBinCenter(ix) > 2.0)
             {
-                // this is the input lambda value
-                //Double_t content{h_el_energy_sum_original->GetBinContent(ix)};
-                //Double_t lambda{h_el_energy_sum_original->GetBinContent(ix)};
-                // NOTE: changed 2018-06-12: lambda was obtained from wrong distribution
-                Double_t lambda{h_el_energy_original->GetBinContent(ix)};
+                //std::cout << "Bin center: " << h_el_energy_sum_original->GetBinCenter(ix) << " lambda=" << lambda << " data=" << data << " prob=" << poi << std::endl; 
+            }
                 
-                // Note: before implementing full pseudo experiments,
-                // instead of drawing number randomly from a poisson with
-                // mean lambda (which returns an integer),
-                // instead did:
-                // round the lambda value and pretend it is data
-                //content = std::round(content);
-                //content = std::lround(content);
-                //h_el_energy_data->SetBinContent(ix, content);
-
-                // Note: moved to pseudorandom data rather than rounding
-                Int_t poisson_result{gen.Poisson(lambda)};
-                h_el_energy_data->SetBinContent(ix, poisson_result);
-            }
-
-            // compute poisson likelihood for each bin
-            Double_t likelihood{1.0};
-            std::string h_name_prob{std::string("h_el_energy_prob_") + std::to_string(count)}; 
-            h_el_energy_prob = new TH1D(h_name_prob.c_str(), "", num_bins, 0.0, 4.0);
-            for(Int_t ix{1}; ix <= h_el_energy_sum_original->GetNbinsX(); ++ ix)
+            if(count == 0)
             {
-                //Double_t lambda{h_el_energy_sum_reweight->GetBinContent(ix)}; // reweighted
-                Double_t lambda{h_el_energy_reweight->GetBinContent(ix)}; // reweighted
-                // NOTE: changed 2018-06-12: lambda was obtained from wrong distribution
-                // NOTE: above lambda is the output lambda, it is for the other distribution
-                // rather than the input lambda in the previous code block
-
-                //Int_t data{std::lround(h_el_energy_data->GetBinContent(ix))}; // rounded data (not -> baseline <- ?)
-                Int_t data{(Int_t)std::lround(h_el_energy_data->GetBinContent(ix))}; // rounded data, is already rounded, is integer
-                // Note: lround required as GetBinContent returns Double_t
-                // TODO: do not need round?
-                Double_t poi{TMath::Poisson(data, lambda)};
-                //std::cout << "bin index = " << ix << ", poisson = " << poi << ", lambda = " << lambda << ", data = " << data << std::endl;
-                likelihood *= poi;
-
-                h_el_energy_prob->SetBinContent(ix, poi);
-
-                if(h_el_energy_sum_original->GetBinCenter(ix) > 2.0)
-                {
-                    //std::cout << "Bin center: " << h_el_energy_sum_original->GetBinCenter(ix) << " lambda=" << lambda << " data=" << data << " prob=" << poi << std::endl; 
-                }
-                    
-                if(count == 0)
-                {
-                    //std::cout << "lambda=," << lambda << ",data=," << data << ",prob=," << poi << std::endl;
-                }
+                //std::cout << "lambda=," << lambda << ",data=," << data << ",prob=," << poi << std::endl;
             }
-            //std::cout << "likelihood=" << likelihood << std::endl;
-            //std::cout << "likelihood = " << likelihood << std::endl;
-            Double_t log_likelihood{std::log(likelihood)};
-            vec_ll.push_back(-2.0 * log_likelihood);
+        }
+        //std::cout << "likelihood=" << likelihood << std::endl;
+        //std::cout << "likelihood = " << likelihood << std::endl;
+        Double_t log_likelihood{std::log(likelihood)};
+        vec_ll.push_back(-2.0 * log_likelihood);
+
+        std::cout << "LL=" << -2.0 * log_likelihood << ", LL2=" << -2.0 * likelihood_sum << ", diff=" << (-2.0 * log_likelihood) - (-2.0 * likelihood_sum) << std::endl;
+        std::sort(likelihood_sum_vec.begin(), likelihood_sum_vec.end());
+        Double_t likelihood_sum_vec_sum{0.0};
+        for(std::vector<Double_t>::const_iterator it{likelihood_sum_vec.cbegin()}; it != likelihood_sum_vec.cend(); ++ it)
+        {
+            likelihood_sum_vec_sum += *it;
+        }
+        std::cout << "LL3" << -2.0 * likelihood_sum_vec_sum << std::endl;
+
+        // create difference histogram, data - reweight
+        std::string h_name_diff_data_rw{std::string("h_el_energy_diff_data_rw_") + eps_string + std::string("_") + std::to_string(count)};
+        h_el_energy_diff_data_rw = new TH1D(h_name_diff_data_rw.c_str(), "", num_bins, 0.0, 4.0);
+        h_el_energy_diff_data_rw->SetStats(0);
+        for(Int_t i{1}; i <= h_el_energy_diff_data_rw->GetNbinsX(); ++ i)
+        {
+            Double_t content1{h_el_energy_data->GetBinContent(i)};
+            Double_t content2{h_el_energy_reweight->GetBinContent(i)};
+            Double_t error1{h_el_energy_data->GetBinError(i)};
+            // note: do not use error or reweighted
+            Double_t error2{0.0 * h_el_energy_reweight->GetBinError(i)};
+            Double_t content{content1 - content2};
+            Double_t error{std::sqrt(error1 * error1 + error2 * error2)};
+            h_el_energy_diff_data_rw->SetBinContent(i, content);
+            h_el_energy_diff_data_rw->SetBinError(i, error);
+        }
+
+        // create difference histogram, data - original
+        std::string h_name_diff_data_orig{std::string("h_el_energy_diff_data_orig_") + eps_string + std::string("_") + std::to_string(count)};
+        h_el_energy_diff_data_orig = new TH1D(h_name_diff_data_orig.c_str(), "", num_bins, 0.0, 4.0);
+        h_el_energy_diff_data_orig->SetStats(0);
+        for(Int_t i{1}; i <= h_el_energy_diff_data_orig->GetNbinsX(); ++ i)
+        {
+            Double_t content1{h_el_energy_data->GetBinContent(i)};
+            Double_t content2{h_el_energy_original->GetBinContent(i)};
+            Double_t error1{h_el_energy_data->GetBinError(i)};
+            // note: do not use error or reweighted
+            Double_t error2{0.0 * h_el_energy_original->GetBinError(i)};
+            Double_t content{content1 - content2};
+            Double_t error{std::sqrt(error1 * error1 + error2 * error2)};
+            h_el_energy_diff_data_orig->SetBinContent(i, content);
+            h_el_energy_diff_data_orig->SetBinError(i, error);
+        }
 
 
-            // create difference histogram, data - reweight
-            std::string h_name_diff_data_rw{std::string("h_el_energy_diff_data_rw_") + std::to_string(count)};
-            h_el_energy_diff_data_rw = new TH1D(h_name_diff_data_rw.c_str(), "", num_bins, 0.0, 4.0);
-            h_el_energy_diff_data_rw->SetStats(0);
-            for(Int_t i{1}; i <= h_el_energy_diff_data_rw->GetNbinsX(); ++ i)
-            {
-                Double_t content1{h_el_energy_data->GetBinContent(i)};
-                Double_t content2{h_el_energy_reweight->GetBinContent(i)};
-                Double_t error1{h_el_energy_data->GetBinError(i)};
-                // note: do not use error or reweighted
-                Double_t error2{0.0 * h_el_energy_reweight->GetBinError(i)};
-                Double_t content{content1 - content2};
-                Double_t error{std::sqrt(error1 * error1 + error2 * error2)};
-                h_el_energy_diff_data_rw->SetBinContent(i, content);
-                h_el_energy_diff_data_rw->SetBinError(i, error);
-            }
+        ////////////////////////////////////////////////////////////////////
+        // CANVAS OUTPUT
+        ////////////////////////////////////////////////////////////////////
 
-            // create difference histogram, data - original
-            std::string h_name_diff_data_orig{std::string("h_el_energy_diff_data_orig_") + std::to_string(count)};
-            h_el_energy_diff_data_orig = new TH1D(h_name_diff_data_orig.c_str(), "", num_bins, 0.0, 4.0);
-            h_el_energy_diff_data_orig->SetStats(0);
-            for(Int_t i{1}; i <= h_el_energy_diff_data_orig->GetNbinsX(); ++ i)
-            {
-                Double_t content1{h_el_energy_data->GetBinContent(i)};
-                Double_t content2{h_el_energy_original->GetBinContent(i)};
-                Double_t error1{h_el_energy_data->GetBinError(i)};
-                // note: do not use error or reweighted
-                Double_t error2{0.0 * h_el_energy_original->GetBinError(i)};
-                Double_t content{content1 - content2};
-                Double_t error{std::sqrt(error1 * error1 + error2 * error2)};
-                h_el_energy_diff_data_orig->SetBinContent(i, content);
-                h_el_energy_diff_data_orig->SetBinError(i, error);
-            }
+        if(false)
+        {
 
+            //const Double_t canvas_max{2.5e5};
+            const Double_t canvas_max{1.0e6};
+            //const Double_t canvas_min{0.0};
+            const Double_t canvas_min{1.0e-1};
+            const std::string canvas_dir("./pseudoexperiments1d");
+            CanvasFactorySettings settings("Single Electron Energy [MeV]", "Events", canvas_min, canvas_max, false);
+            settings.SetLogMode(true);
+            settings.SetDrawOption("E");
+            settings.SetOutputPNGOnly();
+            settings.SetOutputROOT(false);
+            settings.SetOutputPNG(false);
+            CanvasFactory factory(settings);
+            std::string c_name_data{std::string("el_energy_data/el_energy_data_") + eps_string + std::string("_") + std::to_string(count)};
+            factory.Canvas(c_name_data, canvas_dir, h_el_energy_original, "Baseline", h_el_energy_reweight, "Reweighted", h_el_energy_data, "Pseudodata");
 
-            ////////////////////////////////////////////////////////////////////
-            // CANVAS OUTPUT
-            ////////////////////////////////////////////////////////////////////
+            settings.SetMax(1.1);
+            settings.SetMin(1.0e-10); // 1.0e-35
+            settings.SetDrawOption("hist");
+            settings.SetLogMode(true);
+            factory.Settings(settings);
+            std::string c_name_prob{std::string("el_energy_prob/el_energy_prob") + eps_string + std::string("_") + std::to_string(count)};
+            factory.Canvas(c_name_prob.c_str(), canvas_dir, h_el_energy_prob, "Probability");
 
-            if(false)
-            {
+            std::string c_name_diff_data_rw{canvas_dir + std::string("/el_energy_diff_data_rw/c_el_energy_diff_data_rw_") + std::to_string(count)};
+            c_el_energy_diff_data_rw = new TCanvas(c_name_diff_data_rw.c_str(), "", 800, 600);
+            //c_el_energy_diff_data_rw->SetRightMargin(0.12);
+            //c_el_energy_diff_data_rw->SetLogz();
+            h_el_energy_diff_data_rw->GetXaxis()->SetTitle("Single Electron Energy [MeV]");
+            h_el_energy_diff_data_rw->GetYaxis()->SetTitle("Events (Pseudodata - Reweight)");
+            h_el_energy_diff_data_rw->Draw("E");
+            //c_el_energy_diff_data_rw->SaveAs((c_name_diff_data_rw + std::string(".C")).c_str());
+            c_el_energy_diff_data_rw->SaveAs((c_name_diff_data_rw + std::string(".png")).c_str());
+            //c_el_energy_diff_data_rw->SaveAs((c_name_diff_data_rw + std::string(".pdf")).c_str());
 
-                //const Double_t canvas_max{2.5e5};
-                const Double_t canvas_max{1.0e6};
-                //const Double_t canvas_min{0.0};
-                const Double_t canvas_min{1.0e-1};
-                const std::string canvas_dir("./pseudoexperiments1d");
-                CanvasFactorySettings settings("Single Electron Energy [MeV]", "Events", canvas_min, canvas_max, false);
-                settings.SetLogMode(true);
-                settings.SetDrawOption("E");
-                settings.SetOutputPNGOnly();
-                settings.SetOutputROOT(false);
-                settings.SetOutputPNG(false);
-                CanvasFactory factory(settings);
-                std::string c_name_data{std::string("el_energy_data/el_energy_data_") + std::to_string(count)};
-                factory.Canvas(c_name_data, canvas_dir, h_el_energy_original, "Baseline", h_el_energy_reweight, "Reweighted", h_el_energy_data, "Pseudodata");
+            std::string c_name_diff_data_orig{canvas_dir + std::string("/el_energy_diff_data_orig/c_el_energy_diff_data_orig_") + std::to_string(count)};
+            c_el_energy_diff_data_orig = new TCanvas(c_name_diff_data_orig.c_str(), "", 800, 600);
+            //c_el_energy_diff_data_orig->SetRightMargin(0.12);
+            //c_el_energy_diff_data_orig->SetLogz();
+            h_el_energy_diff_data_orig->GetXaxis()->SetTitle("Single Electron Energy [MeV]");
+            h_el_energy_diff_data_orig->GetYaxis()->SetTitle("Events (Pseudodata - Baseline)");
+            h_el_energy_diff_data_orig->Draw("E");
+            //c_el_energy_diff_data_orig->SaveAs((c_name_diff_data_orig + std::string(".C")).c_str());
+            c_el_energy_diff_data_orig->SaveAs((c_name_diff_data_orig + std::string(".png")).c_str());
+            //c_el_energy_diff_data_orig->SaveAs((c_name_diff_data_orig + std::string(".pdf")).c_str());
 
-                settings.SetMax(1.1);
-                settings.SetMin(1.0e-10); // 1.0e-35
-                settings.SetDrawOption("hist");
-                settings.SetLogMode(true);
-                factory.Settings(settings);
-                std::string c_name_prob{std::string("el_energy_prob/el_energy_prob") + std::to_string(count)};
-                factory.Canvas(c_name_prob.c_str(), canvas_dir, h_el_energy_prob, "Probability");
-
-                std::string c_name_diff_data_rw{canvas_dir + std::string("/el_energy_diff_data_rw/c_el_energy_diff_data_rw_") + std::to_string(count)};
-                c_el_energy_diff_data_rw = new TCanvas(c_name_diff_data_rw.c_str(), "", 800, 600);
-                //c_el_energy_diff_data_rw->SetRightMargin(0.12);
-                //c_el_energy_diff_data_rw->SetLogz();
-                h_el_energy_diff_data_rw->GetXaxis()->SetTitle("Single Electron Energy [MeV]");
-                h_el_energy_diff_data_rw->GetYaxis()->SetTitle("Events (Pseudodata - Reweight)");
-                h_el_energy_diff_data_rw->Draw("E");
-                //c_el_energy_diff_data_rw->SaveAs((c_name_diff_data_rw + std::string(".C")).c_str());
-                c_el_energy_diff_data_rw->SaveAs((c_name_diff_data_rw + std::string(".png")).c_str());
-                //c_el_energy_diff_data_rw->SaveAs((c_name_diff_data_rw + std::string(".pdf")).c_str());
-
-                std::string c_name_diff_data_orig{canvas_dir + std::string("/el_energy_diff_data_orig/c_el_energy_diff_data_orig_") + std::to_string(count)};
-                c_el_energy_diff_data_orig = new TCanvas(c_name_diff_data_orig.c_str(), "", 800, 600);
-                //c_el_energy_diff_data_orig->SetRightMargin(0.12);
-                //c_el_energy_diff_data_orig->SetLogz();
-                h_el_energy_diff_data_orig->GetXaxis()->SetTitle("Single Electron Energy [MeV]");
-                h_el_energy_diff_data_orig->GetYaxis()->SetTitle("Events (Pseudodata - Baseline)");
-                h_el_energy_diff_data_orig->Draw("E");
-                //c_el_energy_diff_data_orig->SaveAs((c_name_diff_data_orig + std::string(".C")).c_str());
-                c_el_energy_diff_data_orig->SaveAs((c_name_diff_data_orig + std::string(".png")).c_str());
-                //c_el_energy_diff_data_orig->SaveAs((c_name_diff_data_orig + std::string(".pdf")).c_str());
-
-            }
-
-
+            delete c_el_energy_diff_data_rw;
+            delete c_el_energy_diff_data_orig;
 
         }
+
+
+
 
     }
 
@@ -656,6 +688,8 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
     c_ll = new TCanvas("c_ll", "", 800, 600);
     h_ll->Draw("E");
     c_ll->SaveAs("c_ll.png");
+
+    delete c_ll;
         
 }
 
@@ -669,105 +703,115 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
 
     for(Int_t count{0}; count < number_of_pseudo_experiments_2d; ++ count)
     {
+
+
+        delete h_el_energy_2d_data;
+        delete h_el_energy_2d_prob;
+        delete h_el_energy_2d_diff_data_rw_2d;
+        delete h_el_energy_2d_diff_data_orig;
+        delete h_ll_2d;
+
         ////////////////////////////////////////////////////////////////////////
         // INDEPENDENT SINGLE ELECTRON ENERGY
         ////////////////////////////////////////////////////////////////////////
 
+        // log likelihood method
+        // create 2d "data" histogram - poisson generated data
+
+        // chisquare method
+        // create 2d "data" histogram
+        // TODO which one
+
+        std::string h_name_2d{std::string("h_el_energy_2d_data_") + std::to_string(count)};
+        h_el_energy_2d_data = new TH2I(h_name_2d.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+        h_el_energy_2d_data->SetStats(0);
+        for(Int_t jx{1}; jx <= h_el_energy_2d_original->GetNbinsY(); ++ jx)
         {
-            // log likelihood method
-            // create 2d "data" histogram - poisson generated data
-
-            // chisquare method
-            // create 2d "data" histogram
-            // TODO which one
-
-            std::string h_name_2d{std::string("h_el_energy_2d_data_") + std::to_string(count)};
-            h_el_energy_2d_data = new TH2I(h_name_2d.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
-            h_el_energy_2d_data->SetStats(0);
-            for(Int_t jx{1}; jx <= h_el_energy_2d_original->GetNbinsY(); ++ jx)
+            for(Int_t ix{1}; ix <= h_el_energy_2d_original->GetNbinsX(); ++ ix)
             {
-                for(Int_t ix{1}; ix <= h_el_energy_2d_original->GetNbinsX(); ++ ix)
-                {
-                    // this is the input lambda value
-                    Double_t lambda{h_el_energy_2d_original->GetBinContent(ix, jx)};
-                    
-                    // pseudorandom data
-                    Int_t poisson_result{gen.Poisson(lambda)};
-                    h_el_energy_2d_data->SetBinContent(ix, jx, poisson_result);
-                }
+                // this is the input lambda value
+                Double_t lambda{h_el_energy_2d_original->GetBinContent(ix, jx)};
+                
+                // pseudorandom data
+                Int_t poisson_result{gen.Poisson(lambda)};
+                h_el_energy_2d_data->SetBinContent(ix, jx, poisson_result);
             }
+        }
 
-            // compute poisson likelihood for each bin
-            Double_t likelihood_2d{1.0};
-            std::string h_name_prob_2d{std::string("h_el_energy_2d_prob_") + std::to_string(count)}; 
-            h_el_energy_2d_prob = new TH2D(h_name_prob_2d.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
-            h_el_energy_2d_prob->SetStats(0);
-            for(Int_t jx{1}; jx <= h_el_energy_2d_original->GetNbinsY(); ++ jx)
+        // compute poisson likelihood for each bin
+        Double_t likelihood_2d{1.0};
+        std::string h_name_prob_2d{std::string("h_el_energy_2d_prob_") + std::to_string(count)}; 
+        h_el_energy_2d_prob = new TH2D(h_name_prob_2d.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+        h_el_energy_2d_prob->SetStats(0);
+        for(Int_t jx{1}; jx <= h_el_energy_2d_original->GetNbinsY(); ++ jx)
+        {
+            for(Int_t ix{1}; ix <= h_el_energy_2d_original->GetNbinsX(); ++ ix)
             {
-                for(Int_t ix{1}; ix <= h_el_energy_2d_original->GetNbinsX(); ++ ix)
+                Double_t lambda{h_el_energy_2d_reweight->GetBinContent(ix, jx)}; // reweighted
+                // NOTE: above lambda is the output lambda, it is for the other distribution
+                // rather than the input lambda in the previous code block
+
+                //Int_t data{std::lround(h_el_energy_data->GetBinContent(ix))}; // rounded data (not -> baseline <- ?)
+                Int_t data{(Int_t)std::lround(h_el_energy_2d_data->GetBinContent(ix, jx))};
+                // Note: lround required because function returns Double_t
+                Double_t poi{TMath::Poisson(data, lambda)};
+                likelihood_2d *= poi;
+
+                h_el_energy_2d_prob->SetBinContent(ix, jx, poi);
+                if(poi != 1.0)
                 {
-                    Double_t lambda{h_el_energy_2d_reweight->GetBinContent(ix, jx)}; // reweighted
-                    // NOTE: above lambda is the output lambda, it is for the other distribution
-                    // rather than the input lambda in the previous code block
-
-                    //Int_t data{std::lround(h_el_energy_data->GetBinContent(ix))}; // rounded data (not -> baseline <- ?)
-                    Int_t data{(Int_t)std::lround(h_el_energy_2d_data->GetBinContent(ix, jx))};
-                    // Note: lround required because function returns Double_t
-                    Double_t poi{TMath::Poisson(data, lambda)};
-                    likelihood_2d *= poi;
-
-                    h_el_energy_2d_prob->SetBinContent(ix, jx, poi);
-                    if(poi != 1.0)
+                    if(poi < 1.0e-14 || poi > 1.0)
                     {
-                        if(poi < 1.0e-14 || poi > 1.0)
-                        {
-                        //    std::cout << ix << ", " << jx << " -> " << poi << " data=" << data << " lambda=" << lambda << std::endl;
-                        }
+                    //    std::cout << ix << ", " << jx << " -> " << poi << " data=" << data << " lambda=" << lambda << std::endl;
                     }
                 }
             }
-            std::cout << "likelihood (2d) = " << likelihood_2d << std::endl;
-            Double_t log_likelihood_2d{std::log(likelihood_2d)};
-            vec_ll_2d.push_back(-2.0 * log_likelihood_2d);
+        }
+        std::cout << "likelihood (2d) = " << likelihood_2d << std::endl;
+        Double_t log_likelihood_2d{std::log(likelihood_2d)};
+        vec_ll_2d.push_back(-2.0 * log_likelihood_2d);
+    
         
-            
-            // create difference histogram - difference between data and reweighted
-            for(Int_t j{1}; j <= h_el_energy_2d_diff_data_rw->GetNbinsY(); ++ j)
+        // create difference histogram - difference between data and reweighted
+        for(Int_t j{1}; j <= h_el_energy_2d_diff_data_rw->GetNbinsY(); ++ j)
+        {
+            for(Int_t i{1}; i <= h_el_energy_2d_diff_data_rw->GetNbinsX(); ++ i)
             {
-                for(Int_t i{1}; i <= h_el_energy_2d_diff_data_rw->GetNbinsX(); ++ i)
-                {
-                    Double_t content1{h_el_energy_2d_data->GetBinContent(i, j)};
-                    Double_t content2{h_el_energy_2d_reweight->GetBinContent(i, j)};
-                    Double_t error1{h_el_energy_2d_data->GetBinError(i, j)};
-                    // note: do not use error or reweighted
-                    Double_t error2{0.0 * h_el_energy_2d_reweight->GetBinError(i, j)};
-                    Double_t content{content1 - content2};
-                    Double_t error{std::sqrt(error1 * error1 + error2 * error2)};
-                    h_el_energy_2d_diff_data_rw->SetBinContent(i, j, content);
-                    h_el_energy_2d_diff_data_rw->SetBinError(i, j, error);
-                }
+                Double_t content1{h_el_energy_2d_data->GetBinContent(i, j)};
+                Double_t content2{h_el_energy_2d_reweight->GetBinContent(i, j)};
+                Double_t error1{h_el_energy_2d_data->GetBinError(i, j)};
+                // note: do not use error or reweighted
+                Double_t error2{0.0 * h_el_energy_2d_reweight->GetBinError(i, j)};
+                Double_t content{content1 - content2};
+                Double_t error{std::sqrt(error1 * error1 + error2 * error2)};
+                h_el_energy_2d_diff_data_rw->SetBinContent(i, j, content);
+                h_el_energy_2d_diff_data_rw->SetBinError(i, j, error);
             }
+        }
 
-            // create difference histogram - difference between data and original
-            for(Int_t j{1}; j <= h_el_energy_2d_diff_data_orig->GetNbinsY(); ++ j)
+        // create difference histogram - difference between data and original
+        for(Int_t j{1}; j <= h_el_energy_2d_diff_data_orig->GetNbinsY(); ++ j)
+        {
+            for(Int_t i{1}; i <= h_el_energy_2d_diff_data_orig->GetNbinsX(); ++ i)
             {
-                for(Int_t i{1}; i <= h_el_energy_2d_diff_data_orig->GetNbinsX(); ++ i)
-                {
-                    Double_t content1{h_el_energy_2d_data->GetBinContent(i, j)};
-                    Double_t content2{h_el_energy_2d_original->GetBinContent(i, j)};
-                    Double_t error1{h_el_energy_2d_data->GetBinError(i, j)};
-                    // note: do not use error or reweighted
-                    Double_t error2{0.0 * h_el_energy_2d_original->GetBinError(i, j)};
-                    Double_t content{content1 - content2};
-                    Double_t error{std::sqrt(error1 * error1 + error2 * error2)};
-                    h_el_energy_2d_diff_data_orig->SetBinContent(i, j, content);
-                    h_el_energy_2d_diff_data_orig->SetBinError(i, j, error);
-                }
+                Double_t content1{h_el_energy_2d_data->GetBinContent(i, j)};
+                Double_t content2{h_el_energy_2d_original->GetBinContent(i, j)};
+                Double_t error1{h_el_energy_2d_data->GetBinError(i, j)};
+                // note: do not use error or reweighted
+                Double_t error2{0.0 * h_el_energy_2d_original->GetBinError(i, j)};
+                Double_t content{content1 - content2};
+                Double_t error{std::sqrt(error1 * error1 + error2 * error2)};
+                h_el_energy_2d_diff_data_orig->SetBinContent(i, j, content);
+                h_el_energy_2d_diff_data_orig->SetBinError(i, j, error);
             }
+        }
 
-            ////////////////////////////////////////////////////////////////////
-            // CANVAS OUTPUT
-            ////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////
+        // CANVAS OUTPUT
+        ////////////////////////////////////////////////////////////////////
+
+        if(false)
+        {
 
             // TODO: multiple experiemnts problem
             // if statement for batch mode
@@ -821,26 +865,28 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
             c_el_energy_2d_diff_data_orig->SaveAs("c_el_energy_2d_diff_data_orig.png");
             c_el_energy_2d_diff_data_orig->SaveAs("c_el_energy_2d_diff_data_orig.pdf");
 
-
-            ////////////////////////////////////////////////////////////////////////
-            // SAVE TO ROOT FILE
-            ////////////////////////////////////////////////////////////////////////
-
-            TFile *f_el_energy_2d_loglikelihood = new TFile("f_el_energy_2d_loglikelihood.root", "RECREATE");
-            h_el_energy_2d_original->Write();
-            //c_el_energy_2d_original->Write(); // Note: not defined in this scope
-            h_el_energy_2d_reweight->Write();
-            //c_el_energy_2d_reweight->Write(); // Note: not defined in this scope
-            h_el_energy_2d_diff_data_rw->Write();
-            c_el_energy_2d_diff_data_rw->Write();
-            h_el_energy_2d_data->Write();
-            c_el_energy_2d_data->Write();
-            h_el_energy_2d_prob->Write();
-            c_el_energy_2d_prob->Write();
-            f_el_energy_2d_loglikelihood->Close();
-            //delete f_el_energy_2d;
-
         }
+
+        ////////////////////////////////////////////////////////////////////////
+        // SAVE TO ROOT FILE
+        ////////////////////////////////////////////////////////////////////////
+
+        /*
+        TFile *f_el_energy_2d_loglikelihood = new TFile("f_el_energy_2d_loglikelihood.root", "RECREATE");
+        h_el_energy_2d_original->Write();
+        //c_el_energy_2d_original->Write(); // Note: not defined in this scope
+        h_el_energy_2d_reweight->Write();
+        //c_el_energy_2d_reweight->Write(); // Note: not defined in this scope
+        h_el_energy_2d_diff_data_rw->Write();
+        c_el_energy_2d_diff_data_rw->Write();
+        h_el_energy_2d_data->Write();
+        c_el_energy_2d_data->Write();
+        h_el_energy_2d_prob->Write();
+        c_el_energy_2d_prob->Write();
+        f_el_energy_2d_loglikelihood->Close();
+        //delete f_el_energy_2d;
+        */
+
     }
 
 
@@ -865,6 +911,7 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
     c_ll_2d = new TCanvas("c_ll_2d", "", 800, 600);
     h_ll_2d->Draw("E");
     c_ll_2d->SaveAs("c_ll_2d.png");
+    delete c_ll_2d;
 
 }
 
