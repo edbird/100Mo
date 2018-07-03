@@ -33,7 +33,7 @@ Analysis::Analysis(const std::string& filename, const std::string& output_filena
     , psiN2{0.0}
     , sensitivity_chisquare{0.0}
     , sensitivity_chisquare_2d{0.0}
-    , fit_subrange{true} // fit subrange flag
+    , fit_subrange{false} // fit subrange flag
     , number_of_pseudo_experiments{1}
     , number_of_pseudo_experiments_2d{1}
     , h_data_0{nullptr}
@@ -109,12 +109,10 @@ Analysis::~Analysis()
 // ANALYSIS FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-/*
 void Analysis::SetEpsilon31(const Double_t epsilon)
 {
     epsilon_31 = epsilon;
 }
-*/
 
 void Analysis::AddEpsilonValue(const Double_t epsilon)
 {
@@ -127,7 +125,7 @@ void Analysis::RunOverEpsilonVector()
     ReadData();
     CanvasDecayRate();
     CanvasSingleElectronProjection();
-    CanvasSingleElectronTest();
+    //CanvasSingleElectronTest(); // must be done after Fill in event loop
 
     InitEventLoopTree();
 

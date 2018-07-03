@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
 
     TGraph *g_0 = new TGraph(data_size_0, data_x_0, data_y_0); // FULL RANGE CUT
     g_0->SetTitle("");
-    g_0->GetXaxis()->SetTitle("Parameter #xi");
+    g_0->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
     g_0->GetYaxis()->SetTitle("#chi^{2}");
     //g_0->GetYaxis()->SetTitleOffset(1.75);
     //g_0->GetYaxis()->SetMaxDigits(3);
@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
 
     TGraph *g_1 = new TGraph(data_size_1, data_x_1, data_y_1); // FULL RANGE NO CUT
     g_1->SetTitle("");
-    g_1->GetXaxis()->SetTitle("Parameter #xi");
+    g_1->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
     g_1->GetYaxis()->SetTitle("#chi^{2}");
     //g_1->GetYaxis()->SetTitleOffset(1.75);
     //g_1->GetYaxis()->SetMaxDigits(3);
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
 
     TGraph *g_2 = new TGraph(data_size_2, data_x_2, data_y_2); // SUB RANGE CUT
     g_2->SetTitle("");
-    g_2->GetXaxis()->SetTitle("Parameter #xi");
+    g_2->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
     g_2->GetYaxis()->SetTitle("#chi^{2}");
     //g_2->GetYaxis()->SetTitleOffset(1.75);
     //g_2->GetYaxis()->SetMaxDigits(3);
@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
 
     TGraph *g_3 = new TGraph(data_size_3, data_x_3, data_y_3); // SUB RANGE NO CUT
     g_3->SetTitle("");
-    g_3->GetXaxis()->SetTitle("Parameter #xi");
+    g_3->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
     g_3->GetYaxis()->SetTitle("#chi^{2}");
     //g_3->GetYaxis()->SetTitleOffset(1.75);
     //((TGAxis*)(g_3->GetYaxis()))->SetMaxDigits(3);
@@ -183,6 +183,7 @@ int main(int argc, char* argv[])
 
     std::cout << "Finished constructing intermediate data" << std::endl;
 
+    /*
     Double_t l_x{0.7 - 0.05};
     Double_t l_y{0.15};
     Double_t l_h{0.15};
@@ -201,12 +202,15 @@ int main(int argc, char* argv[])
         l_h = 0.15;
         l_w = 0.2;
     }
+    */
 
+    /*
     TLegend *l = new TLegend(l_x, l_y, l_x + l_w, l_y + l_h);
     l->AddEntry(g_1, "Full range no cut", "l"); // FULL RANGE NO CUT
     l->AddEntry(g_0, "Full range cut", "l"); // FULL RANGE CUT
     l->AddEntry(g_3, "Sub range no cut", "l"); // SUB RANGE NO CUT
     l->AddEntry(g_2, "Sub range cut", "l"); // SUB RANGE CUT
+    */
 
     ////////////////////////////////////////////////////////////////////////////
     // CREATE OUTPUT GRAPH
@@ -214,10 +218,16 @@ int main(int argc, char* argv[])
     
     TFile *f_out = new TFile("f_out.root", "RECREATE");
 
+    TLegend *l = new TLegend(0.65, 0.70, 0.85, 0.85);
+    l->AddEntry(g_1, "Full range no cut", "l"); // FULL RANGE NO CUT
+    l->AddEntry(g_0, "Full range cut", "l"); // FULL RANGE CUT
+    l->AddEntry(g_3, "Sub range no cut", "l"); // SUB RANGE NO CUT
+    l->AddEntry(g_2, "Sub range cut", "l"); // SUB RANGE CUT
+
     TCanvas *c = new TCanvas("c", "", 804, 628);
     c->GetPad(0)->SetTicks(1, 2);
     g_1->GetYaxis()->SetRangeUser(0.0, 20.0);
-    g_1->Draw();
+    g_1->Draw("AL");
     g_0->Draw("same");
     g_2->Draw("same");
     g_3->Draw("same");
@@ -228,16 +238,23 @@ int main(int argc, char* argv[])
     c->SaveAs("c_out.C");
     c->Write();
             
+
+    TLegend *l_log = new TLegend(0.65, 0.15, 0.85, 0.30);
+    l_log->AddEntry(g_1, "Full range no cut", "l"); // FULL RANGE NO CUT
+    l_log->AddEntry(g_0, "Full range cut", "l"); // FULL RANGE CUT
+    l_log->AddEntry(g_3, "Sub range no cut", "l"); // SUB RANGE NO CUT
+    l_log->AddEntry(g_2, "Sub range cut", "l"); // SUB RANGE CUT
+
     TCanvas *c_log = new TCanvas("c_log", "", 804, 628);
     c_log->GetPad(0)->SetTicks(1, 2);
     c_log->SetLogy();
     //g_1->GetYaxis()->SetLimits(1.0e0, 1.0e5);
     g_1->GetYaxis()->SetRangeUser(1.0e-2, 1.0e3);
-    g_1->Draw();
+    g_1->Draw("AL");
     g_0->Draw("same");
     g_2->Draw("same");
     g_3->Draw("same");
-    l->Draw();
+    l_log->Draw();
     c_log->SaveAs("c_log_out.png");
     c_log->SaveAs("c_log_out.pdf");
     c_log->SaveAs("c_log_out.eps");
@@ -253,7 +270,7 @@ int main(int argc, char* argv[])
 
     TGraph *g_0_2d = new TGraph(data_size_0, data_x_0, data_y_0_2d); // FULL RANGE CUT 2D
     g_0_2d->SetTitle("");
-    g_0_2d->GetXaxis()->SetTitle("Parameter #xi");
+    g_0_2d->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
     g_0_2d->GetYaxis()->SetTitle("#chi^{2}");
     //g_0_2d->GetYaxis()->SetTitleOffset(1.75);
     //g_0_2d->GetYaxis()->SetMaxDigits(3);
@@ -263,7 +280,7 @@ int main(int argc, char* argv[])
 
     TGraph *g_1_2d = new TGraph(data_size_1, data_x_1, data_y_1_2d); // FULL RANGE NO CUT 2D
     g_1_2d->SetTitle("");
-    g_1_2d->GetXaxis()->SetTitle("Parameter #xi");
+    g_1_2d->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
     g_1_2d->GetYaxis()->SetTitle("#chi^{2}");
     //g_1_2d->GetYaxis()->SetTitleOffset(1.75);
     //g_1_2d->GetYaxis()->SetMaxDigits(3);
@@ -273,7 +290,7 @@ int main(int argc, char* argv[])
 
     TGraph *g_2_2d = new TGraph(data_size_2, data_x_2, data_y_2_2d); // SUB RANGE CUT 2D
     g_2_2d->SetTitle("");
-    g_2_2d->GetXaxis()->SetTitle("Parameter #xi");
+    g_2_2d->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
     g_2_2d->GetYaxis()->SetTitle("#chi^{2}");
     //g_2_2d->GetYaxis()->SetTitleOffset(1.75);
     //g_2_2d->GetYaxis()->SetMaxDigits(3);
@@ -283,7 +300,7 @@ int main(int argc, char* argv[])
 
     TGraph *g_3_2d = new TGraph(data_size_3, data_x_3, data_y_3_2d); // SUB RANGE NO CUT 2D
     g_3_2d->SetTitle("");
-    g_3_2d->GetXaxis()->SetTitle("Parameter #xi");
+    g_3_2d->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
     g_3_2d->GetYaxis()->SetTitle("#chi^{2}");
     //g_3_2d->GetYaxis()->SetTitleOffset(1.75);
     //((TGAxis*)(g_3_2d->GetYaxis()))->SetMaxDigits(3);
@@ -292,16 +309,17 @@ int main(int argc, char* argv[])
     g_3_2d->SetLineColor(3);
 
 
-    TLegend *l_2d = new TLegend(0.15, 0.15, 0.35, 0.30);
-    l_2d->AddEntry(g_1_2d, "Ful_2dl_2d range no cut", "l_2d"); // FULL RANGE NO CUT
-    l_2d->AddEntry(g_0_2d, "Ful_2dl_2d range cut", "l_2d"); // FULL RANGE CUT
-    l_2d->AddEntry(g_3_2d, "Sub range no cut", "l_2d"); // SUB RANGE NO CUT
-    l_2d->AddEntry(g_2_2d, "Sub range cut", "l_2d"); // SUB RANGE CUT
+    TLegend *l_2d = new TLegend(0.40, 0.60, 0.60, 0.75);
+    l_2d->AddEntry(g_1_2d, "Full range no cut", "l"); // FULL RANGE NO CUT
+    l_2d->AddEntry(g_0_2d, "Full range cut", "l"); // FULL RANGE CUT
+    l_2d->AddEntry(g_3_2d, "Sub range no cut", "l"); // SUB RANGE NO CUT
+    l_2d->AddEntry(g_2_2d, "Sub range cut", "l"); // SUB RANGE CUT
 
     TCanvas *c_2d = new TCanvas("c_2d", "", 804, 628);
     c_2d->GetPad(0)->SetTicks(1, 2);
     g_1_2d->GetYaxis()->SetRangeUser(0.0, 20.0);
-    g_1_2d->Draw();
+    g_1_2d->GetXaxis()->SetRangeUser(0.29, 0.45);
+    g_1_2d->Draw("AL");
     g_0_2d->Draw("same");
     g_2_2d->Draw("same");
     g_3_2d->Draw("same");
@@ -313,26 +331,26 @@ int main(int argc, char* argv[])
     c_2d->Write();
     
 
-    TLegend *l_log_2d = new TLegend(0.15, 0.15, 0.35, 0.30);
-    l_log_2d->AddEntry(g_1_2d, "Ful_log_2dl_log_2d range no cut", "l_log_2d"); // FULL RANGE NO CUT
-    l_log_2d->AddEntry(g_0_2d, "Ful_log_2dl_log_2d range cut", "l_log_2d"); // FULL RANGE CUT
-    l_log_2d->AddEntry(g_3_2d, "Sub range no cut", "l_log_2d"); // SUB RANGE NO CUT
-    l_log_2d->AddEntry(g_2_2d, "Sub range cut", "l_log_2d"); // SUB RANGE CUT
+    TLegend *l_log_2d = new TLegend(0.65, 0.15, 0.85, 0.30);
+    l_log_2d->AddEntry(g_1_2d, "Full range no cut", "l"); // FULL RANGE NO CUT
+    l_log_2d->AddEntry(g_0_2d, "Full range cut", "l"); // FULL RANGE CUT
+    l_log_2d->AddEntry(g_3_2d, "Sub range no cut", "l"); // SUB RANGE NO CUT
+    l_log_2d->AddEntry(g_2_2d, "Sub range cut", "l"); // SUB RANGE CUT
 
     TCanvas *c_log_2d = new TCanvas("c_log_2d", "", 804, 628);
     c_log_2d->GetPad(0)->SetTicks(1, 2);
     c_log_2d->SetLogy();
     //g_1_2d->GetYaxis()->SetLimits(1.0e0, 1.0e5);
     g_1_2d->GetYaxis()->SetRangeUser(1.0e-2, 1.0e3);
-    g_1_2d->Draw();
+    g_1_2d->Draw("AL");
     g_0_2d->Draw("same");
     g_2_2d->Draw("same");
     g_3_2d->Draw("same");
     l_log_2d->Draw();
-    c_log_2d->SaveAs("c_log_2d_out_2d.png");
-    c_log_2d->SaveAs("c_log_2d_out_2d.pdf");
-    c_log_2d->SaveAs("c_log_2d_out_2d.eps");
-    c_log_2d->SaveAs("c_log_2d_out_2d.C");
+    c_log_2d->SaveAs("c_log_out_2d.png");
+    c_log_2d->SaveAs("c_log_out_2d.pdf");
+    c_log_2d->SaveAs("c_log_out_2d.eps");
+    c_log_2d->SaveAs("c_log_out_2d.C");
     c_log_2d->Write();
 
     g_0_2d->Write();

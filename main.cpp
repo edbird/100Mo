@@ -37,30 +37,38 @@ int main(int argc, char* argv[])
     ProgramArguments pa;
     pa.Add("help", "--help", "false");
     pa.Add("filename", "--filename", "NewElectronNtuplizerExe_Int_ManDB_output.root");
-    pa.Add("epsilon", "--epsilon", "0.0");
+    pa.Add("epsilon", "--epsilon", "0.8");
     pa.Add("batch_mode", "--batch-mode", "false");
     //pa.Add("300 keV energy cut", "--energy-cut", "false");
     pa.Add("energy_cut", "--energy-cut", "false");
     pa.Add("fit_subrange", "--fit-subrange", "false");
     pa.Add("log_mode", "--log-mode", "false");
     pa.Add("output_filename", "--output-file", "of_data.txt");
+    pa.Add("eps_min", "--epsilon-min", "0.0");
+    pa.Add("eps_max", "--epsilon-max", "1.0");
+    pa.Add("eps_num", "--epsilon-num", "1");
     pa.Print();
     pa.Process(argc, argv);
+
 
     // this argument is a string
     std::string help{pa.Get("help")};
     // this argument is a string
     std::string filename{pa.Get("filename")};
     // this argument is to be converted to a double
-    /*std::string arg_epsilon_31{pa.Get("epsilon")};*/
+    std::string arg_epsilon_31{pa.Get("epsilon")};
     // this argument is to be converted to a bool
     std::string arg_batch_mode{pa.Get("batch_mode")};
     std::string arg_energy_cut{pa.Get("energy_cut")};
     std::string arg_fit_subrange{pa.Get("fit_subrange")};
     std::string arg_log_mode{pa.Get("log_mode")};
     std::string arg_output_filename{pa.Get("output_filename")};
+    std::string arg_eps_min{pa.Get("eps_min")};
+    std::string arg_eps_max{pa.Get("eps_max")};
+    std::string arg_eps_num{pa.Get("eps_num")};
 
-    /*double epsilon_31{std::stod(arg_epsilon_31)};*/
+
+    double epsilon_31{std::stod(arg_epsilon_31)};
     bool batch_mode{false};
     if(arg_batch_mode == std::string("true"))
     {
@@ -166,33 +174,55 @@ int main(int argc, char* argv[])
     }
 
 
-    /*
-    analysis.SetEpsilon31(epsilon_31);
+    // THIS CODE FOR PRODUCING THE TEST HISTOGRAMS
+
+#if 1
+    
+    //analysis.SetEpsilon31(epsilon_31);
+    analysis.SetEpsilon31(0.5);
 
     // run analysis
     analysis.ReadData();
     //analysis.CanvasRawData();
     analysis.CanvasDecayRate();
     analysis.CanvasSingleElectronProjection();
-    analysis.CanvasSingleElectronTest();
+    analysis.InitSingleElectronTest();
     analysis.InitEventLoopTree();
     analysis.InitEventLoopHistogram();
     analysis.EventLoop();
     analysis.PostProcess();
+    analysis.CanvasSingleElectronTest();
+    
     analysis.SummedEnergyFit();
     analysis.SensitivityMeasurementChisquare1();
     analysis.SensitivityMeasurementChisquare2();
     analysis.SensitivityMeasurementLoglikelihood1();
     analysis.SensitivityMeasurementLoglikelihood2();
     analysis.PrintOutputToFile();
-    */
+    
+
+#endif
 
 
+    // THIS CODE FOR REGULAR DATA ANALYSIS RUN
+
+#if 0
+    // run analysis
+    analysis.ReadData();
+    //analysis.CanvasRawData();
+    analysis.CanvasDecayRate();
+    analysis.CanvasSingleElectronProjection();
+    analysis.InitSingleElectronTest();
+    analysis.InitEventLoopTree();
+    analysis.InitEventLoopHistogram();
     analysis.SetNumberOfPseudoexperiments(10000, 1);
 
     //Double_t eps_incr{0.025};
-    Double_t eps_incr{0.01};
-    for(Double_t eps{0.1}; eps <= 0.7 + 0.5 * eps_incr; eps += eps_incr)
+    Double_t eps_min{std::stod(arg_eps_min)};
+    Double_t eps_max{std::stod(arg_eps_max)};
+    Int_t eps_num{std::stoi(arg_eps_num)};
+    Double_t eps_incr{(eps_max - eps_min) / (Double_t)eps_num};
+    for(Double_t eps{eps_min}; eps <= eps_max + 0.5 * eps_incr; eps += eps_incr)
     {
         std::cout << "Running: eps=" << eps << std::endl;
         //analysis.AddEpsilonValue(eps);
@@ -202,7 +232,15 @@ int main(int argc, char* argv[])
     //analysis.AddEpsilonValue(0.368);
     //analysis.AddEpsilonValue(0.5);
     analysis.RunOverEpsilonVector();
-
+    
+    
+    analysis.SummedEnergyFit();
+    analysis.SensitivityMeasurementChisquare1();
+    analysis.SensitivityMeasurementChisquare2();
+    analysis.SensitivityMeasurementLoglikelihood1();
+    analysis.SensitivityMeasurementLoglikelihood2();
+    analysis.PrintOutputToFile();
+#endif
 
 
     ////////////////////////////////////////////////////////////////////////////
