@@ -242,7 +242,6 @@ void Analysis::SensitivityMeasurementChisquare1()
         c_el_energy_diff->SaveAs("c_el_energy_diff.pdf");
         
         c_el_energy_pull = new TCanvas("c_el_energy_pull", "", 800, 600);
-        c_el_energy_pull->SetRightMargin(0.12);
         //c_el_energy_pull->SetLogz();
         h_el_energy_pull->GetXaxis()->SetTitle("Single Electron Energy [MeV]");
         h_el_energy_pull->GetYaxis()->SetTitle("Pull #sigma");
@@ -330,20 +329,24 @@ void Analysis::SensitivityMeasurementChisquare2()
 
         // 2d original and reweight histograms
         c_el_energy_2d_original = new TCanvas("c_el_energy_2d_original", "", 800, 600);
-        c_el_energy_2d_original->SetRightMargin(0.15);
+        c_el_energy_2d_original->SetRightMargin(0.17);
         //c_el_energy_2d_original->SetLogz();
         h_el_energy_2d_original->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
         h_el_energy_2d_original->GetYaxis()->SetTitle("High Energy Electron [MeV]");
+        h_el_energy_2d_original->GetZaxis()->SetTitle("Events");
+        h_el_energy_2d_original->GetZaxis()->SetTitleOffset(1.6);
         h_el_energy_2d_original->Draw("colz");
         c_el_energy_2d_original->SaveAs("c_el_energy_2d_original.C");
         c_el_energy_2d_original->SaveAs("c_el_energy_2d_original.png");
         c_el_energy_2d_original->SaveAs("c_el_energy_2d_original.pdf");
 
         c_el_energy_2d_reweight = new TCanvas("c_el_energy_2d_reweight", "", 800, 600);
-        c_el_energy_2d_reweight->SetRightMargin(0.15);
+        c_el_energy_2d_reweight->SetRightMargin(0.17);
         //c_el_energy_2d_reweight->SetLogz();
         h_el_energy_2d_reweight->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
         h_el_energy_2d_reweight->GetYaxis()->SetTitle("High Energy Electron [MeV]");
+        h_el_energy_2d_reweight->GetZaxis()->SetTitle("Events");
+        h_el_energy_2d_reweight->GetZaxis()->SetTitleOffset(1.6);
         h_el_energy_2d_reweight->Draw("colz");
         c_el_energy_2d_reweight->SaveAs("c_el_energy_2d_reweight.C");
         c_el_energy_2d_reweight->SaveAs("c_el_energy_2d_reweight.png");
@@ -375,6 +378,8 @@ void Analysis::SensitivityMeasurementChisquare2()
         //c_el_energy_2d_diff->SetLogz();
         h_el_energy_2d_diff->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
         h_el_energy_2d_diff->GetYaxis()->SetTitle("High Energy Electron [MeV]");
+        h_el_energy_2d_diff->GetZaxis()->SetTitle("Events");
+        h_el_energy_2d_diff->GetZaxis()->SetTitleOffset(1.2);
         h_el_energy_2d_diff->Draw("colz");
         c_el_energy_2d_diff->SaveAs("c_el_energy_2d_diff.C");
         c_el_energy_2d_diff->SaveAs("c_el_energy_2d_diff.png");
@@ -402,6 +407,8 @@ void Analysis::SensitivityMeasurementChisquare2()
         //c_el_energy_2d_pull->SetLogz();
         h_el_energy_2d_pull->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
         h_el_energy_2d_pull->GetYaxis()->SetTitle("High Energy Electron [MeV]");
+        h_el_energy_2d_pull->GetZaxis()->SetTitle("Events");
+        h_el_energy_2d_pull->GetZaxis()->SetTitleOffset(1.2);
         h_el_energy_2d_pull->Draw("colz");
         c_el_energy_2d_pull->SaveAs("c_el_energy_2d_pull.C");
         c_el_energy_2d_pull->SaveAs("c_el_energy_2d_pull.png");
@@ -601,7 +608,7 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
                 //c_el_energy_diff_data_rw->SetRightMargin(0.12);
                 //c_el_energy_diff_data_rw->SetLogz();
                 h_el_energy_diff_data_rw->GetXaxis()->SetTitle("Single Electron Energy [MeV]");
-                h_el_energy_diff_data_rw->GetYaxis()->SetTitle("Events");
+                h_el_energy_diff_data_rw->GetYaxis()->SetTitle("Events (Pseudodata - Reweight)");
                 h_el_energy_diff_data_rw->Draw("E");
                 //c_el_energy_diff_data_rw->SaveAs((c_name_diff_data_rw + std::string(".C")).c_str());
                 c_el_energy_diff_data_rw->SaveAs((c_name_diff_data_rw + std::string(".png")).c_str());
@@ -612,7 +619,7 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
                 //c_el_energy_diff_data_orig->SetRightMargin(0.12);
                 //c_el_energy_diff_data_orig->SetLogz();
                 h_el_energy_diff_data_orig->GetXaxis()->SetTitle("Single Electron Energy [MeV]");
-                h_el_energy_diff_data_orig->GetYaxis()->SetTitle("Events");
+                h_el_energy_diff_data_orig->GetYaxis()->SetTitle("Events (Pseudodata - Baseline)");
                 h_el_energy_diff_data_orig->Draw("E");
                 //c_el_energy_diff_data_orig->SaveAs((c_name_diff_data_orig + std::string(".C")).c_str());
                 c_el_energy_diff_data_orig->SaveAs((c_name_diff_data_orig + std::string(".png")).c_str());
@@ -765,24 +772,26 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
             // TODO: multiple experiemnts problem
             // if statement for batch mode
             c_el_energy_2d_data = new TCanvas("c_el_energy_2d_data", "", 800, 600);
-            c_el_energy_2d_data->SetRightMargin(0.14);
+            c_el_energy_2d_data->SetRightMargin(0.17);
             //c_el_energy_2d_data->SetLogz();
             h_el_energy_2d_data->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
             h_el_energy_2d_data->GetYaxis()->SetTitle("High Energy Electron [MeV]");
             h_el_energy_2d_data->GetZaxis()->SetTitle("Events");
+            h_el_energy_2d_data->GetZaxis()->SetTitleOffset(1.6);
             h_el_energy_2d_data->Draw("colz");
             c_el_energy_2d_data->SaveAs("c_el_energy_2d_data.C");
             c_el_energy_2d_data->SaveAs("c_el_energy_2d_data.png");
             c_el_energy_2d_data->SaveAs("c_el_energy_2d_data.pdf");
 
             c_el_energy_2d_prob = new TCanvas("c_el_energy_2d_prob", "", 800, 600);
-            c_el_energy_2d_prob->SetRightMargin(0.14);
+            c_el_energy_2d_prob->SetRightMargin(0.15);
             c_el_energy_2d_prob->SetLogz();
             h_el_energy_2d_prob->SetMinimum(1.0e-6);
             h_el_energy_2d_prob->SetMaximum(1.0e0);
             h_el_energy_2d_prob->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
             h_el_energy_2d_prob->GetYaxis()->SetTitle("High Energy Electron [MeV]");
             h_el_energy_2d_prob->GetZaxis()->SetTitle("Events");
+            h_el_energy_2d_prob->GetZaxis()->SetTitleOffset(1.2);
             h_el_energy_2d_prob->Draw("colz");
             c_el_energy_2d_prob->SaveAs("c_el_energy_2d_prob.C");
             c_el_energy_2d_prob->SaveAs("c_el_energy_2d_prob.png");
@@ -794,6 +803,7 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
             h_el_energy_2d_diff_data_rw->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
             h_el_energy_2d_diff_data_rw->GetYaxis()->SetTitle("High Energy Electron [MeV]");
             h_el_energy_2d_diff_data_rw->GetZaxis()->SetTitle("Events");
+            h_el_energy_2d_diff_data_rw->GetZaxis()->SetTitleOffset(1.2);
             h_el_energy_2d_diff_data_rw->Draw("colz");
             c_el_energy_2d_diff_data_rw->SaveAs("c_el_energy_2d_diff_data_rw.C");
             c_el_energy_2d_diff_data_rw->SaveAs("c_el_energy_2d_diff_data_rw.png");
@@ -805,6 +815,7 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
             h_el_energy_2d_diff_data_orig->GetXaxis()->SetTitle("Low Energy Electron [MeV]");
             h_el_energy_2d_diff_data_orig->GetYaxis()->SetTitle("High Energy Electron [MeV]");
             h_el_energy_2d_diff_data_orig->GetZaxis()->SetTitle("Events");
+            h_el_energy_2d_diff_data_orig->GetZaxis()->SetTitleOffset(1.2);
             h_el_energy_2d_diff_data_orig->Draw("colz");
             c_el_energy_2d_diff_data_orig->SaveAs("c_el_energy_2d_diff_data_orig.C");
             c_el_energy_2d_diff_data_orig->SaveAs("c_el_energy_2d_diff_data_orig.png");
