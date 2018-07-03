@@ -122,12 +122,13 @@ void Analysis::AddEpsilonValue(const Double_t epsilon)
 void Analysis::RunOverEpsilonVector()
 {
 
-    ReadData();
-    CanvasDecayRate();
-    CanvasSingleElectronProjection();
+    ////ReadData();
+    ////CanvasDecayRate();
+    ////CanvasSingleElectronProjection();
     //CanvasSingleElectronTest(); // must be done after Fill in event loop
 
-    InitEventLoopTree();
+    ////InitEventLoopTree();
+    //InitEventLoopHistogram();
 
     std::vector<Double_t>::const_iterator it{vec_epsilon_31.cbegin()};
     for(; it != vec_epsilon_31.cend(); ++ it)
@@ -137,14 +138,40 @@ void Analysis::RunOverEpsilonVector()
 
         std::cout << "epsilon_31=" << epsilon_31 << std::endl;
 
+        //std::cout << "Press Enter to Init" << std::endl;
+        //std::cin.get();
         InitEventLoopHistogram();
+        
+        //std::cout << "Press Enter to Loop" << std::endl;
+        //std::cin.get();
         EventLoop();
-        PostProcess();
-        SummedEnergyFit();
-        SensitivityMeasurementChisquare1();
-        SensitivityMeasurementChisquare2();
-        //SensitivityMeasurementLoglikelihood1();
 
+        //std::cout << "Press Enter to Postprocess" << std::endl;
+        //std::cin.get();
+        PostProcess();
+
+        //std::cout << "Press Enter to Fit" << std::endl;
+        //std::cin.get();
+        SummedEnergyFit();
+        
+        std::cout << "Press Enter to Chisquare1" << std::endl;
+        //std::cin.get();
+        SensitivityMeasurementChisquare1();
+        
+        std::cout << "Press Enter to Chisquare2" << std::endl;
+        //std::cin.get();
+        SensitivityMeasurementChisquare2();
+        
+        std::cout << "Press Enter to Loglikelihood1" << std::endl;
+        //std::cin.get();
+        SensitivityMeasurementLoglikelihood1();
+        
+        std::cout << "Press Enter to Loglikelihood2" << std::endl;
+        //std::cin.get();
+        SensitivityMeasurementLoglikelihood2();
+
+        std::cout << "Press Enter to Print" << std::endl;
+        //std::cin.get();
         PrintOutputToFile();
     }
 
