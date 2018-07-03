@@ -257,6 +257,8 @@ void read_data_helper_2(const std::string& filename_data,
     std::vector<std::vector<double>> data_temp;
     //read_data_2(buf, data_temp, delimiter);
     read_data(buf, data_temp, delimiter);
+    delete buf;
+    buf = nullptr;
     data = data_temp;
     
     return;
@@ -345,6 +347,18 @@ void read_data_helper(const std::string& filename_nEqNull, const std::string& fi
     std::cout << "Finished reading " << "nEqNull.dat" << std::endl;
     read_data(buf_nEqTwo, data_nEqTwo);
     std::cout << "Finished reading " << "nEqTwo.dat" << std::endl;
+    
+    delete buf_nEqNull;
+    delete buf_nEqTwo;
+
+    buf_nEqNull = nullptr;
+    buf_nEqTwo = nullptr;
+
+    delete buf_psiN0;
+    delete buf_psiN2;
+
+    buf_psiN0 = nullptr;
+    buf_psiN2 = nullptr;
 
     //std::cout << buf_nEqNull << std::endl;
     //std::cout << buf_nEqTwo << std::endl;
