@@ -79,7 +79,7 @@ void Analysis::InitEventLoopHistogram()
     h_el_energy_sum_reweight = new TH1D("h_el_energy_sum_reweight", "", num_bins, 0.0, 4.0);
     h_el_energy_sum_reweight->SetStats(0);
     h_el_energy_sum_reweight->SetLineColor(4);
-    h_el_energy_sum_reweight->SetMarkerColor(4);
+    h_el_energy_sum_reweight->SetMarkerColor(4); // TODO: don't think specific colors are required anymore
 
     // 2d fit version of h_el_energy_sum_original
     // instead of using a 1d histogram containing the sum of the 2 electron
@@ -90,28 +90,6 @@ void Analysis::InitEventLoopHistogram()
     
     h_el_energy_2d_reweight = new TH2D("h_el_energy_2d_reweight", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
     h_el_energy_2d_reweight->SetStats(0);
-
-    // chisquare method
-    h_el_energy_2d_diff = new TH2D("h_el_energy_2d_diff", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
-    h_el_energy_2d_diff->SetStats(0);
-    // chisquare method
-    h_el_energy_2d_pull = new TH2D("h_el_energy_2d_pull", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
-    h_el_energy_2d_pull->SetStats(0);
-
-// NOTE: defined when required in code below
-    h_el_energy_2d_diff_data_rw = new TH2D("h_el_energy_2d_diff_data_rw", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
-    h_el_energy_2d_diff_data_rw->SetStats(0);
-    h_el_energy_2d_diff_data_orig = new TH2D("h_el_energy_2d_diff_data_orig", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
-    h_el_energy_2d_diff_data_orig->SetStats(0);
-//#if TWO_D_METHOD_LOGLIKELIHOOD
-//    // pseudodata histogram
-//    TH2D *h_el_energy_2d_data = new TH2D("h_el_energy_2d_data", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
-//    h_el_energy_2d_data->SetStats(0);
-//
-//    TH2D *h_el_energy_2d_prob = new TH2D("h_el_energy_2d_prob", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
-//    h_el_energy_2d_prob->SetStats(0);
-//#endif
-
 
 
 
@@ -159,7 +137,7 @@ void Analysis::EventLoop()
         h_el_energy_original->Fill(el_energy_[1], 1.0 * gen_weight);
         
         h_el_energy_sum_original->Fill(el_energy_[0] + el_energy_[1], 1.0 * gen_weight);
-
+        
         if(el_energy_[0] <= el_energy_[1])
         {
             h_el_energy_2d_original->Fill(el_energy_[0], el_energy_[1], 1.0 * gen_weight);
@@ -170,10 +148,15 @@ void Analysis::EventLoop()
         }
         
         // test histograms
-        h_test_single_original->Fill(trueT1, 1.0 * gen_weight);
-        h_test_single_original->Fill(trueT2, 1.0 * gen_weight);
-
-        h_test_sum_original->Fill(trueT1 + trueT2, 1.0 * gen_weight);
+        if(h_test_single_original != nullptr)
+        {
+            h_test_single_original->Fill(trueT1, 1.0 * gen_weight);
+            h_test_single_original->Fill(trueT2, 1.0 * gen_weight);
+        }
+        if(h_test_sum_original != nullptr)
+        {
+            h_test_sum_original->Fill(trueT1 + trueT2, 1.0 * gen_weight);
+        }
 
         /*
         if(!(weight < 3.0 && weight > 0.001))
@@ -203,10 +186,15 @@ void Analysis::EventLoop()
         }
 
         // test histograms
-        h_test_single_reweight->Fill(trueT1, weight * gen_weight);
-        h_test_single_reweight->Fill(trueT2, weight * gen_weight);
-
-        h_test_sum_reweight->Fill(trueT1 + trueT2, weight * gen_weight);
+        if(h_test_single_reweight != nullptr)
+        {
+            h_test_single_reweight->Fill(trueT1, weight * gen_weight);
+            h_test_single_reweight->Fill(trueT2, weight * gen_weight);
+        }
+        if(h_test_sum_reweight != nullptr)
+        {
+            h_test_sum_reweight->Fill(trueT1 + trueT2, weight * gen_weight);
+        }
 
         h_gen_weight->Fill(trueT1, trueT2, gen_weight);
 
@@ -253,20 +241,34 @@ void Analysis::PostProcess()
     h_el_energy_sum_reweight->Scale(scale_factor);
     */
     
-    h_test_single_original->Scale((1.0 / 0.1) / h_test_single_original->Integral());
-    h_test_single_reweight->Scale((1.0 / 0.1) / h_test_single_reweight->Integral());
-    h_test_sum_original->Scale((1.0 / 0.1) / h_test_sum_original->Integral());
-    h_test_sum_reweight->Scale((1.0 / 0.1) / h_test_sum_reweight->Integral());
+    if(h_test_single_original != nullptr)
+    {
+        h_test_single_original->Scale((1.0 / 0.1) / h_test_single_original->Integral());
+    }
+    if(h_test_single_reweight != nullptr)
+    {
+        h_test_single_reweight->Scale((1.0 / 0.1) / h_test_single_reweight->Integral());
+    }
+    if(h_test_sum_original != nullptr)
+    {
+        h_test_sum_original->Scale((1.0 / 0.1) / h_test_sum_original->Integral());
+    }
+    if(h_test_sum_reweight != nullptr)
+    {
+        h_test_sum_reweight->Scale((1.0 / 0.1) / h_test_sum_reweight->Integral());
+    }
 
     std::cout << "h_el_energy_original_integral=" << h_el_energy_original->Integral() << std::endl;
 
     // calculate integral manually
+    /*
     Double_t h_el_energy_original_integral{0.0};
     for(Int_t i{1}; i <= h_el_energy_original->GetNbinsX(); ++ i)
     {
         h_el_energy_original_integral += h_el_energy_original->GetBinContent(i);
     }
     std::cout << "h_el_energy_original_integral=" << h_el_energy_original_integral << std::endl;
+    */
 
     if(_batch_mode_ == false)
     {
@@ -276,6 +278,7 @@ void Analysis::PostProcess()
         c_gen_weight->SaveAs("c_gen_weight.C");
         c_gen_weight->SaveAs("c_gen_weight.png");
         c_gen_weight->SaveAs("c_gen_weight.pdf");
+        delete c_gen_weight;
     }
 
 
