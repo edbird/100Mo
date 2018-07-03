@@ -360,6 +360,8 @@ void Analysis::SensitivityMeasurementChisquare2()
         ////////////////////////////////////////////////////////////////////////
 
         // create difference histogram
+        h_el_energy_2d_diff = new TH2D("h_el_energy_2d_diff", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+        h_el_energy_2d_diff->SetStats(0);
         for(Int_t j{1}; j <= h_el_energy_2d_diff->GetNbinsY(); ++ j)
         {
             for(Int_t i{1}; i <= h_el_energy_2d_diff->GetNbinsX(); ++ i)
@@ -388,6 +390,8 @@ void Analysis::SensitivityMeasurementChisquare2()
         c_el_energy_2d_diff->SaveAs("c_el_energy_2d_diff.pdf");
         
         // create pull histogram
+        h_el_energy_2d_pull = new TH2D("h_el_energy_2d_pull", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+        h_el_energy_2d_pull->SetStats(0);
         for(Int_t j{1}; j <= h_el_energy_2d_pull->GetNbinsY(); ++ j)
         {
             for(Int_t i{1}; i <= h_el_energy_2d_pull->GetNbinsX(); ++ i)
@@ -474,6 +478,9 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
     h_el_energy_ll->Reset("ICESM");
     */
 
+    delete h_ll;
+    h_ll = nullptr;
+
 
     for(Int_t count{0}; count < number_of_pseudo_experiments; ++ count)
     {
@@ -482,7 +489,10 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
         delete h_el_energy_prob;
         delete h_el_energy_diff_data_rw;
         delete h_el_energy_diff_data_orig;
-        delete h_ll;
+        h_el_energy_data = nullptr;
+        h_el_energy_prob = nullptr;
+        h_el_energy_diff_data_rw = nullptr;
+        h_el_energy_diff_data_orig = nullptr;
 
 
         ////////////////////////////////////////////////////////////////////////
@@ -566,7 +576,7 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
         {
             likelihood_sum_vec_sum += *it;
         }
-        std::cout << "LL3" << -2.0 * likelihood_sum_vec_sum << std::endl;
+        std::cout << "LL3=" << -2.0 * likelihood_sum_vec_sum << std::endl;
 
         // create difference histogram, data - reweight
         std::string h_name_diff_data_rw{std::string("h_el_energy_diff_data_rw_") + eps_string + std::string("_") + std::to_string(count)};
@@ -593,6 +603,7 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
         {
             Double_t content1{h_el_energy_data->GetBinContent(i)};
             Double_t content2{h_el_energy_original->GetBinContent(i)};
+            std::cout << content1 << "   " << content2 << std::endl;
             Double_t error1{h_el_energy_data->GetBinError(i)};
             // note: do not use error or reweighted
             Double_t error2{0.0 * h_el_energy_original->GetBinError(i)};
@@ -701,15 +712,23 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
 void Analysis::SensitivityMeasurementLoglikelihood2()
 {
 
+    
+    delete h_ll_2d;
+    h_ll_2d = nullptr;
+    
+    
     for(Int_t count{0}; count < number_of_pseudo_experiments_2d; ++ count)
     {
 
 
         delete h_el_energy_2d_data;
         delete h_el_energy_2d_prob;
-        delete h_el_energy_2d_diff_data_rw_2d;
+        delete h_el_energy_2d_diff_data_rw;
         delete h_el_energy_2d_diff_data_orig;
-        delete h_ll_2d;
+        h_el_energy_2d_data = nullptr;
+        h_el_energy_2d_prob = nullptr;
+        h_el_energy_2d_diff_data_rw = nullptr;
+        h_el_energy_2d_diff_data_orig = nullptr;
 
         ////////////////////////////////////////////////////////////////////////
         // INDEPENDENT SINGLE ELECTRON ENERGY
@@ -758,13 +777,6 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
                 likelihood_2d *= poi;
 
                 h_el_energy_2d_prob->SetBinContent(ix, jx, poi);
-                if(poi != 1.0)
-                {
-                    if(poi < 1.0e-14 || poi > 1.0)
-                    {
-                    //    std::cout << ix << ", " << jx << " -> " << poi << " data=" << data << " lambda=" << lambda << std::endl;
-                    }
-                }
             }
         }
         std::cout << "likelihood (2d) = " << likelihood_2d << std::endl;
@@ -773,6 +785,9 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
     
         
         // create difference histogram - difference between data and reweighted
+        std::string h_name_2d_diff_data_rw{std::string("h_el_energy_2d_diff_data_rw_") + std::to_string(count)};
+        h_el_energy_2d_diff_data_rw = new TH2D(h_name_2d_diff_data_rw.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+        h_el_energy_2d_diff_data_rw->SetStats(0);
         for(Int_t j{1}; j <= h_el_energy_2d_diff_data_rw->GetNbinsY(); ++ j)
         {
             for(Int_t i{1}; i <= h_el_energy_2d_diff_data_rw->GetNbinsX(); ++ i)
@@ -790,6 +805,9 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
         }
 
         // create difference histogram - difference between data and original
+        std::string h_name_2d_diff_data_orig{std::string("h_el_energy_2d_diff_data_orig_") + std::to_string(count)};
+        h_el_energy_2d_diff_data_orig = new TH2D(h_name_2d_diff_data_orig.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+        h_el_energy_2d_diff_data_orig->SetStats(0);
         for(Int_t j{1}; j <= h_el_energy_2d_diff_data_orig->GetNbinsY(); ++ j)
         {
             for(Int_t i{1}; i <= h_el_energy_2d_diff_data_orig->GetNbinsX(); ++ i)
@@ -864,6 +882,12 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
             c_el_energy_2d_diff_data_orig->SaveAs("c_el_energy_2d_diff_data_orig.C");
             c_el_energy_2d_diff_data_orig->SaveAs("c_el_energy_2d_diff_data_orig.png");
             c_el_energy_2d_diff_data_orig->SaveAs("c_el_energy_2d_diff_data_orig.pdf");
+
+
+            delete c_el_energy_2d_data;
+            delete c_el_energy_2d_prob;
+            delete c_el_energy_2d_diff_data_rw;
+            delete c_el_energy_2d_diff_data_orig;
 
         }
 
