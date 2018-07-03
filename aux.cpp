@@ -107,6 +107,12 @@ Double_t fit_function(Double_t *x, Double_t *par)
         throw "problem";
     }
 
+    // clean
+    delete x_values;
+    delete y_values;
+    x_values = nullptr;
+    y_values = nullptr;
+
     // get y value (content) of this bin
     // return content
     Double_t ret{amplitude * y_values[found_bin_index]};
