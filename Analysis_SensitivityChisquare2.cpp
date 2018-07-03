@@ -7,8 +7,12 @@ void Analysis::SensitivityMeasurementChisquare2()
 
     // reset
     non_empty_bins_2d = 0;
+    
+    ////////////////////////////////////////////////////////////////////////////
+    // INDEPENDENT (2D) ELECTRON ENERGY CHISQUARE METHOD
+    ////////////////////////////////////////////////////////////////////////////
 
-    // get chi-square for single electron histograms
+    // get chi-square for 2d electron histogram
     if(fit_subrange == false)
     {
 
@@ -20,10 +24,6 @@ void Analysis::SensitivityMeasurementChisquare2()
             }
         }
 
-        // get chi-square for single electron histograms
-        // Note: no subrange for 2d histogram
-        //if(fit_subrange == false)
-        //{
         sensitivity_chisquare_2d = chi_square_test(h_el_energy_2d_reweight, h_el_energy_2d_original);
         std::cout << "chi square of 2 electron: " << sensitivity_chisquare_2d << std::endl;
         std::cout << " degrees of freedom (2d): " << non_empty_bins_2d << std::endl;
@@ -49,10 +49,6 @@ void Analysis::SensitivityMeasurementChisquare2()
         }
         */
 
-        // get chi-square for single electron histograms
-        // Note: no subrange for 2d histogram
-        //if(fit_subrange == false)
-        //{
         sensitivity_chisquare_2d = chi_square_test(h_el_energy_2d_reweight, h_el_energy_2d_original, 2.0, 4.0, non_empty_bins_2d);
         std::cout << "chi square of 2 electron, 2.0 MeV - 2.0 MeV: " << sensitivity_chisquare_2d << std::endl;
         std::cout << " degrees of freedom (2d): " << non_empty_bins_2d << std::endl;
@@ -64,12 +60,58 @@ void Analysis::SensitivityMeasurementChisquare2()
     // the sensitivity, therefore there is only a chi-square test
 
 
+    ////////////////////////////////////////////////////////////////////////
+    // CREATE DIFFERENCE AND PULL HISTOGRAMS AND CANVAS OUTPUT
+    ////////////////////////////////////////////////////////////////////////
+
+    // create difference histogram
+    h_el_energy_2d_diff = new TH2D("h_el_energy_2d_diff", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+    h_el_energy_2d_diff->SetStats(0);
+    for(Int_t j{1}; j <= h_el_energy_2d_diff->GetNbinsY(); ++ j)
+    {
+        for(Int_t i{1}; i <= h_el_energy_2d_diff->GetNbinsX(); ++ i)
+        {
+            Double_t content1{h_el_energy_2d_original->GetBinContent(i, j)};
+            Double_t content2{h_el_energy_2d_reweight->GetBinContent(i, j)};
+            Double_t error1{h_el_energy_2d_original->GetBinError(i, j)};
+            // note: do not use error or reweighted
+            Double_t error2{0.0 * h_el_energy_2d_reweight->GetBinError(i, j)};
+            Double_t content{content1 - content2};
+            Double_t error{std::sqrt(error1 * error1 + error2 * error2)};
+            h_el_energy_2d_diff->SetBinContent(i, j, content);
+            h_el_energy_2d_diff->SetBinError(i, j, error);
+        }
+    }
+        
+    // create pull histogram
+    h_el_energy_2d_pull = new TH2D("h_el_energy_2d_pull", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+    h_el_energy_2d_pull->SetStats(0);
+    for(Int_t j{1}; j <= h_el_energy_2d_pull->GetNbinsY(); ++ j)
+    {
+        for(Int_t i{1}; i <= h_el_energy_2d_pull->GetNbinsX(); ++ i)
+        {
+            Double_t content{h_el_energy_2d_diff->GetBinContent(i, j)};
+            Double_t error{h_el_energy_2d_diff->GetBinError(i, j)};
+            if(error == 0.0)
+            {
+                //h_el_energy_2d_pull->SetBinContent(i, j, 0.0);
+                h_el_energy_2d_pull->SetBinError(i, j, 0.0);
+            }
+            else
+            {
+                h_el_energy_2d_pull->SetBinContent(i, j, content / error);
+                h_el_energy_pull->SetBinError(i, j, 0.0);
+            }
+        }
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    // 2D ORIGINAL AND REWEIGHT CANVAS OUTPUT
+    ////////////////////////////////////////////////////////////////////////////
+        
     if(_batch_mode_ == false)
     {
-
-        ////////////////////////////////////////////////////////////////////////
-        // 2D ORIGINAL AND REWEIGHT CANVAS OUTPUT
-        ////////////////////////////////////////////////////////////////////////
 
         // 2d original and reweight histograms
         c_el_energy_2d_original = new TCanvas("c_el_energy_2d_original", "", 800, 600);
@@ -95,30 +137,7 @@ void Analysis::SensitivityMeasurementChisquare2()
         c_el_energy_2d_reweight->SaveAs("c_el_energy_2d_reweight.C");
         c_el_energy_2d_reweight->SaveAs("c_el_energy_2d_reweight.png");
         c_el_energy_2d_reweight->SaveAs("c_el_energy_2d_reweight.pdf");
-
-
-        ////////////////////////////////////////////////////////////////////////
-        // CREATE DIFFERENCE AND PULL HISTOGRAMS AND CANVAS OUTPUT
-        ////////////////////////////////////////////////////////////////////////
-
-        // create difference histogram
-        h_el_energy_2d_diff = new TH2D("h_el_energy_2d_diff", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
-        h_el_energy_2d_diff->SetStats(0);
-        for(Int_t j{1}; j <= h_el_energy_2d_diff->GetNbinsY(); ++ j)
-        {
-            for(Int_t i{1}; i <= h_el_energy_2d_diff->GetNbinsX(); ++ i)
-            {
-                Double_t content1{h_el_energy_2d_original->GetBinContent(i, j)};
-                Double_t content2{h_el_energy_2d_reweight->GetBinContent(i, j)};
-                Double_t error1{h_el_energy_2d_original->GetBinError(i, j)};
-                // note: do not use error or reweighted
-                Double_t error2{0.0 * h_el_energy_2d_reweight->GetBinError(i, j)};
-                Double_t content{content1 - content2};
-                Double_t error{std::sqrt(error1 * error1 + error2 * error2)};
-                h_el_energy_2d_diff->SetBinContent(i, j, content);
-                h_el_energy_2d_diff->SetBinError(i, j, error);
-            }
-        }
+        
         c_el_energy_2d_diff = new TCanvas("c_el_energy_2d_diff", "", 800, 600);
         c_el_energy_2d_diff->SetRightMargin(0.15);
         //c_el_energy_2d_diff->SetLogz();
@@ -131,25 +150,6 @@ void Analysis::SensitivityMeasurementChisquare2()
         c_el_energy_2d_diff->SaveAs("c_el_energy_2d_diff.png");
         c_el_energy_2d_diff->SaveAs("c_el_energy_2d_diff.pdf");
         
-        // create pull histogram
-        h_el_energy_2d_pull = new TH2D("h_el_energy_2d_pull", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
-        h_el_energy_2d_pull->SetStats(0);
-        for(Int_t j{1}; j <= h_el_energy_2d_pull->GetNbinsY(); ++ j)
-        {
-            for(Int_t i{1}; i <= h_el_energy_2d_pull->GetNbinsX(); ++ i)
-            {
-                Double_t content{h_el_energy_2d_diff->GetBinContent(i, j)};
-                Double_t error{h_el_energy_2d_diff->GetBinError(i, j)};
-                if(error == 0.0)
-                {
-                    //h_el_energy_2d_pull->SetBinContent(i, j, 0.0);
-                }
-                else
-                {
-                    h_el_energy_2d_pull->SetBinContent(i, j, content / error);
-                }
-            }
-        }
         c_el_energy_2d_pull = new TCanvas("c_el_energy_2d_pull", "", 800, 600);
         c_el_energy_2d_pull->SetRightMargin(0.15);
         //c_el_energy_2d_pull->SetLogz();
@@ -195,5 +195,6 @@ void Analysis::SensitivityMeasurementChisquare2()
         */
 
     }
+    
  
 }

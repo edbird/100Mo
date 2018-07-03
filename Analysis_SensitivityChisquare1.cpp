@@ -12,13 +12,15 @@ void Analysis::SensitivityMeasurementChisquare1()
     // SINGLE ELECTRON ENERGY CHISQUARE METHOD
     ////////////////////////////////////////////////////////////////////////////
 
-    // get chi-square for single electron histograms
+    // get chi-square for single electron histogram
     if(fit_subrange == false)
     {
+    
         for(Int_t i{1}; i <= h_el_energy_original->GetNbinsX(); ++ i)
         {
             if(h_el_energy_original->GetBinContent(i) != 0.0) ++ non_empty_bins;
         }
+        
         sensitivity_chisquare = chi_square_test(h_el_energy_reweight, h_el_energy_original);
         std::cout << "chi square of single electron: " << sensitivity_chisquare << std::endl;
         std::cout << " degrees of freedom: " << non_empty_bins << std::endl;
@@ -27,6 +29,7 @@ void Analysis::SensitivityMeasurementChisquare1()
     }
     else if(fit_subrange == true)
     {
+    
         for(Int_t i{1}; i <= h_el_energy_original->GetNbinsX(); ++ i)
         {
             if(h_el_energy_original->GetBinCenter(i) >= 2.0)
@@ -34,6 +37,7 @@ void Analysis::SensitivityMeasurementChisquare1()
                 if(h_el_energy_original->GetBinContent(i) != 0.0) ++ non_empty_bins;
             }
         }
+        
         sensitivity_chisquare = chi_square_test(h_el_energy_reweight, h_el_energy_original, 2.0, 4.0);
         std::cout << "chi square of single electron, 2.0 MeV - 4.0 MeV: " << sensitivity_chisquare << std::endl;
         std::cout << " degrees of freedom: " << non_empty_bins << std::endl;
@@ -81,23 +85,13 @@ void Analysis::SensitivityMeasurementChisquare1()
     }
 
 
-    //HistogramWrapper2 hwrap_el_energy("el_energy", "x_axis_label_text", "y_axis_label_text", "E");
-    //hwrap_el_energy.SetLogMode(log_mode);
-    //hwrap_el_energy.Add("h_el_energy_original", h_el_energy_original);
-    //hwrap_el_energy.Canvas();
-    // TODO: make some nice histograms
-    // X/Y AXIS: LABEL: TEXT, FONT SIZE, FONT
-    // X/Y AXIS: TICK NUMBERS: FONT SIZE, FONT
-    // X/Y AXIS LIMITS, RANGE, PARTICULARLY Y MAX
-    // GRAPH COLORS
-
-
-    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
     // SINGLE ELECTRON (1D) CHISQUARE CANVAS OUTPUT
-    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
 
     if(_batch_mode_ == false)
     {
+    
         // print single electron distribution
         const Double_t max_log_mode{1000.0e3};
         const Double_t max_nolog_mode{220.0e3};

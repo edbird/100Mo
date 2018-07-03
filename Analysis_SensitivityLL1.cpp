@@ -40,11 +40,11 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
         // SINGLE ELECTRON ENERGY PSEUDODATA METHOD
         ////////////////////////////////////////////////////////////////////////
 
-        // TODO: name of histograms which we iterate over
         // log likelihood method
         // create "data" histogram - poisson generated data
         std::string h_name{std::string("h_el_energy_data_") + eps_string + std::string("_") + std::to_string(count)};
         h_el_energy_data = new TH1I(h_name.c_str(), "", num_bins, 0.0, 4.0);
+        h_el_energy_data->SetStats(0);
         for(Int_t ix{1}; ix <= h_el_energy_sum_original->GetNbinsX(); ++ ix)
         {
             // this is the input lambda value
@@ -73,6 +73,7 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
         std::vector<Double_t> likelihood_sum_vec;
         std::string h_name_prob{std::string("h_el_energy_prob_") + eps_string + std::string("_") + std::to_string(count)}; 
         h_el_energy_prob = new TH1D(h_name_prob.c_str(), "", num_bins, 0.0, 4.0);
+        h_el_energy_prob->SetStats(0);
         for(Int_t ix{1}; ix <= h_el_energy_sum_original->GetNbinsX(); ++ ix)
         {
             //Double_t lambda{h_el_energy_sum_reweight->GetBinContent(ix)}; // reweighted
@@ -94,19 +95,8 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
             likelihood_sum_vec.push_back(poi_log);
 
             h_el_energy_prob->SetBinContent(ix, poi);
-
-            if(h_el_energy_sum_original->GetBinCenter(ix) > 2.0)
-            {
-                //std::cout << "Bin center: " << h_el_energy_sum_original->GetBinCenter(ix) << " lambda=" << lambda << " data=" << data << " prob=" << poi << std::endl; 
-            }
-                
-            if(count == 0)
-            {
-                //std::cout << "lambda=," << lambda << ",data=," << data << ",prob=," << poi << std::endl;
-            }
         }
-        //std::cout << "likelihood=" << likelihood << std::endl;
-        //std::cout << "likelihood = " << likelihood << std::endl;
+        std::cout << "likelihood = " << likelihood << std::endl;
         Double_t log_likelihood{std::log(likelihood)};
         vec_ll.push_back(-2.0 * log_likelihood);
 
@@ -118,6 +108,7 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
             likelihood_sum_vec_sum += *it;
         }
         std::cout << "LL3=" << -2.0 * likelihood_sum_vec_sum << std::endl;
+
 
         // create difference histogram, data - reweight
         std::string h_name_diff_data_rw{std::string("h_el_energy_diff_data_rw_") + eps_string + std::string("_") + std::to_string(count)};
@@ -144,7 +135,6 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
         {
             Double_t content1{h_el_energy_data->GetBinContent(i)};
             Double_t content2{h_el_energy_original->GetBinContent(i)};
-            std::cout << content1 << "   " << content2 << std::endl;
             Double_t error1{h_el_energy_data->GetBinError(i)};
             // note: do not use error or reweighted
             Double_t error2{0.0 * h_el_energy_original->GetBinError(i)};
@@ -213,8 +203,6 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
         }
 
 
-
-
     }
 
 
@@ -228,7 +216,6 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
     Double_t min{*min_max_pair.first};
     Double_t max{*min_max_pair.second};
     h_ll = new TH1D("h_ll", "", 100, min, max);
-    //h_ll->GetXaxis()->SetTitle("Log Likelihood Value");
     h_ll->GetXaxis()->SetTitle("Chi Square Value");
     h_ll->GetYaxis()->SetTitle("Number of Pseudo Experiments");
     // fill the histogram
@@ -240,7 +227,6 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
     c_ll = new TCanvas("c_ll", "", 800, 600);
     h_ll->Draw("E");
     c_ll->SaveAs("c_ll.png");
-
     delete c_ll;
         
 }
