@@ -107,15 +107,18 @@ Double_t fit_function(Double_t *x, Double_t *par)
         throw "problem";
     }
 
+
+    // get y value (content) of this bin
+    // return content
+    Double_t ret{amplitude * y_values[found_bin_index]};
+
     // clean
     delete x_values;
     delete y_values;
     x_values = nullptr;
     y_values = nullptr;
 
-    // get y value (content) of this bin
-    // return content
-    Double_t ret{amplitude * y_values[found_bin_index]};
+    // return
     return ret;
 }
 
@@ -434,8 +437,11 @@ Double_t chi_square_test(const TH2* const histo_fit, const TH2* const histo_data
 // histo_fit is the fit function
 // histo_data is the data
 // 2d version
-Double_t chi_square_test(const TH2* const histo_fit, const TH2* const histo_data, const Double_t min, const Double_t max)
+Double_t chi_square_test(const TH2* const histo_fit, const TH2* const histo_data, const Double_t min, const Double_t max, Int_t &non_empty_bins_2d)
 {
+
+    non_empty_bins_2d = 0;
+
     // number of bins
     Int_t nbx{histo_fit->GetNbinsX()};
     Int_t nby{histo_fit->GetNbinsY()};
@@ -453,12 +459,17 @@ Double_t chi_square_test(const TH2* const histo_fit, const TH2* const histo_data
         {
             Double_t bin_center_x{histo_fit->GetXaxis()->GetBinCenter(ix)};
             Double_t bin_center_y{histo_fit->GetYaxis()->GetBinCenter(iy)};
+            /* note: only care about high energy region - y axis
             if(bin_center_x < min) continue;
             if(bin_center_x > max) continue;
             if(bin_center_y < min) continue;
             if(bin_center_y > max) continue;
+            */
+            if(bin_center_y < min) continue;
+            if(bin_center_y > max) continue;
             Double_t content_f{histo_fit->GetBinContent(ix, iy)};
             Double_t content_d{histo_data->GetBinContent(ix, iy)};
+            if(content_d != 0.0) ++ non_empty_bins_2d;
             Double_t delta{content_f - content_d};
             Double_t error_d{histo_data->GetBinError(ix, iy)};
             if(error_d <= 0.0)
