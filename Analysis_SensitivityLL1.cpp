@@ -99,18 +99,18 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
 
             h_el_energy_prob->SetBinContent(ix, poi);
         }
-        std::cout << "likelihood = " << likelihood << std::endl;
+        //std::cout << "likelihood = " << likelihood << std::endl;
         Double_t log_likelihood{std::log(likelihood)};
         vec_ll.push_back(-2.0 * log_likelihood);
 
-        std::cout << "LL=" << -2.0 * log_likelihood << ", LL2=" << -2.0 * likelihood_sum << ", diff=" << (-2.0 * log_likelihood) - (-2.0 * likelihood_sum) << std::endl;
+        //std::cout << "LL=" << -2.0 * log_likelihood << ", LL2=" << -2.0 * likelihood_sum << ", diff=" << (-2.0 * log_likelihood) - (-2.0 * likelihood_sum) << std::endl;
         std::sort(likelihood_sum_vec.begin(), likelihood_sum_vec.end());
         Double_t likelihood_sum_vec_sum{0.0};
         for(std::vector<Double_t>::const_iterator it{likelihood_sum_vec.cbegin()}; it != likelihood_sum_vec.cend(); ++ it)
         {
             likelihood_sum_vec_sum += *it;
         }
-        std::cout << "LL3=" << -2.0 * likelihood_sum_vec_sum << std::endl;
+        //std::cout << "LL3=" << -2.0 * likelihood_sum_vec_sum << std::endl;
 
 
         // create difference histogram, data - reweight
@@ -218,7 +218,13 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
     std::pair<std::vector<Double_t>::iterator, std::vector<Double_t>::iterator> min_max_pair{std::minmax_element(vec_ll.begin(), vec_ll.end())};
     Double_t min{*min_max_pair.first};
     Double_t max{*min_max_pair.second};
-    h_ll = new TH1D("h_ll", "", 100, min, max);
+    std::string name_ll{std::string("h_ll_") + eps_string};
+    Double_t center{0.5 * (max + min)};
+    Double_t width{0.5 * (max - min)};
+    width *= 1.1;
+    min = center - width;
+    max = center + width;
+    h_ll = new TH1D(name_ll.c_str(), "", 100, min, max);
     h_ll->GetXaxis()->SetTitle("Chi Square Value");
     h_ll->GetYaxis()->SetTitle("Number of Pseudo Experiments");
     // fill the histogram
@@ -227,9 +233,10 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
         h_ll->Fill(*it);
     }
 
-    c_ll = new TCanvas("c_ll", "", 800, 600);
+    std::string c_name_ll{std::string("c_ll_") + eps_string};
+    c_ll = new TCanvas(c_name_ll.c_str(), "", 800, 600);
     h_ll->Draw("E");
-    c_ll->SaveAs("c_ll.png");
+    c_ll->SaveAs((c_name_ll + std::string(".png")).c_str());
     delete c_ll;
         
 }
