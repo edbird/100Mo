@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
 
     // THIS CODE FOR PRODUCING THE TEST HISTOGRAMS
 
-#if 1
+#if 0
     
     //analysis.SetEpsilon31(epsilon_31);
     analysis.SetEpsilon31(0.5);
@@ -206,7 +206,7 @@ int main(int argc, char* argv[])
 
     // THIS CODE FOR REGULAR DATA ANALYSIS RUN
 
-#if 0
+#if 1
     // run analysis
     analysis.ReadData();
     //analysis.CanvasRawData();
@@ -215,7 +215,7 @@ int main(int argc, char* argv[])
     analysis.InitSingleElectronTest();
     analysis.InitEventLoopTree();
     analysis.InitEventLoopHistogram();
-    analysis.SetNumberOfPseudoexperiments(10000, 1);
+    analysis.SetNumberOfPseudoexperiments(10000, 10000);
 
     //Double_t eps_incr{0.025};
     Double_t eps_min{std::stod(arg_eps_min)};
@@ -225,21 +225,23 @@ int main(int argc, char* argv[])
     for(Double_t eps{eps_min}; eps <= eps_max + 0.5 * eps_incr; eps += eps_incr)
     {
         std::cout << "Running: eps=" << eps << std::endl;
-        //analysis.AddEpsilonValue(eps);
+        analysis.AddEpsilonValue(eps);
     }
-    analysis.AddEpsilonValue(0.5);
+
 
     //analysis.AddEpsilonValue(0.368);
     //analysis.AddEpsilonValue(0.5);
+
     analysis.RunOverEpsilonVector();
     
-    
+    /* 
     analysis.SummedEnergyFit();
     analysis.SensitivityMeasurementChisquare1();
     analysis.SensitivityMeasurementChisquare2();
     analysis.SensitivityMeasurementLoglikelihood1();
     analysis.SensitivityMeasurementLoglikelihood2();
     analysis.PrintOutputToFile();
+    */
 #endif
 
 
