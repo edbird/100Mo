@@ -28,16 +28,24 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
     
     for(Int_t count{0}; count < number_of_pseudo_experiments_2d; ++ count)
     {
+    
+        std::cout << "count=" << count << std::endl;
 
 
         delete h_el_energy_2d_data;
+        std::cout << "1 delete done" << std::endl;
         delete h_el_energy_2d_prob;
+        std::cout << "2 delete done" << std::endl;
         delete h_el_energy_2d_diff_data_rw;
+        std::cout << "3 delete done" << std::endl;
         delete h_el_energy_2d_diff_data_orig;
+        std::cout << "4 delete done" << std::endl;
         h_el_energy_2d_data = nullptr;
         h_el_energy_2d_prob = nullptr;
         h_el_energy_2d_diff_data_rw = nullptr;
         h_el_energy_2d_diff_data_orig = nullptr;
+        
+        std::cout << "delete done" << std::endl;
 
 
         ////////////////////////////////////////////////////////////////////////
@@ -61,9 +69,11 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
                 h_el_energy_2d_data->SetBinContent(ix, jx, poisson_result);
             }
         }
+        std::cout << "data done" << std::endl;
 
         // compute poisson likelihood for each bin
         Double_t likelihood_2d{1.0};
+        Double_t likelihood_sum_2d{0.0};
         std::string h_name_prob_2d{std::string("h_el_energy_2d_prob_") + eps_string + std::string("_") + std::to_string(count)}; 
         h_el_energy_2d_prob = new TH2D(h_name_prob_2d.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
         h_el_energy_2d_prob->SetStats(0);
@@ -81,13 +91,20 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
                 Double_t poi{TMath::Poisson(data, lambda)};
                 likelihood_2d *= poi;
 
+                Double_t poi_log{std::log(poi)};
+                likelihood_sum_2d += poi_log;
+
                 h_el_energy_2d_prob->SetBinContent(ix, jx, poi);
             }
         }
-        std::cout << "likelihood (2d) = " << likelihood_2d << std::endl;
+        std::cout << "prob done" << std::endl;
+        //std::cout << "likelihood (2d) = " << likelihood_2d << std::endl;
         Double_t log_likelihood_2d{std::log(likelihood_2d)};
-        vec_ll_2d.push_back(-2.0 * log_likelihood_2d);
+        //vec_ll_2d.push_back(-2.0 * log_likelihood_2d);
+        vec_ll_2d.push_back(-2.0 * likelihood_sum_2d);
     
+        //std::cout << "LL=" << -2.0 * log_likelihood_2d << ", LL2=" << -2.0 * likelihood_sum_2d << ", diff=" << (-2.0 * log_likelihood_2d) - (-2.0 * likelihood_sum_2d) << std::endl;
+        
         
         // create difference histogram - difference between data and reweighted
         std::string h_name_2d_diff_data_rw{std::string("h_el_energy_2d_diff_data_rw_") + eps_string + std::string("_") + std::to_string(count)};
@@ -108,6 +125,7 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
                 h_el_energy_2d_diff_data_rw->SetBinError(i, j, error);
             }
         }
+        std::cout << "diff done" << std::endl;
 
         // create difference histogram - difference between data and original
         std::string h_name_2d_diff_data_orig{std::string("h_el_energy_2d_diff_data_orig_") + eps_string + std::string("_") + std::to_string(count)};
@@ -128,6 +146,7 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
                 h_el_energy_2d_diff_data_orig->SetBinError(i, j, error);
             }
         }
+        std::cout << "other diff done" << std::endl;
 
 
         ////////////////////////////////////////////////////////////////////
@@ -218,6 +237,7 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
         */
 
     }
+    std::cout << "creating output" << std::endl;
 
 
     ////////////////////////////////////////////////////////////////////////////
@@ -227,7 +247,13 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
     std::pair<std::vector<Double_t>::iterator, std::vector<Double_t>::iterator> min_max_pair_2d{std::minmax_element(vec_ll_2d.begin(), vec_ll_2d.end())};
     Double_t min_2d{*min_max_pair_2d.first};
     Double_t max_2d{*min_max_pair_2d.second};
-    h_ll_2d = new TH1D("h_ll_2d", "", 100, min_2d, max_2d);
+    std::string name_ll_2d{std::string("h_ll_2d_") + eps_string};
+    Double_t center_2d{0.5 * (max_2d + min_2d)};
+    Double_t width_2d{0.5 * (max_2d - min_2d)};
+    width_2d *= 1.1;
+    min_2d = center_2d - width_2d;
+    max_2d = center_2d + width_2d;
+    h_ll_2d = new TH1D(name_ll_2d.c_str(), "", 100, min_2d, max_2d);
     h_ll_2d->GetXaxis()->SetTitle("Chi Square Value");
     h_ll_2d->GetYaxis()->SetTitle("Number of Pseudo Experiments");
     // fill the histogram
@@ -235,10 +261,11 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
     {
         h_ll_2d->Fill(*it);
     }
-
-    c_ll_2d = new TCanvas("c_ll_2d", "", 800, 600);
+    
+    std::string c_name_ll_2d{std::string("c_ll_2d_") + eps_string};
+    c_ll_2d = new TCanvas(c_name_ll_2d.c_str(), "", 800, 600);
     h_ll_2d->Draw("E");
-    c_ll_2d->SaveAs("c_ll_2d.png");
+    c_ll_2d->SaveAs((c_name_ll_2d + std::string(".png")).c_str());
     delete c_ll_2d;
 
 }
