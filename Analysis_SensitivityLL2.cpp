@@ -24,29 +24,22 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
     
     delete h_ll_2d;
     h_ll_2d = nullptr;
+
+    vec_ll_2d.clear();
     
     
     for(Int_t count{0}; count < number_of_pseudo_experiments_2d; ++ count)
     {
     
-        std::cout << "count=" << count << std::endl;
-
-
         delete h_el_energy_2d_data;
-        std::cout << "1 delete done" << std::endl;
         delete h_el_energy_2d_prob;
-        std::cout << "2 delete done" << std::endl;
         delete h_el_energy_2d_diff_data_rw;
-        std::cout << "3 delete done" << std::endl;
         delete h_el_energy_2d_diff_data_orig;
-        std::cout << "4 delete done" << std::endl;
         h_el_energy_2d_data = nullptr;
         h_el_energy_2d_prob = nullptr;
         h_el_energy_2d_diff_data_rw = nullptr;
         h_el_energy_2d_diff_data_orig = nullptr;
         
-        std::cout << "delete done" << std::endl;
-
 
         ////////////////////////////////////////////////////////////////////////
         // INDEPENDENT SINGLE ELECTRON ENERGY
@@ -69,7 +62,6 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
                 h_el_energy_2d_data->SetBinContent(ix, jx, poisson_result);
             }
         }
-        std::cout << "data done" << std::endl;
 
         // compute poisson likelihood for each bin
         Double_t likelihood_2d{1.0};
@@ -97,7 +89,6 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
                 h_el_energy_2d_prob->SetBinContent(ix, jx, poi);
             }
         }
-        std::cout << "prob done" << std::endl;
         //std::cout << "likelihood (2d) = " << likelihood_2d << std::endl;
         Double_t log_likelihood_2d{std::log(likelihood_2d)};
         //vec_ll_2d.push_back(-2.0 * log_likelihood_2d);
@@ -125,7 +116,6 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
                 h_el_energy_2d_diff_data_rw->SetBinError(i, j, error);
             }
         }
-        std::cout << "diff done" << std::endl;
 
         // create difference histogram - difference between data and original
         std::string h_name_2d_diff_data_orig{std::string("h_el_energy_2d_diff_data_orig_") + eps_string + std::string("_") + std::to_string(count)};
@@ -146,7 +136,6 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
                 h_el_energy_2d_diff_data_orig->SetBinError(i, j, error);
             }
         }
-        std::cout << "other diff done" << std::endl;
 
 
         ////////////////////////////////////////////////////////////////////
@@ -237,7 +226,6 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
         */
 
     }
-    std::cout << "creating output" << std::endl;
 
 
     ////////////////////////////////////////////////////////////////////////////
