@@ -154,23 +154,23 @@ void Analysis::RunOverEpsilonVector()
         //std::cin.get();
         SummedEnergyFit();
         
-        std::cout << "Press Enter to Chisquare1" << std::endl;
+        //std::cout << "Press Enter to Chisquare1" << std::endl;
         //std::cin.get();
         SensitivityMeasurementChisquare1();
         
-        std::cout << "Press Enter to Chisquare2" << std::endl;
+        //std::cout << "Press Enter to Chisquare2" << std::endl;
         //std::cin.get();
         SensitivityMeasurementChisquare2();
         
-        std::cout << "Press Enter to Loglikelihood1" << std::endl;
+        //std::cout << "Press Enter to Loglikelihood1" << std::endl;
         //std::cin.get();
         SensitivityMeasurementLoglikelihood1();
         
-        std::cout << "Press Enter to Loglikelihood2" << std::endl;
+        //std::cout << "Press Enter to Loglikelihood2" << std::endl;
         //std::cin.get();
         SensitivityMeasurementLoglikelihood2();
 
-        std::cout << "Press Enter to Print" << std::endl;
+        //std::cout << "Press Enter to Print" << std::endl;
         //std::cin.get();
         PrintOutputToFile();
     }
