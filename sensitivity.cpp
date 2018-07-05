@@ -237,8 +237,8 @@ int main(int argc, char* argv[])
 
     }
 
-    TH1D *h_minimum = new TH1D("h_minimum", "", 50, 0.0, 0.8);
-    TH1D *h_width = new TH1D("h_width", "", 100, 0.1, 0.15);
+    TH1D *h_minimum = new TH1D("h_minimum", "", 50, 0.3, 0.45);
+    TH1D *h_width = new TH1D("h_width", "", 100, -0.1, 0.1);
 
     std::ofstream ofs_min_width("ofs_min_width.txt");
     for(std::size_t i{0}; i < v_minimum.size(); ++ i)
@@ -249,11 +249,11 @@ int main(int argc, char* argv[])
     }
     ofs_min_width.close();
 
-    CanvasFactorySettings settings("Minimum", "Experiments", 0.0, 150000.0, false);
+    CanvasFactorySettings settings("Minimum", "Experiments", 0.0, 1500.0, false);
     CanvasFactory factory(settings);
     factory.Canvas("h_minimum", ".", h_minimum, "Minimum");
     
-    CanvasFactorySettings settings2("Width", "Experiments", 0.0, 60000.0, false);
+    CanvasFactorySettings settings2("Width", "Experiments", 0.0, 3000.0, false);
     CanvasFactory factory2(settings2);
     factory2.Canvas("h_width", ".", h_width, "Width");
 

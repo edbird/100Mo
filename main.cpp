@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
 //    analysis.SetNumberOfPseudoexperiments(10000, 1);
 //=======
     analysis.InitEventLoopHistogram();
-    analysis.SetNumberOfPseudoexperiments(10000, 10000);
+    analysis.SetNumberOfPseudoexperiments(100, 100);
 //>>>>>>> 39030f95ed5a3920b8a999e9180245e89cd9b007
 
     //Double_t eps_incr{0.025};
