@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
 
     // THIS CODE FOR PRODUCING THE TEST HISTOGRAMS
 
-#if 1
+#if 0
     
     //analysis.SetEpsilon31(epsilon_31);
     analysis.SetEpsilon31(0.5);
@@ -188,17 +188,21 @@ int main(int argc, char* argv[])
     analysis.CanvasSingleElectronProjection();
     analysis.InitSingleElectronTest();
     analysis.InitEventLoopTree();
+
+    // event loop
     analysis.InitEventLoopHistogram();
     analysis.EventLoop();
     analysis.PostProcess();
-    analysis.CanvasSingleElectronTest();
-    
+
     analysis.SummedEnergyFit();
     analysis.SensitivityMeasurementChisquare1();
     analysis.SensitivityMeasurementChisquare2();
     analysis.SensitivityMeasurementLoglikelihood1();
     analysis.SensitivityMeasurementLoglikelihood2();
     analysis.PrintOutputToFile();
+
+    // note: assumed this can go here?
+    analysis.CanvasSingleElectronTest();
     
 
 #endif
@@ -206,40 +210,50 @@ int main(int argc, char* argv[])
 
     // THIS CODE FOR REGULAR DATA ANALYSIS RUN
 
-#if 0
+#if 1
+
     // run analysis
     analysis.ReadData();
     //analysis.CanvasRawData();
     analysis.CanvasDecayRate();
     analysis.CanvasSingleElectronProjection();
-    analysis.InitSingleElectronTest();
+    ///analysis.InitSingleElectronTest(); // have not integrated this into the multi run mode
     analysis.InitEventLoopTree();
-    analysis.InitEventLoopHistogram();
+    
+    // set number of pseudoexperiments
     analysis.SetNumberOfPseudoexperiments(10000, 1);
 
     //Double_t eps_incr{0.025};
     Double_t eps_min{std::stod(arg_eps_min)};
     Double_t eps_max{std::stod(arg_eps_max)};
     Int_t eps_num{std::stoi(arg_eps_num)};
-    Double_t eps_incr{(eps_max - eps_min) / (Double_t)eps_num};
-    for(Double_t eps{eps_min}; eps <= eps_max + 0.5 * eps_incr; eps += eps_incr)
+    if(eps_num < 1)
     {
-        std::cout << "Running: eps=" << eps << std::endl;
-        //analysis.AddEpsilonValue(eps);
+        std::cout << "error" << std::endl;
     }
-    analysis.AddEpsilonValue(0.5);
+    else if(eps_num == 1)
+    {
+        // TODO: should switch mode here depending on if eps_min, eps_max are
+        // provided or a single eps is provided as prog arg
+        std::cout << "Running: eps=" << eps_min << std::endl;
+        analysis.AddEpsilonValue(eps_min);
+    }
+    else
+    {
+        Double_t eps_incr{(eps_max - eps_min) / (Double_t)(eps_num - 1)};
+        for(Double_t eps{eps_min}; eps <= eps_max + 0.5 * eps_incr; eps += eps_incr)
+        {
+            std::cout << "Running: eps=" << eps << std::endl;
+            analysis.AddEpsilonValue(eps);
+        }
+    }
 
     //analysis.AddEpsilonValue(0.368);
     //analysis.AddEpsilonValue(0.5);
+
     analysis.RunOverEpsilonVector();
     
     
-    analysis.SummedEnergyFit();
-    analysis.SensitivityMeasurementChisquare1();
-    analysis.SensitivityMeasurementChisquare2();
-    analysis.SensitivityMeasurementLoglikelihood1();
-    analysis.SensitivityMeasurementLoglikelihood2();
-    analysis.PrintOutputToFile();
 #endif
 
 
