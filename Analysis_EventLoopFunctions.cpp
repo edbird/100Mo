@@ -41,16 +41,18 @@ void Analysis::InitEventLoopHistogram()
 {
 
     
-    delete h_el_energy_original;
-    delete h_el_energy_reweight;
     delete h_el_energy_sum_original;
     delete h_el_energy_sum_reweight;
+    delete h_el_energy_original;
+    delete h_el_energy_reweight;
+    delete h_el_energy_diff;
+    delete h_el_energy_pull;
     delete h_el_energy_2d_original;
     delete h_el_energy_2d_reweight;
     delete h_el_energy_2d_diff;
     delete h_el_energy_2d_pull;
-    delete h_el_energy_2d_diff_data_rw;
-    delete h_el_energy_2d_diff_data_orig;
+    //delete h_el_energy_2d_diff_data_rw;
+    //delete h_el_energy_2d_diff_data_orig;
     delete h_gen_weight;
 
 
