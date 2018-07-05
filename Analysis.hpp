@@ -226,6 +226,8 @@ class Analysis
     TH1D *h_el_energy_diff;
     // pull
     TH1D *h_el_energy_pull;
+    // ratio
+    TH1D *h_el_energy_ratio;
 
     // log likelihood pseudoexperiments method
     TH1D *h_el_energy_diff_data_rw; // data - reweighted
@@ -242,6 +244,8 @@ class Analysis
     TH2D *h_el_energy_2d_diff;
     // chisquare pull
     TH2D *h_el_energy_2d_pull;
+    // ratio
+    TH2D *h_el_energy_2d_ratio;
 
     // log likelihood pseudoexperiments method
     TH2I *h_el_energy_2d_data;

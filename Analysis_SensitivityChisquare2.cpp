@@ -111,6 +111,28 @@ void Analysis::SensitivityMeasurementChisquare2()
         }
     }
 
+    // create ratio histogram
+    h_el_energy_ratio = new TH1D("h_el_energy_ratio", "", num_bins, 0.0, 4.0);
+    h_el_energy_ratio->SetStats(0);
+    for(Int_t i{1}; i <= h_el_energy_ratio->GetNbinsX(); ++ i)
+    {
+        Double_t content1{h_el_energy_original->GetBinContent(i)};
+        Double_t content2{h_el_energy_reweight->GetBinContent(i)};
+        Double_t error1{h_el_energy_original->GetBinError(i)}; // correct way round?
+        // note: do not use error or reweighted
+        Double_t error2{0.0 * h_el_energy_reweight->GetBinError(i)};
+        Double_t content{content2 / content1}; // correct way round?
+        Double_t error{std::sqrt(std::pow(error1 * (1.0 / content2), 2.0) + std::pow(error2 * (content1 / (content2 * content2)), 2.0))}; // should error2 be used?
+        h_el_energy_ratio->SetBinContent(i, content);
+        h_el_energy_ratio->SetBinError(i, error);
+        // what to do if content1 = 0.0 -> div by zero error
+    }
+    TFile *f_el_energy_ratio_2d = new TFile("h_el_energy_ratio_2d", "WRITE");
+    h_el_energy_ratio_2d->Write();
+    f_el_energy_ratio_2d->Close();
+    delete f_el_energy_ratio_2d;
+    f_el_energy_ratio_2d = nullptr;
+
 
     ////////////////////////////////////////////////////////////////////////////
     // 2D ORIGINAL AND REWEIGHT CANVAS OUTPUT

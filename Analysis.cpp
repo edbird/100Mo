@@ -52,6 +52,7 @@ Analysis::Analysis(const std::string& filename, const std::string& output_filena
     , h_el_energy_sum_reweight{nullptr}
     , h_el_energy_diff{nullptr}
     , h_el_energy_pull{nullptr}
+    , h_el_energy_ratio{nullptr}
     , h_el_energy_data{nullptr}
     , h_el_energy_prob{nullptr}
     , h_el_energy_diff_data_rw{nullptr}
@@ -60,6 +61,7 @@ Analysis::Analysis(const std::string& filename, const std::string& output_filena
     , h_el_energy_2d_reweight{nullptr}
     , h_el_energy_2d_diff{nullptr}
     , h_el_energy_2d_pull{nullptr}
+    , h_el_energy_2d_ratio{nullptr}
     , h_el_energy_2d_data{nullptr}
     , h_el_energy_2d_prob{nullptr}
     , h_el_energy_2d_diff_data_rw{nullptr}
@@ -164,11 +166,11 @@ void Analysis::RunOverEpsilonVector()
         
         //std::cout << "Press Enter to Loglikelihood1" << std::endl;
         //std::cin.get();
-        SensitivityMeasurementLoglikelihood1();
+        //SensitivityMeasurementLoglikelihood1();
         
         //std::cout << "Press Enter to Loglikelihood2" << std::endl;
         //std::cin.get();
-        SensitivityMeasurementLoglikelihood2();
+        //SensitivityMeasurementLoglikelihood2();
 
         //std::cout << "Press Enter to Print" << std::endl;
         //std::cin.get();

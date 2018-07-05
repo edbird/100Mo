@@ -47,10 +47,12 @@ void Analysis::InitEventLoopHistogram()
     delete h_el_energy_reweight;
     delete h_el_energy_diff;
     delete h_el_energy_pull;
+    delete h_el_energy_ratio;
     delete h_el_energy_2d_original;
     delete h_el_energy_2d_reweight;
     delete h_el_energy_2d_diff;
     delete h_el_energy_2d_pull;
+    delete h_el_energy_2d_ratio;
     //delete h_el_energy_2d_diff_data_rw;
     //delete h_el_energy_2d_diff_data_orig;
     delete h_gen_weight;
@@ -111,6 +113,9 @@ void Analysis::InitEventLoopHistogram()
 void Analysis::EventLoop()
 {
 
+    // 2 % energy shift
+    Double_t systematic_energy_mult{1.0 + 0.02};
+
     std::cout << "Processing data" << std::endl;
     Long64_t prog_c{-1};
     //const Double epsilon_31{0.0};
@@ -119,13 +124,16 @@ void Analysis::EventLoop()
 
         t->GetEntry(ix);
 
+        Double_t el_energy_0{el_energy_[0] * systematic_energy_mult};
+        Double_t el_energy_1{el_energy_[1] * systematic_energy_mult};
+
         if(nElectrons != 2) continue;
 
         // cut both electrons > 300 keV
         if(_energy_cut_enable_)
         {
-            if(el_energy_[0] < 0.3) continue;
-            if(el_energy_[1] < 0.3) continue;
+            if(el_energy_0 < 0.3) continue;
+            if(el_energy_1 < 0.3) continue;
         }
 
         Double_t T1{trueT1 / bb_Q};
@@ -135,18 +143,18 @@ void Analysis::EventLoop()
         Double_t weight{ReWeight2(T1, T2, epsilon_31, h_nEqNull, h_nEqTwo, psiN0, psiN2, "true")};
         //Double_t weight{ReWeight(T1, T2, epsilon_31, h_nEqNull, h_nEqTwo, psiN0, psiN2, "true")};
 
-        h_el_energy_original->Fill(el_energy_[0], 1.0 * gen_weight);
-        h_el_energy_original->Fill(el_energy_[1], 1.0 * gen_weight);
+        h_el_energy_original->Fill(el_energy_0, 1.0 * gen_weight);
+        h_el_energy_original->Fill(el_energy_1, 1.0 * gen_weight);
         
-        h_el_energy_sum_original->Fill(el_energy_[0] + el_energy_[1], 1.0 * gen_weight);
+        h_el_energy_sum_original->Fill(el_energy_0 + el_energy_1, 1.0 * gen_weight);
         
-        if(el_energy_[0] <= el_energy_[1])
+        if(el_energy_0 <= el_energy_1)
         {
-            h_el_energy_2d_original->Fill(el_energy_[0], el_energy_[1], 1.0 * gen_weight);
+            h_el_energy_2d_original->Fill(el_energy_0, el_energy_1, 1.0 * gen_weight);
         }
         else
         {
-            h_el_energy_2d_original->Fill(el_energy_[1], el_energy_[0], 1.0 * gen_weight);
+            h_el_energy_2d_original->Fill(el_energy_1, el_energy_0, 1.0 * gen_weight);
         }
         
         // test histograms
@@ -173,18 +181,18 @@ void Analysis::EventLoop()
         }
         */
 
-        h_el_energy_reweight->Fill(el_energy_[0], weight * gen_weight);
-        h_el_energy_reweight->Fill(el_energy_[1], weight * gen_weight);
+        h_el_energy_reweight->Fill(el_energy_0, weight * gen_weight);
+        h_el_energy_reweight->Fill(el_energy_1, weight * gen_weight);
 
-        h_el_energy_sum_reweight->Fill(el_energy_[0] + el_energy_[1], weight * gen_weight);
+        h_el_energy_sum_reweight->Fill(el_energy_0 + el_energy_1, weight * gen_weight);
 
-        if(el_energy_[0] <= el_energy_[1])
+        if(el_energy_0 <= el_energy_1)
         {
-            h_el_energy_2d_reweight->Fill(el_energy_[0], el_energy_[1], weight * gen_weight);
+            h_el_energy_2d_reweight->Fill(el_energy_0, el_energy_1, weight * gen_weight);
         }
         else
         {
-            h_el_energy_2d_reweight->Fill(el_energy_[1], el_energy_[0], weight * gen_weight);
+            h_el_energy_2d_reweight->Fill(el_energy_1, el_energy_0, weight * gen_weight);
         }
 
         // test histograms
