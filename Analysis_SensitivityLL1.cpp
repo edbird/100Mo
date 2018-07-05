@@ -25,6 +25,8 @@ void Analysis::SensitivityMeasurementLoglikelihood1()
     delete h_ll;
     h_ll = nullptr;
 
+    vec_ll.clear();
+
 
     for(Int_t count{0}; count < number_of_pseudo_experiments; ++ count)
     {
