@@ -7,7 +7,7 @@ SET(CMAKE_CXX_STANDARD 11)
 
 PROJECT(main)
 
-ADD_EXECUTABLE(main aux.cpp ReWeight.cpp Analysis.cpp Analysis_ReadData.cpp Analysis_CanvasFunctions.cpp Analysis_EventLoopFunctions.cpp Analysis_SensitivityFunctions.cpp main.cpp)
+ADD_EXECUTABLE(main aux.cpp ReWeight.cpp Analysis.cpp Analysis_ReadData.cpp Analysis_CanvasFunctions.cpp Analysis_EventLoopFunctions.cpp Analysis_SensitivityFunctions.cpp Analysis_SensitivityChisquare1.cpp Analysis_SensitivityChisquare2.cpp Analysis_SensitivityLL1.cpp Analysis_SensitivityLL2.cpp main.cpp)
 ADD_EXECUTABLE(createtree ReWeight.cpp createtree.cpp)
 ADD_EXECUTABLE(sensitivity sensitivity.cpp)
 ADD_EXECUTABLE(canvas_test canvas_test.cpp)

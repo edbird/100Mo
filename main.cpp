@@ -211,7 +211,10 @@ int main(int argc, char* argv[])
     // THIS CODE FOR REGULAR DATA ANALYSIS RUN
 
 #if 1
-
+//<<<<<<< HEAD
+//
+//=======
+//>>>>>>> 39030f95ed5a3920b8a999e9180245e89cd9b007
     // run analysis
     analysis.ReadData();
     //analysis.CanvasRawData();
@@ -219,9 +222,14 @@ int main(int argc, char* argv[])
     analysis.CanvasSingleElectronProjection();
     ///analysis.InitSingleElectronTest(); // have not integrated this into the multi run mode
     analysis.InitEventLoopTree();
-    
-    // set number of pseudoexperiments
-    analysis.SetNumberOfPseudoexperiments(10000, 1);
+//<<<<<<< HEAD
+//    
+//    // set number of pseudoexperiments
+//    analysis.SetNumberOfPseudoexperiments(10000, 1);
+//=======
+    analysis.InitEventLoopHistogram();
+    analysis.SetNumberOfPseudoexperiments(10000, 10000);
+//>>>>>>> 39030f95ed5a3920b8a999e9180245e89cd9b007
 
     //Double_t eps_incr{0.025};
     Double_t eps_min{std::stod(arg_eps_min)};
@@ -229,6 +237,7 @@ int main(int argc, char* argv[])
     Int_t eps_num{std::stoi(arg_eps_num)};
     if(eps_num < 1)
     {
+//<<<<<<< HEAD
         std::cout << "error" << std::endl;
     }
     else if(eps_num == 1)
@@ -247,13 +256,30 @@ int main(int argc, char* argv[])
             analysis.AddEpsilonValue(eps);
         }
     }
+//=======
+//        std::cout << "Running: eps=" << eps << std::endl;
+//        analysis.AddEpsilonValue(eps);
+//    }
+//
+//>>>>>>> 39030f95ed5a3920b8a999e9180245e89cd9b007
 
     //analysis.AddEpsilonValue(0.368);
     //analysis.AddEpsilonValue(0.5);
 
     analysis.RunOverEpsilonVector();
     
-    
+//<<<<<<< HEAD
+//    
+//=======
+    /* 
+    analysis.SummedEnergyFit();
+    analysis.SensitivityMeasurementChisquare1();
+    analysis.SensitivityMeasurementChisquare2();
+    analysis.SensitivityMeasurementLoglikelihood1();
+    analysis.SensitivityMeasurementLoglikelihood2();
+    analysis.PrintOutputToFile();
+    */
+//>>>>>>> 39030f95ed5a3920b8a999e9180245e89cd9b007
 #endif
 
 

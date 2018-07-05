@@ -1,4 +1,8 @@
 #!/bin/bash
 #./build/main --epsilon 0.8
+#<<<<<<< HEAD
 ./build/main --batch-mode false --fit-subrange false --energy-cut false --epsilon-min 0.2 --epsilon-max 0.6 --epsilon-num 5 --output-file "of_data_testing_single_run.txt" 2> "log_testing_single_run_.txt"
+#=======
+#./build/main --batch-mode false --fit-subrange false --energy-cut false --epsilon-min 0.10 --epsilon-max 0.70 --epsilon-num 100 --output-file "of_data_testing_single_run.txt" #> "log_testing_single_run_EPS_"$EPSILON".txt"
+#>>>>>>> 39030f95ed5a3920b8a999e9180245e89cd9b007
 #./build/main --batch-mode false --output-file "of_data_testing_single_run.txt" --filename "NewElectronNtuplizerExe_Int_ManDB_output.output.root" #> "log_testing_single_run_EPS_"$EPSILON".txt"
