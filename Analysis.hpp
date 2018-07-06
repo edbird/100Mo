@@ -37,6 +37,7 @@ class Analysis
     // ANALYSIS FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////
 
+    void SetSystematicEnergyMultiplier(const Double_t);
     void SetEpsilon31(const Double_t);
     void AddEpsilonValue(const Double_t epsilon);
     void RunOverEpsilonVector();
@@ -107,6 +108,9 @@ class Analysis
 
     std::vector<Double_t> vec_epsilon_31;
     Double_t epsilon_31;
+
+    // systematic energy shift
+    Double_t systematic_energy_mult;
 
     TFile *f;
     TTree *t;

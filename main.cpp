@@ -47,6 +47,7 @@ int main(int argc, char* argv[])
     pa.Add("eps_min", "--epsilon-min", "0.0");
     pa.Add("eps_max", "--epsilon-max", "1.0");
     pa.Add("eps_num", "--epsilon-num", "1");
+    pa.Add("syst_energy_mult", "--systematic-energy-mult", "1.0");
     pa.Print();
     pa.Process(argc, argv);
 
@@ -66,8 +67,9 @@ int main(int argc, char* argv[])
     std::string arg_eps_min{pa.Get("eps_min")};
     std::string arg_eps_max{pa.Get("eps_max")};
     std::string arg_eps_num{pa.Get("eps_num")};
+    std::string arg_systematic_energy_mult{pa.Get("syst_energy_mult")};
 
-
+    double systematic_energy_mult{std::stod(arg_systematic_energy_mult)};
     double epsilon_31{std::stod(arg_epsilon_31)};
     bool batch_mode{false};
     if(arg_batch_mode == std::string("true"))
@@ -153,6 +155,8 @@ int main(int argc, char* argv[])
     analysis.SetBatchMode(batch_mode);
     analysis.SetCanvasEnableRawData(false);
     analysis.SetCanvasEnableDecayRate(false);
+
+    analysis.SetSystematicEnergyMultiplier(systematic_energy_mult);
 
     if(arg_fit_subrange == std::string("true"))
     {

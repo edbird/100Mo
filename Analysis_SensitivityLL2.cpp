@@ -250,7 +250,7 @@ void Analysis::SensitivityMeasurementLoglikelihood2()
         h_ll_2d->Fill(*it);
     }
     
-    std::string c_name_ll_2d{std::string("c_ll_2d_") + eps_string};
+    std::string c_name_ll_2d{std::string("c_ll_2d/") + std::string("c_ll_2d_") + eps_string};
     c_ll_2d = new TCanvas(c_name_ll_2d.c_str(), "", 800, 600);
     h_ll_2d->Draw("E");
     c_ll_2d->SaveAs((c_name_ll_2d + std::string(".png")).c_str());

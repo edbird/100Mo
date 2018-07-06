@@ -11,6 +11,9 @@
 void Analysis::SensitivityMeasurementChisquare2()
 {
 
+    const std::string eps_string{std::to_string(epsilon_31)};
+    const std::string systematic_energy_mult_string{std::to_string(systematic_energy_mult)};
+
     // reset
     non_empty_bins_2d = 0;
     
@@ -112,26 +115,34 @@ void Analysis::SensitivityMeasurementChisquare2()
     }
 
     // create ratio histogram
-    h_el_energy_ratio = new TH1D("h_el_energy_ratio", "", num_bins, 0.0, 4.0);
-    h_el_energy_ratio->SetStats(0);
-    for(Int_t i{1}; i <= h_el_energy_ratio->GetNbinsX(); ++ i)
+    std::string h_el_energy_2d_ratio_name{std::string("h_el_energy_2d_ratio") + std::string("_") + eps_string + std::string("_") + systematic_energy_mult_string};
+    h_el_energy_2d_ratio = new TH2D(h_el_energy_2d_ratio_name.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+    h_el_energy_2d_ratio->SetStats(0);
+    for(Int_t j{1}; j <= h_el_energy_2d_ratio->GetNbinsY(); ++ j)
     {
-        Double_t content1{h_el_energy_original->GetBinContent(i)};
-        Double_t content2{h_el_energy_reweight->GetBinContent(i)};
-        Double_t error1{h_el_energy_original->GetBinError(i)}; // correct way round?
-        // note: do not use error or reweighted
-        Double_t error2{0.0 * h_el_energy_reweight->GetBinError(i)};
-        Double_t content{content2 / content1}; // correct way round?
-        Double_t error{std::sqrt(std::pow(error1 * (1.0 / content2), 2.0) + std::pow(error2 * (content1 / (content2 * content2)), 2.0))}; // should error2 be used?
-        h_el_energy_ratio->SetBinContent(i, content);
-        h_el_energy_ratio->SetBinError(i, error);
-        // what to do if content1 = 0.0 -> div by zero error
+        for(Int_t i{1}; i <= h_el_energy_2d_ratio->GetNbinsX(); ++ i)
+        {
+            Double_t content1{h_el_energy_2d_original->GetBinContent(i, j)};
+            Double_t content2{h_el_energy_2d_reweight->GetBinContent(i, j)};
+            Double_t error1{h_el_energy_2d_original->GetBinError(i, j)}; // correct way round?
+            // note: do not use error or reweighted
+            Double_t error2{0.0 * h_el_energy_2d_reweight->GetBinError(i, j)};
+            if(content2 != 0.0)
+            {
+                Double_t content{content1 / content2}; // correct way round?
+                Double_t error{std::sqrt(std::pow(error1 * (1.0 / content2), 2.0) + std::pow(error2 * (content1 / (content2 * content2)), 2.0))}; // should error2 be used?
+                h_el_energy_2d_ratio->SetBinContent(i, j, content);
+                h_el_energy_2d_ratio->SetBinError(i, j, error);
+                // what to do if content1 = 0.0 -> div by zero error
+            }
+        }
     }
-    TFile *f_el_energy_ratio_2d = new TFile("h_el_energy_ratio_2d", "WRITE");
-    h_el_energy_ratio_2d->Write();
-    f_el_energy_ratio_2d->Close();
-    delete f_el_energy_ratio_2d;
-    f_el_energy_ratio_2d = nullptr;
+    std::string f_el_energy_2d_ratio_name{std::string("h_el_energy_2d_ratio") + std::string("_") + eps_string + std::string(".root")};
+    TFile *f_el_energy_2d_ratio = new TFile(f_el_energy_2d_ratio_name.c_str(), "UPDATE");
+    h_el_energy_2d_ratio->Write();
+    f_el_energy_2d_ratio->Close();
+    delete f_el_energy_2d_ratio;
+    f_el_energy_2d_ratio = nullptr;
 
 
     ////////////////////////////////////////////////////////////////////////////

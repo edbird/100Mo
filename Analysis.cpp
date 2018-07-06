@@ -9,6 +9,7 @@
 
 Analysis::Analysis(const std::string& filename, const std::string& output_filename)
     : epsilon_31{0.368}
+    , systematic_energy_mult{1.0}
     , f{nullptr}
     , t{nullptr}
     , num_bins{40}
@@ -110,6 +111,11 @@ Analysis::~Analysis()
 ////////////////////////////////////////////////////////////////////////////////
 // ANALYSIS FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+void Analysis::SetSystematicEnergyMultiplier(const Double_t value)
+{
+    systematic_energy_mult = value;
+}
 
 void Analysis::SetEpsilon31(const Double_t epsilon)
 {

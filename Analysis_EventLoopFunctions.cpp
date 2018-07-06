@@ -113,9 +113,6 @@ void Analysis::InitEventLoopHistogram()
 void Analysis::EventLoop()
 {
 
-    // 2 % energy shift
-    Double_t systematic_energy_mult{1.0 + 0.02};
-
     std::cout << "Processing data" << std::endl;
     Long64_t prog_c{-1};
     //const Double epsilon_31{0.0};
