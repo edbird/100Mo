@@ -7,10 +7,35 @@ SET(CMAKE_CXX_STANDARD 11)
 
 PROJECT(main)
 
-ADD_EXECUTABLE(main aux.cpp ReWeight.cpp Analysis.cpp Analysis_ReadData.cpp Analysis_CanvasFunctions.cpp Analysis_EventLoopFunctions.cpp Analysis_SensitivityFunctions.cpp Analysis_SensitivityChisquare1.cpp Analysis_SensitivityChisquare2.cpp Analysis_SensitivityLL1.cpp Analysis_SensitivityLL2.cpp main.cpp)
-ADD_EXECUTABLE(createtree ReWeight.cpp createtree.cpp)
-ADD_EXECUTABLE(sensitivity sensitivity.cpp)
-ADD_EXECUTABLE(canvas_test canvas_test.cpp)
+ADD_EXECUTABLE(main
+    src/aux.cpp
+    src/ReWeight.cpp
+    src/Analysis.cpp
+    src/Analysis_ReadData.cpp
+    src/Analysis_CanvasFunctions.cpp
+    src/Analysis_EventLoopFunctions.cpp
+    src/Analysis_SensitivityFunctions.cpp
+    src/Analysis_SensitivityChisquare1.cpp
+    src/Analysis_SensitivityChisquare2.cpp
+    src/Analysis_SensitivityLL1.cpp
+    src/Analysis_SensitivityLL2.cpp
+    src/SubAnalysis.cpp
+    src/SubAnalysis_EventLoopFunctions.cpp
+    src/SubAnalysis_SensitivityFunctions.cpp
+    src/SubAnalysis_SensitivityChisquare1.cpp
+    src/SubAnalysis_SensitivityChisquare2.cpp
+    src/SubAnalysis_SensitivityLL1.cpp
+    src/SubAnalysis_SensitivityLL2.cpp
+    src/main.cpp
+)
+ADD_EXECUTABLE(createtree
+    src/ReWeight.cpp
+    src/createtree.cpp
+)
+ADD_EXECUTABLE(sensitivity
+    src/sensitivity.cpp
+)
+ADD_EXECUTABLE(canvas_test src/canvas_test.cpp)
 
 FIND_PACKAGE(ROOT REQUIRED)
 MESSAGE(STATUS "CMAKE_PREFIX_PATH=" ${CMAKE_PREFIX_PATH})
