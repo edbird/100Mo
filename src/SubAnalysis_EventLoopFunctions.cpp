@@ -24,6 +24,19 @@ void SubAnalysis::InitEventLoopHistogram()
     delete h_el_energy_2d_diff;
     delete h_el_energy_2d_pull;
     delete h_el_energy_2d_ratio;
+    
+    h_el_energy_sum_original = nullptr;
+    h_el_energy_sum_reweight = nullptr;
+    h_el_energy_original = nullptr;
+    h_el_energy_reweight = nullptr;
+    h_el_energy_diff = nullptr;
+    h_el_energy_pull = nullptr;
+    h_el_energy_ratio = nullptr;
+    h_el_energy_2d_original = nullptr;
+    h_el_energy_2d_reweight = nullptr;
+    h_el_energy_2d_diff = nullptr;
+    h_el_energy_2d_pull = nullptr;
+    h_el_energy_2d_ratio = nullptr;
 
 
     ////////////////////////////////////////////////////////////////////////////
@@ -32,23 +45,23 @@ void SubAnalysis::InitEventLoopHistogram()
     ////////////////////////////////////////////////////////////////////////////
     
     // load from NEMO-3 data (MC), the reconstructed electron energy (2 in same histogram)
-    h_el_energy_original = new TH1D("h_el_energy_original", "", num_bins, 0.0, 4.0);
+    h_el_energy_original = new TH1D((std::string("h_el_energy_original") + h_name_append).c_str(), "", num_bins, 0.0, 4.0);
     //h_el_energy_original->SetStats(0);
     //h_el_energy_original->SetLineColor(2);
     //h_el_energy_original->SetMarkerColor(2);
     // same as above but re-weighted
-    h_el_energy_reweight = new TH1D("h_el_energy_reweight", "", num_bins, 0.0, 4.0);
+    h_el_energy_reweight = new TH1D((std::string("h_el_energy_reweight") + h_name_append).c_str(), "", num_bins, 0.0, 4.0);
     //h_el_energy_reweight->SetStats(0);
     //h_el_energy_reweight->SetLineColor(4);
     //h_el_energy_reweight->SetMarkerColor(4);
 
     // load from NEMO-3 data (mc), the sum of the two reconstructed electron energies
-    h_el_energy_sum_original = new TH1D("h_el_energy_sum_original", "", num_bins, 0.0, 4.0);
+    h_el_energy_sum_original = new TH1D((std::string("h_el_energy_sum_original") + h_name_append).c_str(), "", num_bins, 0.0, 4.0);
     h_el_energy_sum_original->SetStats(0);
     h_el_energy_sum_original->SetLineColor(2);
     h_el_energy_sum_original->SetMarkerColor(2);
     // same as above but re-weighted
-    h_el_energy_sum_reweight = new TH1D("h_el_energy_sum_reweight", "", num_bins, 0.0, 4.0);
+    h_el_energy_sum_reweight = new TH1D((std::string("h_el_energy_sum_reweight") + h_name_append).c_str(), "", num_bins, 0.0, 4.0);
     h_el_energy_sum_reweight->SetStats(0);
     h_el_energy_sum_reweight->SetLineColor(4);
     h_el_energy_sum_reweight->SetMarkerColor(4); // TODO: don't think specific colors are required anymore
@@ -57,10 +70,10 @@ void SubAnalysis::InitEventLoopHistogram()
     // instead of using a 1d histogram containing the sum of the 2 electron
     // energies, use a 2d histogram containing both energies
     // TODO: should I sort by energy?
-    h_el_energy_2d_original = new TH2D("h_el_energy_2d_original", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+    h_el_energy_2d_original = new TH2D((std::string("h_el_energy_2d_original") + h_name_append).c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
     h_el_energy_2d_original->SetStats(0);
     
-    h_el_energy_2d_reweight = new TH2D("h_el_energy_2d_reweight", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+    h_el_energy_2d_reweight = new TH2D((std::string("h_el_energy_2d_reweight") + h_name_append).c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
     h_el_energy_2d_reweight->SetStats(0);
 
 }

@@ -26,7 +26,10 @@ void SubAnalysis::SummedEnergyFit()
     // 1d histogram fit and sensitivity
     ////////////////////////////////////////////////////////////////////////
 
-    f_el_energy_sum_original = new TF1("f_el_energy_sum_original", fit_function, 0.0, 4.0, 1 + 2 * (h_el_energy_sum_reweight->GetNbinsX() + 1));
+    delete f_el_energy_sum_original;
+    f_el_energy_sum_original = nullptr;
+
+    f_el_energy_sum_original = new TF1((std::string("f_el_energy_sum_original") + h_name_append).c_str(), fit_function, 0.0, 4.0, 1 + 2 * (h_el_energy_sum_reweight->GetNbinsX() + 1));
     f_el_energy_sum_original->SetParameter(0, 1.0); // set initial amplitude parameter to 1.0
     f_el_energy_sum_original->SetNpx(100000);
     // set the "parameters" (constants)
@@ -67,11 +70,11 @@ void SubAnalysis::SummedEnergyFit()
         // i fitting the correct function?
         if(fit_subrange == false)
         {
-            h_el_energy_sum_original->Fit("f_el_energy_sum_original", "0");
+            h_el_energy_sum_original->Fit((std::string("f_el_energy_sum_original") + h_name_append).c_str(), "0Q");
         }
         else if(fit_subrange == true)
         {
-            h_el_energy_sum_original->Fit("f_el_energy_sum_original", "0", "", 2.0, 4.0);
+            h_el_energy_sum_original->Fit((std::string("f_el_energy_sum_original") + h_name_append).c_str(), "0Q", "", 2.0, 4.0);
         }
 
     }
@@ -96,6 +99,7 @@ void SubAnalysis::SummedEnergyFit()
     // FIT CANVAS OUTPUT SUMMED ENERGY
     ////////////////////////////////////////////////////////////////////////////
 
+    #if 0
     // print summed distribution
     Double_t max{0.0};
     Double_t min{0.0};
@@ -112,6 +116,7 @@ void SubAnalysis::SummedEnergyFit()
     factory_2.Canvas("el_energy_sum", dir, h_el_energy_sum_original, "Baseline", h_el_energy_sum_reweight, "Reweighted");
     // TODO: settings should be passed to canvas in case settings should be changed?
     // or setsettings function should be provided
+    #endif
 
 }
 

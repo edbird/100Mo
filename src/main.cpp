@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
 //    // set number of pseudoexperiments
 //    analysis.SetNumberOfPseudoexperiments(10000, 1);
 //=======
-    analysis.InitEventLoopHistogram();
+    //analysis.InitEventLoopHistogram();
     analysis.SetNumberOfPseudoexperiments(100, 100);
 //>>>>>>> 39030f95ed5a3920b8a999e9180245e89cd9b007
 

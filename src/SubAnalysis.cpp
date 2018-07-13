@@ -9,13 +9,15 @@
 
 SubAnalysis::SubAnalysis
     (
+        const std::string& h_name_append,
         const std::string& output_filename,
         Double_t epsilon_31, Double_t systematic_energy_mult,
         TH2D *h_nEqNull, TH2D *h_nEqTwo, Double_t psiN0, Double_t psiN2,
         Int_t *nElectrons, Double_t *trueT1, Double_t *trueT2, Double_t *el_energy_, Double_t *gen_weight,
         TRandom3 *gen
     )
-    : epsilon_31{epsilon_31}
+    : h_name_append{h_name_append}
+    , epsilon_31{epsilon_31}
     , systematic_energy_mult{systematic_energy_mult}
 
     , nElectrons{nElectrons}
@@ -49,6 +51,7 @@ SubAnalysis::SubAnalysis
     , number_of_pseudo_experiments_2d{1}
 
 
+    , f_el_energy_sum_original{nullptr}
     
     , h_el_energy_original{nullptr}
     , h_el_energy_reweight{nullptr}
@@ -96,11 +99,46 @@ SubAnalysis::SubAnalysis
     , c_ll_2d{nullptr}
 {
 
+    std::cout << "construct: " << h_name_append << std::endl;
+
 }
 
 
 SubAnalysis::~SubAnalysis()
 {
+
+    std::cout << "delete: " << h_name_append << std::endl;
+
+    delete f_el_energy_sum_original;
+
+    delete h_el_energy_sum_original;
+    delete h_el_energy_sum_reweight;
+    delete h_el_energy_original;
+    delete h_el_energy_reweight;
+    delete h_el_energy_diff;
+    delete h_el_energy_pull;
+    delete h_el_energy_ratio;
+    delete h_el_energy_2d_original;
+    delete h_el_energy_2d_reweight;
+    delete h_el_energy_2d_diff;
+    delete h_el_energy_2d_pull;
+    delete h_el_energy_2d_ratio;
+
+    delete h_el_energy_data;
+    delete h_el_energy_prob;
+    delete h_el_energy_diff_data_rw;
+    delete h_el_energy_diff_data_orig;
+
+    delete h_el_energy_2d_data;
+    delete h_el_energy_2d_prob;
+    delete h_el_energy_2d_diff_data_rw;
+    delete h_el_energy_2d_diff_data_orig;
+
+    delete h_ll;
+    delete h_ll_2d;
+    
+
+
 
 }
 

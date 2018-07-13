@@ -71,27 +71,31 @@ void Analysis::InitEventLoopHistogram()
     // INIT SUBCLASS
     ////////////////////////////////////////////////////////////////////////////
  
-     _subanalysis_systematic_default_ = new SubAnalysis(output_filename,
-                                                       epsilon_31,
-                                                       systematic_energy_mult,
-                                                       h_nEqNull, h_nEqTwo, psiN0, psiN2,
-                                                       &nElectrons, &trueT1, &trueT2, el_energy_, &gen_weight,
-                                                       &gen);
+     _subanalysis_systematic_default_ = new SubAnalysis("_default",
+                                                        output_filename,
+                                                        epsilon_31,
+                                                        systematic_energy_mult,
+                                                        h_nEqNull, h_nEqTwo, psiN0, psiN2,
+                                                        &nElectrons, &trueT1, &trueT2, el_energy_, &gen_weight,
+                                                        &gen);
                                                        
-    _subanalysis_systematic_low_ = new SubAnalysis(output_filename,
+    _subanalysis_systematic_low_ = new SubAnalysis("_low",
+                                                   output_filename,
                                                    epsilon_31,
                                                    systematic_energy_mult_low,
                                                    h_nEqNull, h_nEqTwo, psiN0, psiN2,
                                                    &nElectrons, &trueT1, &trueT2, el_energy_, &gen_weight,
                                                    &gen);
                                                    
-    _subanalysis_systematic_high_ = new SubAnalysis(output_filename,
+    _subanalysis_systematic_high_ = new SubAnalysis("_high",
+                                                    output_filename,
                                                     epsilon_31,
                                                     systematic_energy_mult_high,
                                                     h_nEqNull, h_nEqTwo, psiN0, psiN2,
                                                     &nElectrons, &trueT1, &trueT2, el_energy_, &gen_weight,
                                                     &gen);
     
+    _subanalysis_.clear();
     _subanalysis_.push_back(_subanalysis_systematic_default_);
     _subanalysis_.push_back(_subanalysis_systematic_low_);
     _subanalysis_.push_back(_subanalysis_systematic_high_);

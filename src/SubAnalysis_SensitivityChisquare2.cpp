@@ -74,7 +74,7 @@ void SubAnalysis::SensitivityMeasurementChisquare2()
     ////////////////////////////////////////////////////////////////////////
 
     // create difference histogram
-    h_el_energy_2d_diff = new TH2D("h_el_energy_2d_diff", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+    h_el_energy_2d_diff = new TH2D((std::string("h_el_energy_2d_diff") + h_name_append).c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
     h_el_energy_2d_diff->SetStats(0);
     for(Int_t j{1}; j <= h_el_energy_2d_diff->GetNbinsY(); ++ j)
     {
@@ -93,7 +93,7 @@ void SubAnalysis::SensitivityMeasurementChisquare2()
     }
         
     // create pull histogram
-    h_el_energy_2d_pull = new TH2D("h_el_energy_2d_pull", "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
+    h_el_energy_2d_pull = new TH2D((std::string("h_el_energy_2d_pull") + h_name_append).c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
     h_el_energy_2d_pull->SetStats(0);
     for(Int_t j{1}; j <= h_el_energy_2d_pull->GetNbinsY(); ++ j)
     {
@@ -115,7 +115,7 @@ void SubAnalysis::SensitivityMeasurementChisquare2()
     }
 
     // create ratio histogram
-    std::string h_el_energy_2d_ratio_name{std::string("h_el_energy_2d_ratio") + std::string("_") + eps_string + std::string("_") + systematic_energy_mult_string};
+    std::string h_el_energy_2d_ratio_name{std::string("h_el_energy_2d_ratio") + std::string("_") + h_name_append + std::string("_") + eps_string + std::string("_") + systematic_energy_mult_string};
     h_el_energy_2d_ratio = new TH2D(h_el_energy_2d_ratio_name.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
     h_el_energy_2d_ratio->SetStats(0);
     for(Int_t j{1}; j <= h_el_energy_2d_ratio->GetNbinsY(); ++ j)
@@ -137,7 +137,7 @@ void SubAnalysis::SensitivityMeasurementChisquare2()
             }
         }
     }
-    std::string f_el_energy_2d_ratio_name{std::string("h_el_energy_2d_ratio") + std::string("_") + eps_string + std::string(".root")};
+    std::string f_el_energy_2d_ratio_name{std::string("h_el_energy_2d_ratio") + std::string("_") + h_name_append + std::string("_") + eps_string + std::string(".root")};
     TFile *f_el_energy_2d_ratio = new TFile(f_el_energy_2d_ratio_name.c_str(), "UPDATE");
     h_el_energy_2d_ratio->Write();
     f_el_energy_2d_ratio->Close();

@@ -59,5 +59,9 @@ void Analysis::SensitivityMeasurementChisquare1()
     }
     */
 
+    for(std::vector<SubAnalysis*>::iterator it{_subanalysis_.begin()}; it != _subanalysis_.end(); ++ it)
+    {
+        (*it)->SensitivityMeasurementChisquare1();
+    }
 
 }

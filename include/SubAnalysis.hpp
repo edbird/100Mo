@@ -34,7 +34,7 @@ class SubAnalysis
     // CLASS FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////
 
-    SubAnalysis(const std::string&, Double_t, Double_t, TH2D*, TH2D*, Double_t, Double_t,
+    SubAnalysis(const std::string&, const std::string&, Double_t, Double_t, TH2D*, TH2D*, Double_t, Double_t,
                 Int_t*, Double_t*, Double_t*, Double_t*, Double_t*, TRandom3*);
     ~SubAnalysis();
     
@@ -107,6 +107,9 @@ class SubAnalysis
     // DATA
     ////////////////////////////////////////////////////////////////////////////
     
+    // string to append to histogram names to avoid name conflict
+    std::string h_name_append;
+
     // don't have f or t (file or tree),
     // instead have pointers to tree variables (below)
     

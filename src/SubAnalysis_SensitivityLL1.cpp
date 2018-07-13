@@ -47,7 +47,7 @@ void SubAnalysis::SensitivityMeasurementLoglikelihood1()
 
         // log likelihood method
         // create "data" histogram - poisson generated data
-        std::string h_name{std::string("h_el_energy_data_") + eps_string + std::string("_") + std::to_string(count)};
+        std::string h_name{std::string("h_el_energy_data") + h_name_append + std::string("_") + eps_string + std::string("_") + std::to_string(count)};
         h_el_energy_data = new TH1I(h_name.c_str(), "", num_bins, 0.0, 4.0);
         h_el_energy_data->SetStats(0);
         for(Int_t ix{1}; ix <= h_el_energy_sum_original->GetNbinsX(); ++ ix)
@@ -76,7 +76,7 @@ void SubAnalysis::SensitivityMeasurementLoglikelihood1()
         Double_t likelihood{1.0};
         Double_t likelihood_sum{0.0};
         std::vector<Double_t> likelihood_sum_vec;
-        std::string h_name_prob{std::string("h_el_energy_prob_") + eps_string + std::string("_") + std::to_string(count)}; 
+        std::string h_name_prob{std::string("h_el_energy_prob") + h_name_append + std::string("_") + eps_string + std::string("_") + std::to_string(count)}; 
         h_el_energy_prob = new TH1D(h_name_prob.c_str(), "", num_bins, 0.0, 4.0);
         h_el_energy_prob->SetStats(0);
         for(Int_t ix{1}; ix <= h_el_energy_sum_original->GetNbinsX(); ++ ix)
@@ -116,7 +116,7 @@ void SubAnalysis::SensitivityMeasurementLoglikelihood1()
 
 
         // create difference histogram, data - reweight
-        std::string h_name_diff_data_rw{std::string("h_el_energy_diff_data_rw_") + eps_string + std::string("_") + std::to_string(count)};
+        std::string h_name_diff_data_rw{std::string("h_el_energy_diff_data_rw") + std::string("_") + h_name_append + eps_string + std::string("_") + std::to_string(count)};
         h_el_energy_diff_data_rw = new TH1D(h_name_diff_data_rw.c_str(), "", num_bins, 0.0, 4.0);
         h_el_energy_diff_data_rw->SetStats(0);
         for(Int_t i{1}; i <= h_el_energy_diff_data_rw->GetNbinsX(); ++ i)
@@ -133,7 +133,7 @@ void SubAnalysis::SensitivityMeasurementLoglikelihood1()
         }
 
         // create difference histogram, data - original
-        std::string h_name_diff_data_orig{std::string("h_el_energy_diff_data_orig_") + eps_string + std::string("_") + std::to_string(count)};
+        std::string h_name_diff_data_orig{std::string("h_el_energy_diff_data_orig") + std::string("_") + h_name_append + eps_string + std::string("_") + std::to_string(count)};
         h_el_energy_diff_data_orig = new TH1D(h_name_diff_data_orig.c_str(), "", num_bins, 0.0, 4.0);
         h_el_energy_diff_data_orig->SetStats(0);
         for(Int_t i{1}; i <= h_el_energy_diff_data_orig->GetNbinsX(); ++ i)
@@ -221,7 +221,7 @@ void SubAnalysis::SensitivityMeasurementLoglikelihood1()
     std::pair<std::vector<Double_t>::iterator, std::vector<Double_t>::iterator> min_max_pair{std::minmax_element(vec_ll.begin(), vec_ll.end())};
     Double_t min{*min_max_pair.first};
     Double_t max{*min_max_pair.second};
-    std::string name_ll{std::string("h_ll_") + eps_string};
+    std::string name_ll{std::string("h_ll") + h_name_append + std::string("_") + eps_string};
     Double_t center{0.5 * (max + min)};
     Double_t width{0.5 * (max - min)};
     width *= 1.1;

@@ -62,7 +62,7 @@ void SubAnalysis::SensitivityMeasurementChisquare1()
     ////////////////////////////////////////////////////////////////////////
 
     // create difference histogram
-    h_el_energy_diff = new TH1D("h_el_energy_diff", "", num_bins, 0.0, 4.0);
+    h_el_energy_diff = new TH1D((std::string("h_el_energy_diff") + h_name_append).c_str(), "", num_bins, 0.0, 4.0);
     h_el_energy_diff->SetStats(0);
     for(Int_t i{1}; i <= h_el_energy_diff->GetNbinsX(); ++ i)
     {
@@ -78,7 +78,7 @@ void SubAnalysis::SensitivityMeasurementChisquare1()
     }
 
     // create pull histogram
-    h_el_energy_pull = new TH1D("h_el_energy_pull", "", num_bins, 0.0, 4.0);
+    h_el_energy_pull = new TH1D((std::string("h_el_energy_pull") + h_name_append).c_str(), "", num_bins, 0.0, 4.0);
     h_el_energy_pull->SetStats(0);
     for(Int_t i{1}; i <= h_el_energy_pull->GetNbinsX(); ++ i)
     {
@@ -97,7 +97,7 @@ void SubAnalysis::SensitivityMeasurementChisquare1()
     }
 
     // create ratio histogram
-    std::string h_el_energy_ratio_name{std::string("h_el_energy_ratio") + std::string("_") + eps_string + std::string("_") + systematic_energy_mult_string};
+    std::string h_el_energy_ratio_name{std::string("h_el_energy_ratio") + std::string("_") + h_name_append + std::string("_") + eps_string + std::string("_") + systematic_energy_mult_string};
     h_el_energy_ratio = new TH1D(h_el_energy_ratio_name.c_str(), "", num_bins, 0.0, 4.0);
     h_el_energy_ratio->SetStats(0);
     for(Int_t i{1}; i <= h_el_energy_ratio->GetNbinsX(); ++ i)

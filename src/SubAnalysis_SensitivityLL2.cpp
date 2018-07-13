@@ -47,7 +47,7 @@ void SubAnalysis::SensitivityMeasurementLoglikelihood2()
 
         // log likelihood method
         // create 2d "data" histogram - poisson generated data
-        std::string h_name_2d{std::string("h_el_energy_2d_data_") + eps_string + std::string("_") + std::to_string(count)};
+        std::string h_name_2d{std::string("h_el_energy_2d_data_") + h_name_append + std::string("_") + eps_string + std::string("_") + std::to_string(count)};
         h_el_energy_2d_data = new TH2I(h_name_2d.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
         h_el_energy_2d_data->SetStats(0);
         for(Int_t jx{1}; jx <= h_el_energy_2d_original->GetNbinsY(); ++ jx)
@@ -66,7 +66,7 @@ void SubAnalysis::SensitivityMeasurementLoglikelihood2()
         // compute poisson likelihood for each bin
         Double_t likelihood_2d{1.0};
         Double_t likelihood_sum_2d{0.0};
-        std::string h_name_prob_2d{std::string("h_el_energy_2d_prob_") + eps_string + std::string("_") + std::to_string(count)}; 
+        std::string h_name_prob_2d{std::string("h_el_energy_2d_prob_") + h_name_append + std::string("_") + eps_string + std::string("_") + std::to_string(count)}; 
         h_el_energy_2d_prob = new TH2D(h_name_prob_2d.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
         h_el_energy_2d_prob->SetStats(0);
         for(Int_t jx{1}; jx <= h_el_energy_2d_original->GetNbinsY(); ++ jx)
@@ -98,7 +98,7 @@ void SubAnalysis::SensitivityMeasurementLoglikelihood2()
         
         
         // create difference histogram - difference between data and reweighted
-        std::string h_name_2d_diff_data_rw{std::string("h_el_energy_2d_diff_data_rw_") + eps_string + std::string("_") + std::to_string(count)};
+        std::string h_name_2d_diff_data_rw{std::string("h_el_energy_2d_diff_data_rw_") + h_name_append + std::string("_") + eps_string + std::string("_") + std::to_string(count)};
         h_el_energy_2d_diff_data_rw = new TH2D(h_name_2d_diff_data_rw.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
         h_el_energy_2d_diff_data_rw->SetStats(0);
         for(Int_t j{1}; j <= h_el_energy_2d_diff_data_rw->GetNbinsY(); ++ j)
@@ -118,7 +118,7 @@ void SubAnalysis::SensitivityMeasurementLoglikelihood2()
         }
 
         // create difference histogram - difference between data and original
-        std::string h_name_2d_diff_data_orig{std::string("h_el_energy_2d_diff_data_orig_") + eps_string + std::string("_") + std::to_string(count)};
+        std::string h_name_2d_diff_data_orig{std::string("h_el_energy_2d_diff_data_orig_") + h_name_append + std::string("_") + eps_string + std::string("_") + std::to_string(count)};
         h_el_energy_2d_diff_data_orig = new TH2D(h_name_2d_diff_data_orig.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
         h_el_energy_2d_diff_data_orig->SetStats(0);
         for(Int_t j{1}; j <= h_el_energy_2d_diff_data_orig->GetNbinsY(); ++ j)
@@ -237,7 +237,7 @@ void SubAnalysis::SensitivityMeasurementLoglikelihood2()
     std::pair<std::vector<Double_t>::iterator, std::vector<Double_t>::iterator> min_max_pair_2d{std::minmax_element(vec_ll_2d.begin(), vec_ll_2d.end())};
     Double_t min_2d{*min_max_pair_2d.first};
     Double_t max_2d{*min_max_pair_2d.second};
-    std::string name_ll_2d{std::string("h_ll_2d_") + eps_string};
+    std::string name_ll_2d{std::string("h_ll_2d_") + h_name_append + std::string("_") + eps_string};
     Double_t center_2d{0.5 * (max_2d + min_2d)};
     Double_t width_2d{0.5 * (max_2d - min_2d)};
     width_2d *= 1.1;
