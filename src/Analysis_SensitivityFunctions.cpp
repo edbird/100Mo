@@ -205,7 +205,7 @@ void Analysis::MakeSensitivityCanvas()
     h_el_energy_ratio_energy_systematic_high->SetMarkerColor(2);
     h_el_energy_ratio_energy_systematic_high->SetLineColor(2);
 
-    h_el_energy_ratio->SetMaximum(5.0);
+    h_el_energy_ratio->SetMaximum(2.0);
     h_el_energy_ratio->SetMinimum(0.0);
 
     TCanvas* c_ratio_sensitivity = new TCanvas("c_ratio_sensitivity", "", 800, 600);
