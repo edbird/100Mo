@@ -12,7 +12,7 @@ void SubAnalysis::SensitivityMeasurementChisquare2()
 {
 
     const std::string eps_string{std::to_string(epsilon_31)};
-    const std::string systematic_energy_mult_string{std::to_string(systematic_energy_mult)};
+    //const std::string systematic_energy_mult_string{std::to_string(systematic_energy_mult)};
 
     // reset
     non_empty_bins_2d = 0;
@@ -115,7 +115,8 @@ void SubAnalysis::SensitivityMeasurementChisquare2()
     }
 
     // create ratio histogram
-    std::string h_el_energy_2d_ratio_name{std::string("h_el_energy_2d_ratio") + std::string("_") + h_name_append + std::string("_") + eps_string + std::string("_") + systematic_energy_mult_string};
+    //std::string h_el_energy_2d_ratio_name{std::string("h_el_energy_2d_ratio") + std::string("_") + h_name_append + std::string("_") + eps_string + std::string("_") + systematic_energy_mult_string};
+    std::string h_el_energy_2d_ratio_name{std::string("h_el_energy_2d_ratio") + std::string("_") + h_name_append + std::string("_") + eps_string};
     h_el_energy_2d_ratio = new TH2D(h_el_energy_2d_ratio_name.c_str(), "", num_bins, 0.0, 4.0, num_bins, 0.0, 4.0);
     h_el_energy_2d_ratio->SetStats(0);
     for(Int_t j{1}; j <= h_el_energy_2d_ratio->GetNbinsY(); ++ j)

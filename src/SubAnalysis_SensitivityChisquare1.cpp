@@ -15,7 +15,7 @@ void SubAnalysis::SensitivityMeasurementChisquare1()
     // systematic energy shift value, or perhaps I do?
 
     const std::string eps_string{std::to_string(epsilon_31)};
-    const std::string systematic_energy_mult_string{std::to_string(systematic_energy_mult)};
+    //const std::string systematic_energy_mult_string{std::to_string(systematic_energy_mult)};
     
     // reset
     non_empty_bins = 0;
@@ -97,7 +97,8 @@ void SubAnalysis::SensitivityMeasurementChisquare1()
     }
 
     // create ratio histogram
-    std::string h_el_energy_ratio_name{std::string("h_el_energy_ratio") + std::string("_") + h_name_append + std::string("_") + eps_string + std::string("_") + systematic_energy_mult_string};
+    //std::string h_el_energy_ratio_name{std::string("h_el_energy_ratio") + std::string("_") + h_name_append + std::string("_") + eps_string + std::string("_") + systematic_energy_mult_string};
+    std::string h_el_energy_ratio_name{std::string("h_el_energy_ratio") + std::string("_") + h_name_append + std::string("_") + eps_string};
     h_el_energy_ratio = new TH1D(h_el_energy_ratio_name.c_str(), "", num_bins, 0.0, 4.0);
     h_el_energy_ratio->SetStats(0);
     for(Int_t i{1}; i <= h_el_energy_ratio->GetNbinsX(); ++ i)
@@ -107,9 +108,9 @@ void SubAnalysis::SensitivityMeasurementChisquare1()
         Double_t error1{h_el_energy_original->GetBinError(i)}; // correct way round?
         // note: do not use error or reweighted
         Double_t error2{0.0 * h_el_energy_reweight->GetBinError(i)};
-        if(content2 != 0.0)
+        if(content1 != 0.0)
         {
-            Double_t content{content1 / content2}; // correct way round?
+            Double_t content{content2 / content1}; // correct way round?
             Double_t error{std::sqrt(std::pow(error1 * (1.0 / content2), 2.0) + std::pow(error2 * (content1 / (content2 * content2)), 2.0))}; // should error2 be used?
             h_el_energy_ratio->SetBinContent(i, content);
             h_el_energy_ratio->SetBinError(i, error);

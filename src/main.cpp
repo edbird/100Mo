@@ -159,7 +159,8 @@ int main(int argc, char* argv[])
     // set systematic energy multiplier
     // note: could have multiple energy calibration points, hence linear
     // calibration between these points
-    analysis.SetSystematicEnergyMultiplier(systematic_energy_mult);
+    //analysis.SetSystematicEnergyMultiplier(systematic_energy_mult);
+    analysis.SetSystematicEnergyMultiplierHighLow(1.01, 0.99);
 
     if(arg_fit_subrange == std::string("true"))
     {

@@ -60,6 +60,7 @@ class Analysis
     void SensitivityMeasurementLoglikelihood1();
     void SensitivityMeasurementLoglikelihood2();
     void PrintOutputToFile();
+    void MakeSensitivityCanvas();
 
     
 

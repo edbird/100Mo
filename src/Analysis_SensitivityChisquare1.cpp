@@ -12,7 +12,7 @@ void Analysis::SensitivityMeasurementChisquare1()
 {
 
     const std::string eps_string{std::to_string(epsilon_31)};
-    const std::string systematic_energy_mult_string{std::to_string(systematic_energy_mult)};
+    //const std::string systematic_energy_mult_string{std::to_string(systematic_energy_mult)};
     
     ////////////////////////////////////////////////////////////////////////////
     // SINGLE ELECTRON (1D) CHISQUARE CANVAS OUTPUT

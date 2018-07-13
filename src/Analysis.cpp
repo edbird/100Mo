@@ -170,6 +170,8 @@ void Analysis::RunOverEpsilonVector()
         //std::cout << "Press Enter to Print" << std::endl;
         //std::cin.get();
         PrintOutputToFile();
+
+        MakeSensitivityCanvas();
     }
 
 
