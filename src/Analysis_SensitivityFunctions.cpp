@@ -208,11 +208,22 @@ void Analysis::MakeSensitivityCanvas()
     h_el_energy_ratio->SetMaximum(2.0);
     h_el_energy_ratio->SetMinimum(0.0);
 
+    h_el_energy_ratio->GetXaxis()->SetTitle("Single Electron Energy [MeV]");
+    h_el_energy_ratio->GetYaxis()->SetTitle("Ratio");
+
     TCanvas* c_ratio_sensitivity = new TCanvas("c_ratio_sensitivity", "", 800, 600);
     h_el_energy_ratio->Draw("E");
     h_el_energy_ratio_energy_systematic_low->Draw("Esame");
     h_el_energy_ratio_energy_systematic_high->Draw("Esame");
-    std::string c_ratio_sensitivity_name(std::string("c_ratio_sensitivity_name") + std::string("_") + eps_string);
+
+    TLegend *l_ratio_sensitivity = new TLegend(0.13, 0.70, 0.55, 0.88);
+    l_ratio_sensitivity->AddEntry(h_el_energy_ratio, "Reweighted / Baseline", "l");
+    l_ratio_sensitivity->AddEntry(h_el_energy_ratio_energy_systematic_low, "Energy Systematic Low / Baseline", "l");
+    l_ratio_sensitivity->AddEntry(h_el_energy_ratio_energy_systematic_high, "Energy Systematic High / Baseline", "l");
+    l_ratio_sensitivity->SetBorderSize(0);
+    l_ratio_sensitivity->Draw();
+
+    std::string c_ratio_sensitivity_name(std::string("c_ratio_sensitivity") + std::string("_") + eps_string);
     c_ratio_sensitivity->SaveAs((c_ratio_sensitivity_name + std::string(".png")).c_str());
     c_ratio_sensitivity->SaveAs((c_ratio_sensitivity_name + std::string(".pdf")).c_str());
     c_ratio_sensitivity->SaveAs((c_ratio_sensitivity_name + std::string(".eps")).c_str());
