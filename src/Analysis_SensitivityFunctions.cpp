@@ -200,6 +200,17 @@ void Analysis::MakeSensitivityCanvas()
         }
     }
 
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Calculate chisquare
+    ////////////////////////////////////////////////////////////////////////////
+
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Create canvas output
+    ////////////////////////////////////////////////////////////////////////////
+
     h_el_energy_ratio_energy_systematic_low->SetMarkerColor(3);
     h_el_energy_ratio_energy_systematic_low->SetLineColor(3);
     h_el_energy_ratio_energy_systematic_high->SetMarkerColor(2);
@@ -232,6 +243,8 @@ void Analysis::MakeSensitivityCanvas()
     delete c_ratio_sensitivity;
     c_ratio_sensitivity = nullptr;
 
+    delete l_ratio_sensitivity;
+    l_ratio_sensitivity = nullptr;
 
     delete h_el_energy_ratio_energy_systematic_low;
     delete h_el_energy_ratio_energy_systematic_high;
