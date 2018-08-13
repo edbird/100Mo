@@ -2,6 +2,7 @@
 #define ANALYSIS_HPP
 
 
+#include "SensitivityRecord.hpp"
 #include "CanvasFactory.hpp"
 #include "SubAnalysis.hpp"
 
@@ -18,6 +19,9 @@
 
 
 #include <iostream>
+#include <map>
+
+
 
 
 class Analysis
@@ -33,6 +37,12 @@ class Analysis
     Analysis(const std::string&, const std::string&);
     ~Analysis();
 
+
+    ////////////////////////////////////////////////////////////////////////////
+    // CHISQUARE OUTPUT FUNCTIONS
+    ////////////////////////////////////////////////////////////////////////////
+
+    void MakeChiSquareType1();
 
     ////////////////////////////////////////////////////////////////////////////
     // ANALYSIS FUNCTIONS
@@ -119,6 +129,17 @@ class Analysis
 
 
     ////////////////////////////////////////////////////////////////////////////
+    // OUTPUT AND RESULTS
+    ////////////////////////////////////////////////////////////////////////////
+
+    // map: first index: epsilon_31 value
+    // second index: systematic energy multiplier value
+    // SensitivityRecord object contains these values, and they should
+    // be equal, if not there is an error
+    std::map<Double_t, std::map<Double_t, SensitivityRecord>> _sensitivity_record_map_;
+
+
+    ////////////////////////////////////////////////////////////////////////////
     // DATA
     ////////////////////////////////////////////////////////////////////////////
 
@@ -131,6 +152,7 @@ class Analysis
     Double_t systematic_energy_mult_low;
     // systematic energy shift, high level
     Double_t systematic_energy_mult_high;
+    // TODO: need systematic_energy_mult_default ?
 
     TFile *f;
     TTree *t;

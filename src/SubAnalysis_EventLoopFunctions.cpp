@@ -86,7 +86,6 @@ void SubAnalysis::InitEventLoopHistogram()
 void SubAnalysis::EventLoop()
 {
 
-    
     Double_t el_energy_0{el_energy_[0] * systematic_energy_mult};
     Double_t el_energy_1{el_energy_[1] * systematic_energy_mult};
 

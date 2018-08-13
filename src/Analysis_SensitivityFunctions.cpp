@@ -49,8 +49,8 @@ void Analysis::PrintOutputToFile()
         Double_t                &sensitivity_chisquare_2d   {_subanalysis_systematic_default_->sensitivity_chisquare_2d};
         Int_t                   &non_empty_bins_2d          {_subanalysis_systematic_default_->non_empty_bins_2d};
         std::vector<Double_t>   &vec_ll                     {_subanalysis_systematic_default_->vec_ll};
-    
-    
+
+
         // add data to data output file
         std::ofstream of_data(output_filename.c_str(), std::ios::app);
         if(of_data.tellp() == 0)

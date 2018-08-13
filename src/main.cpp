@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
     pa.Add("output_filename", "--output-file", "of_data.txt");
     pa.Add("eps_min", "--epsilon-min", "0.0");
     pa.Add("eps_max", "--epsilon-max", "1.0");
-    pa.Add("eps_num", "--epsilon-num", "1");
+    pa.Add("eps_num", "--epsilon-num", "-1");
     pa.Add("syst_energy_mult", "--systematic-energy-mult", "1.0");
     pa.Print();
     pa.Process(argc, argv);
@@ -219,10 +219,7 @@ int main(int argc, char* argv[])
     // THIS CODE FOR REGULAR DATA ANALYSIS RUN
 
 #if 1
-//<<<<<<< HEAD
-//
-//=======
-//>>>>>>> 39030f95ed5a3920b8a999e9180245e89cd9b007
+
     // run analysis
     analysis.ReadData();
     //analysis.CanvasRawData();
@@ -246,7 +243,18 @@ int main(int argc, char* argv[])
     if(eps_num < 1)
     {
 //<<<<<<< HEAD
-        std::cout << "error" << std::endl;
+        
+        if(pa.WasProvided("epsilon") == true)
+        {
+            std::string arg_eps_value{pa.Get("epsilon")};
+            Double_t eps_value{std::stod(arg_eps_value)};
+            analysis.AddEpsilonValue(eps_value);
+        }
+        else
+        {
+            std::cout << "error" << std::endl;
+        }
+
     }
     else if(eps_num == 1)
     {

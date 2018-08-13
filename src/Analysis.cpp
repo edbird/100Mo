@@ -7,6 +7,12 @@
 #include "aux.hpp"
 
 
+#include "TCanvas.h"
+#include "TGaxis.h"
+#include "TGraph.h"
+#include "TLegend.h"
+
+
 Analysis::Analysis(const std::string& filename, const std::string& output_filename)
     : epsilon_31{0.368}
     , systematic_energy_mult{1.0}
@@ -79,6 +85,107 @@ Analysis::Analysis(const std::string& filename, const std::string& output_filena
 
 Analysis::~Analysis()
 {
+
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// CHISQUARE OUTPUT HISTOGRAM FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+void Analysis::MakeChiSquareType1()
+{
+
+    std::size_t data_size_4{vec_epsilon_31.size()};
+    std::size_t data_size_5{vec_epsilon_31.size()};
+    std::size_t data_size_6{vec_epsilon_31.size()};
+
+    Double_t *data_x_4 = new Double_t[data_size_4];
+    Double_t *data_x_5 = new Double_t[data_size_5];
+    Double_t *data_x_6 = new Double_t[data_size_6];
+
+    Double_t *data_y_4 = new Double_t[data_size_4];
+    Double_t *data_y_5 = new Double_t[data_size_5];
+    Double_t *data_y_6 = new Double_t[data_size_6];
+
+    for(std::size_t i{0}; i < data_size_4; ++ i)
+    {
+        Double_t epsilon_31{vec_epsilon_31.at(i)};
+        std::cout << epsilon_31 << std::endl;
+        std::cout << systematic_energy_mult << std::endl;
+
+        data_x_4[i] = _sensitivity_record_map_.at(epsilon_31).at(systematic_energy_mult).epsilon_31;
+        data_y_4[i] = _sensitivity_record_map_.at(epsilon_31).at(systematic_energy_mult).sensitivity_chisquare_1d_baseline_nosystematic;
+    }
+    for(std::size_t i{0}; i < data_size_5; ++ i)
+    {
+        Double_t epsilon_31{vec_epsilon_31.at(i)};
+        std::cout << epsilon_31 << std::endl;
+        std::cout << systematic_energy_mult << std::endl;
+
+        data_x_5[i] = _sensitivity_record_map_.at(epsilon_31).at(systematic_energy_mult_high).epsilon_31;
+        data_y_5[i] = _sensitivity_record_map_.at(epsilon_31).at(systematic_energy_mult_high).sensitivity_chisquare_1d_baseline_nosystematic;
+
+        // TODO: this still doesn't work because we need the chisquare between the default and the systematic reweighted
+        // not the systematic default and systematic reweighted
+    }
+    for(std::size_t i{0}; i < data_size_6; ++ i)
+    {
+        Double_t epsilon_31{vec_epsilon_31.at(i)};
+        std::cout << epsilon_31 << std::endl;
+        std::cout << systematic_energy_mult << std::endl;
+
+        data_x_6[i] = _sensitivity_record_map_.at(epsilon_31).at(systematic_energy_mult_low).epsilon_31;
+        data_y_6[i] = _sensitivity_record_map_.at(epsilon_31).at(systematic_energy_mult_low).sensitivity_chisquare_1d_baseline_nosystematic;
+    }
+
+    TGraph *g_4 = new TGraph(data_size_4, data_x_4, data_y_4); // FULL RANGE NO CUT DEFAULT
+    g_4->SetTitle("");
+    g_4->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
+    g_4->GetYaxis()->SetTitle("#chi^{2}");
+    //g_4->GetYaxis()->SetTitleOffset(1.75);
+    //g_4->GetYaxis()->SetMaxDigits(3);
+    TGaxis* g_4_tgaxis = (TGaxis*)g_4->GetYaxis();
+    g_4_tgaxis->SetMaxDigits(3);
+    g_4->SetLineColor(2);
+
+    TGraph *g_5 = new TGraph(data_size_5, data_x_5, data_y_5); // FULL RANGE NO CUT HIGH
+    g_5->SetTitle("");
+    g_5->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
+    g_5->GetYaxis()->SetTitle("#chi^{2}");
+    //g_5->GetYaxis()->SetTitleOffset(1.75);
+    //g_5->GetYaxis()->SetMaxDigits(3);
+    TGaxis* g_5_tgaxis = (TGaxis*)g_5->GetYaxis();
+    g_5_tgaxis->SetMaxDigits(3);
+    g_5->SetLineColor(4);
+
+    TGraph *g_6 = new TGraph(data_size_6, data_x_6, data_y_6); // FULL RANGE NO CUT LOW
+    g_6->SetTitle("");
+    g_6->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
+    g_6->GetYaxis()->SetTitle("#chi^{2}");
+    //g_6->GetYaxis()->SetTitleOffset(1.75);
+    //g_6->GetYaxis()->SetMaxDigits(3);
+    TGaxis* g_6_tgaxis = (TGaxis*)g_6->GetYaxis();
+    g_6_tgaxis->SetMaxDigits(3);
+    g_6->SetLineColor(6);
+
+    TLegend *l_systematic = new TLegend(0.45, 0.70, 0.65, 0.85);
+    l_systematic->AddEntry(g_4, "Default", "l"); // FULL RANGE NO CUT DEFAULT
+    l_systematic->AddEntry(g_5, "High", "l"); // HIGH
+    l_systematic->AddEntry(g_6, "Low", "l"); // LOW
+
+    TCanvas *c_systematic = new TCanvas("c_systematic", "", 804, 628);
+    c_systematic->GetPad(0)->SetTicks(1, 2);
+    g_4->GetYaxis()->SetRangeUser(0.0, 1.6e3);
+    g_4->Draw("AL");
+    g_5->Draw("same");
+    g_6->Draw("same");
+    l_systematic->Draw();
+    c_systematic->SaveAs("c_systematic_out.png");
+    c_systematic->SaveAs("c_systematic_out.pdf");
+    c_systematic->SaveAs("c_systematic_out.eps");
+    c_systematic->SaveAs("c_systematic_out.C");
+
 
 }
 
@@ -158,6 +265,11 @@ void Analysis::RunOverEpsilonVector()
         //std::cout << "Press Enter to Chisquare2" << std::endl;
         //std::cin.get();
         SensitivityMeasurementChisquare2();
+
+        for(std::vector<SubAnalysis*>::iterator it{_subanalysis_.begin()}; it != _subanalysis_.end(); ++ it)
+        {
+            (*it)->ChiSquare_BaselineNoSystematic();
+        }
         
         //std::cout << "Press Enter to Loglikelihood1" << std::endl;
         //std::cin.get();
@@ -174,6 +286,7 @@ void Analysis::RunOverEpsilonVector()
         MakeSensitivityCanvas();
     }
 
+    MakeChiSquareType1();
 
 }
 

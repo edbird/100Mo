@@ -66,43 +66,66 @@ int main(int argc, char* argv[])
     ////////////////////////////////////////////////////////////////////////////
 
     // allocate data storage
-    std::vector<std::vector<double>> data_FULLRANGE_CUT;
     std::vector<std::vector<double>> data_FULLRANGE_NOCUT;
-    std::vector<std::vector<double>> data_SUBRANGE_CUT;
+    std::vector<std::vector<double>> data_FULLRANGE_CUT;
     std::vector<std::vector<double>> data_SUBRANGE_NOCUT;
+    std::vector<std::vector<double>> data_SUBRANGE_CUT;
+
+    // systematic
+    std::vector<std::vector<double>> data_FULLRANGE_NOCUT_DEFAULT;
+    std::vector<std::vector<double>> data_FULLRANGE_NOCUT_HIGH;
+    std::vector<std::vector<double>> data_FULLRANGE_NOCUT_LOW;
 
     // read
-    read_data_helper_2("of_data_FULLRANGE_CUT.txt", data_FULLRANGE_CUT, ',');
     read_data_helper_2("of_data_FULLRANGE_NOCUT.txt", data_FULLRANGE_NOCUT, ',');
-    read_data_helper_2("of_data_SUBRANGE_CUT.txt", data_SUBRANGE_CUT, ',');
+    read_data_helper_2("of_data_FULLRANGE_CUT.txt", data_FULLRANGE_CUT, ',');
     read_data_helper_2("of_data_SUBRANGE_NOCUT.txt", data_SUBRANGE_NOCUT, ',');
+    read_data_helper_2("of_data_SUBRANGE_CUT.txt", data_SUBRANGE_CUT, ',');
 
-    std::cout << data_FULLRANGE_CUT.size() << std::endl;
+    // systematic
+    read_data_helper_2("of_data_FULLRANGE_NOCUT_default.txt", data_FULLRANGE_NOCUT_DEFAULT, ',');
+    read_data_helper_2("of_data_FULLRANGE_NOCUT_high.txt", data_FULLRANGE_NOCUT_HIGH, ',');
+    read_data_helper_2("of_data_FULLRANGE_NOCUT_low.txt", data_FULLRANGE_NOCUT_LOW, ',');
+
+    std::cout << data_FULLRANGE_NOCUT.size() << std::endl;
     
     ////////////////////////////////////////////////////////////////////////////
     // CONVERT INPUT DATA TO GRAPH FORMAT
     ////////////////////////////////////////////////////////////////////////////
 
-    Int_t data_size_0{data_FULLRANGE_CUT.size()};
     Int_t data_size_1{data_FULLRANGE_NOCUT.size()};
-    Int_t data_size_2{data_SUBRANGE_CUT.size()};
+    Int_t data_size_0{data_FULLRANGE_CUT.size()};
     Int_t data_size_3{data_SUBRANGE_NOCUT.size()};
+    Int_t data_size_2{data_SUBRANGE_CUT.size()};
+
+    Int_t data_size_4{data_FULLRANGE_NOCUT_DEFAULT.size()};
+    Int_t data_size_5{data_FULLRANGE_NOCUT_HIGH.size()};
+    Int_t data_size_6{data_FULLRANGE_NOCUT_LOW.size()};
 
     Double_t *data_x_0 = new Double_t[data_size_0];
     Double_t *data_x_1 = new Double_t[data_size_1];
     Double_t *data_x_2 = new Double_t[data_size_2];
     Double_t *data_x_3 = new Double_t[data_size_3];
 
+    Double_t *data_x_4 = new Double_t[data_size_4];
+    Double_t *data_x_5 = new Double_t[data_size_5];
+    Double_t *data_x_6 = new Double_t[data_size_6];
+
     Double_t *data_y_0 = new Double_t[data_size_0];
     Double_t *data_y_1 = new Double_t[data_size_1];
     Double_t *data_y_2 = new Double_t[data_size_2];
     Double_t *data_y_3 = new Double_t[data_size_3];
+
+    Double_t *data_y_4 = new Double_t[data_size_4];
+    Double_t *data_y_5 = new Double_t[data_size_5];
+    Double_t *data_y_6 = new Double_t[data_size_6];
 
     Double_t *data_y_0_2d = new Double_t[data_size_0];
     Double_t *data_y_1_2d = new Double_t[data_size_1];
     Double_t *data_y_2_2d = new Double_t[data_size_2];
     Double_t *data_y_3_2d = new Double_t[data_size_3];
 
+    // TODO: 2d version
 
     // NOTE: chi-square value is calculated as chi-square not chi-square
     // reduced, to obtain chi-square reduced divide by the number of bins
@@ -139,6 +162,24 @@ int main(int argc, char* argv[])
         data_y_3_2d[i] = scale_factor * data_SUBRANGE_NOCUT[i][7];
     }
 
+    for(std::size_t i{0}; i < data_size_4; ++ i)
+    {
+        data_x_4[i] = data_FULLRANGE_NOCUT_DEFAULT[i][0];
+        data_y_4[i] = scale_factor * data_FULLRANGE_NOCUT_DEFAULT[i][4];
+        //data_y_0_2d[i] = scale_factor * data_FULLRANGE_CUT[i][7];
+    }
+    for(std::size_t i{0}; i < data_size_5; ++ i)
+    {
+        data_x_5[i] = data_FULLRANGE_NOCUT_HIGH[i][0];
+        data_y_5[i] = scale_factor * data_FULLRANGE_NOCUT_HIGH[i][4];
+        //data_y_0_2d[i] = scale_factor * data_FULLRANGE_CUT[i][7];
+    }
+    for(std::size_t i{0}; i < data_size_6; ++ i)
+    {
+        data_x_6[i] = data_FULLRANGE_NOCUT_LOW[i][0];
+        data_y_6[i] = scale_factor * data_FULLRANGE_NOCUT_LOW[i][4];
+        //data_y_0_2d[i] = scale_factor * data_FULLRANGE_CUT[i][7];
+    }
 
 
     TGraph *g_0 = new TGraph(data_size_0, data_x_0, data_y_0); // FULL RANGE CUT
@@ -180,6 +221,36 @@ int main(int argc, char* argv[])
     TGaxis* g_3_tgaxis = (TGaxis*)g_3->GetYaxis();
     g_3_tgaxis->SetMaxDigits(3);
     g_3->SetLineColor(3);
+
+    TGraph *g_4 = new TGraph(data_size_4, data_x_4, data_y_4); // FULL RANGE NO CUT DEFAULT
+    g_4->SetTitle("");
+    g_4->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
+    g_4->GetYaxis()->SetTitle("#chi^{2}");
+    //g_4->GetYaxis()->SetTitleOffset(1.75);
+    //g_4->GetYaxis()->SetMaxDigits(3);
+    TGaxis* g_4_tgaxis = (TGaxis*)g_4->GetYaxis();
+    g_4_tgaxis->SetMaxDigits(3);
+    g_4->SetLineColor(2);
+
+    TGraph *g_5 = new TGraph(data_size_5, data_x_5, data_y_5); // FULL RANGE NO CUT HIGH
+    g_5->SetTitle("");
+    g_5->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
+    g_5->GetYaxis()->SetTitle("#chi^{2}");
+    //g_5->GetYaxis()->SetTitleOffset(1.75);
+    //g_5->GetYaxis()->SetMaxDigits(3);
+    TGaxis* g_5_tgaxis = (TGaxis*)g_5->GetYaxis();
+    g_5_tgaxis->SetMaxDigits(3);
+    g_5->SetLineColor(4);
+
+    TGraph *g_6 = new TGraph(data_size_6, data_x_6, data_y_6); // FULL RANGE NO CUT LOW
+    g_6->SetTitle("");
+    g_6->GetXaxis()->SetTitle("Parameter #xi_{31}^{2#nu}");
+    g_6->GetYaxis()->SetTitle("#chi^{2}");
+    //g_6->GetYaxis()->SetTitleOffset(1.75);
+    //g_6->GetYaxis()->SetMaxDigits(3);
+    TGaxis* g_6_tgaxis = (TGaxis*)g_6->GetYaxis();
+    g_6_tgaxis->SetMaxDigits(3);
+    g_6->SetLineColor(6);
 
     std::cout << "Finished constructing intermediate data" << std::endl;
 
@@ -261,10 +332,34 @@ int main(int argc, char* argv[])
     c_log->SaveAs("c_log_out.C");
     c_log->Write();
 
+
+    TLegend *l_systematic = new TLegend(0.65, 0.70, 0.85, 0.85);
+    l_systematic->AddEntry(g_4, "Default", "l"); // FULL RANGE NO CUT DEFAULT
+    l_systematic->AddEntry(g_5, "High", "l"); // HIGH
+    l_systematic->AddEntry(g_6, "Low", "l"); // LOW
+
+    TCanvas *c_systematic = new TCanvas("c_systematic", "", 804, 628);
+    c_systematic->GetPad(0)->SetTicks(1, 2);
+    g_4->GetYaxis()->SetRangeUser(0.0, 20.0);
+    g_4->Draw("AL");
+    //g_5->Draw("same");
+    //g_6->Draw("same");
+    l_systematic->Draw();
+    c_systematic->SaveAs("c_systematic_out.png");
+    c_systematic->SaveAs("c_systematic_out.pdf");
+    c_systematic->SaveAs("c_systematic_out.eps");
+    c_systematic->SaveAs("c_systematic_out.C");
+    c_systematic->Write();
+
+
     g_0->Write();
     g_1->Write();
     g_2->Write();
     g_3->Write();
+
+    g_4->Write();
+    g_5->Write();
+    g_6->Write();
 
 
 

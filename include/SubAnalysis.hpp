@@ -2,6 +2,7 @@
 #define SUBANALYSIS_HPP
 
 
+#include "SensitivityRecord.hpp"
 #include "CanvasFactory.hpp"
 #include "SubAnalysis.hpp"
 
@@ -18,6 +19,7 @@
 
 
 #include <iostream>
+#include <map>
 
 
 class Analysis;
@@ -34,7 +36,9 @@ class SubAnalysis
     // CLASS FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////
 
-    SubAnalysis(const std::string&, const std::string&, Double_t, Double_t, TH2D*, TH2D*, Double_t, Double_t,
+    SubAnalysis(const std::string&, const std::string&, std::map<Double_t,
+                std::map<Double_t, SensitivityRecord>>*,
+                Double_t, Double_t, TH2D*, TH2D*, Double_t, Double_t,
                 Int_t*, Double_t*, Double_t*, Double_t*, Double_t*, TRandom3*);
     ~SubAnalysis();
     
@@ -57,6 +61,8 @@ class SubAnalysis
     void SensitivityMeasurementLoglikelihood1();
     void SensitivityMeasurementLoglikelihood2();
     void PrintOutputToFile();
+
+    void ChiSquare_BaselineNoSystematic();
     
     
     ////////////////////////////////////////////////////////////////////////////
@@ -75,6 +81,11 @@ class SubAnalysis
     void SetFitSubrange(const bool);
     void SetNumberOfPseudoexperiments(const Int_t, const Int_t);
     
+
+    void SetBaselineHistoPointer(TH1D* const);
+    TH1D* const GetBaselineHistoPointer();
+    TH1D* const GetElEnergyOriginalHistoPointer();
+
     
     ////////////////////////////////////////////////////////////////////////////
     // CONSTANTS
@@ -100,7 +111,15 @@ class SubAnalysis
     bool _canvas_enable_single_electron_projection_;
 
     
-    
+    ////////////////////////////////////////////////////////////////////////////
+    // OUTPUT AND RESULTS
+    ////////////////////////////////////////////////////////////////////////////
+
+    // map: first index: epsilon_31 value
+    // second index: systematic energy multiplier value
+    // SensitivityRecord object contains these values, and they should
+    // be equal, if not there is an error
+    std::map<Double_t, std::map<Double_t, SensitivityRecord>> *_sensitivity_record_map_;
     
     
     ////////////////////////////////////////////////////////////////////////////
@@ -140,6 +159,10 @@ class SubAnalysis
 
     bool fit_subrange;
     
+    // chisquare between reweighted with arbitary xi and systematics
+    // and baseline with baseline xi (0.368) and no systematics
+    Double_t sensitivity_chisquare_baseline_nosystematic;
+    Int_t non_empty_bins_baseline_nosystematic;
     
     
     // random generator
@@ -273,6 +296,10 @@ class SubAnalysis
     TCanvas *c_ll_2d;
 
 
+    // pointer to the "baseline histogram"
+    // this is the histogram of the class where all systematics are set
+    // to default values, and xi is set to the baseline value (0.368)
+    TH1D *_baseline_histo_p_;
 
 };
 

@@ -73,6 +73,7 @@ void Analysis::InitEventLoopHistogram()
  
      _subanalysis_systematic_default_ = new SubAnalysis("_default",
                                                         output_filename,
+                                                        &_sensitivity_record_map_,
                                                         epsilon_31,
                                                         systematic_energy_mult,
                                                         h_nEqNull, h_nEqTwo, psiN0, psiN2,
@@ -81,6 +82,7 @@ void Analysis::InitEventLoopHistogram()
                                                        
     _subanalysis_systematic_low_ = new SubAnalysis("_low",
                                                    output_filename,
+                                                   &_sensitivity_record_map_,
                                                    epsilon_31,
                                                    systematic_energy_mult_low,
                                                    h_nEqNull, h_nEqTwo, psiN0, psiN2,
@@ -89,12 +91,13 @@ void Analysis::InitEventLoopHistogram()
                                                    
     _subanalysis_systematic_high_ = new SubAnalysis("_high",
                                                     output_filename,
+                                                    &_sensitivity_record_map_,
                                                     epsilon_31,
                                                     systematic_energy_mult_high,
                                                     h_nEqNull, h_nEqTwo, psiN0, psiN2,
                                                     &nElectrons, &trueT1, &trueT2, el_energy_, &gen_weight,
                                                     &gen);
-    
+ 
     _subanalysis_.clear();
     _subanalysis_.push_back(_subanalysis_systematic_default_);
     _subanalysis_.push_back(_subanalysis_systematic_low_);
@@ -105,6 +108,13 @@ void Analysis::InitEventLoopHistogram()
     {
         (*it)->InitEventLoopHistogram();
     }
+
+    // at this point, subanalysis class InitEventLoopHistogram functions have
+    // been called, therefore h_el_energy_original pointer has changed
+    TH1D *h_temp{_subanalysis_systematic_default_->GetElEnergyOriginalHistoPointer()};
+    _subanalysis_systematic_default_->SetBaselineHistoPointer(h_temp);
+    _subanalysis_systematic_low_->SetBaselineHistoPointer(h_temp);
+    _subanalysis_systematic_high_->SetBaselineHistoPointer(h_temp);
 
 }
 

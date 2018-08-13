@@ -11,12 +11,14 @@ SubAnalysis::SubAnalysis
     (
         const std::string& h_name_append,
         const std::string& output_filename,
+        std::map<Double_t, std::map<Double_t, SensitivityRecord>> *sensitivity_record_map,
         Double_t epsilon_31, Double_t systematic_energy_mult,
         TH2D *h_nEqNull, TH2D *h_nEqTwo, Double_t psiN0, Double_t psiN2,
         Int_t *nElectrons, Double_t *trueT1, Double_t *trueT2, Double_t *el_energy_, Double_t *gen_weight,
         TRandom3 *gen
     )
     : h_name_append{h_name_append}
+    , _sensitivity_record_map_{sensitivity_record_map}
     , epsilon_31{epsilon_31}
     , systematic_energy_mult{systematic_energy_mult}
 
@@ -49,6 +51,8 @@ SubAnalysis::SubAnalysis
     , sensitivity_chisquare_2d{0.0}
     , number_of_pseudo_experiments{1}
     , number_of_pseudo_experiments_2d{1}
+    , sensitivity_chisquare_baseline_nosystematic{0.0}
+    , non_empty_bins_baseline_nosystematic{0}
 
 
     , f_el_energy_sum_original{nullptr}
@@ -97,6 +101,8 @@ SubAnalysis::SubAnalysis
     , c_el_energy_2d_data{nullptr}
     , c_el_energy_2d_prob{nullptr}
     , c_ll_2d{nullptr}
+    
+    , _baseline_histo_p_{nullptr}
 {
 
     std::cout << "construct: " << h_name_append << std::endl;
@@ -140,6 +146,22 @@ SubAnalysis::~SubAnalysis()
 
 
 
+}
+
+
+void SubAnalysis::SetBaselineHistoPointer(TH1D* const histo_p)
+{
+    _baseline_histo_p_ = histo_p;
+}
+
+TH1D* const SubAnalysis::GetBaselineHistoPointer()
+{
+    return _baseline_histo_p_;
+}
+
+TH1D* const SubAnalysis::GetElEnergyOriginalHistoPointer()
+{
+    return h_el_energy_original;
 }
 
 
