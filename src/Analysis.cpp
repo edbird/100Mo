@@ -95,6 +95,20 @@ Analysis::~Analysis()
 
 void Analysis::MakeChiSquareType1()
 {
+    
+    // get 1 sigma width for default, and minima for high/low
+
+    // NOTE: chisquare results not stored in subclass
+    //Double_t low_min{_subanalysis_systematic_low_->};
+    //Double_t high_min{_subanalysis_systematic_high_->};
+
+    // find minimum, low
+    // get object
+    //std::map<Double_t, SensitivityRecord> &s_rec_low{_sensitivity_record_map_.at()};
+    //for(;;)
+
+
+    // construct data for graphs
 
     std::size_t data_size_4{vec_epsilon_31.size()};
     std::size_t data_size_5{vec_epsilon_31.size()};
@@ -186,6 +200,91 @@ void Analysis::MakeChiSquareType1()
     c_systematic->SaveAs("c_systematic_out.eps");
     c_systematic->SaveAs("c_systematic_out.C");
 
+    // get minimum, low, high
+    Double_t min_low{data_y_6[0]};
+    Int_t min_low_ix{0};
+    Double_t min_high{data_y_5[0]};
+    Int_t min_high_ix{0};
+    Double_t min_default{data_y_4[0]};
+    Int_t min_default_ix{0};
+    Double_t sigma_1_low{0.0};
+    Int_t sigma_1_low_ix{0};
+    Double_t sigma_1_high{0.0};
+    Int_t sigma_1_high_ix{0};
+
+    for(std::size_t i{0}; i < data_size_4; ++ i)
+    {
+        Double_t val_low{data_y_6[i]};
+        Double_t val_high{data_y_5[i]};
+        Double_t val_default{data_y_4[i]};
+
+        if(val_low < min_low)
+        {
+            min_low = val_low;
+            min_low_ix = i;
+        }
+        if(val_high < min_high)
+        {
+            min_high = val_high;
+            min_high_ix = i;
+        }
+        if(val_default < min_default)
+        {
+            min_default = val_default;
+            min_default_ix = i;
+        }
+
+    }
+
+    // find 1 sigma width and interpolate
+    Int_t x0_index{min_default_ix};
+    Int_t data_size{data_size_4};
+    Double_t *data_y{data_y_4};
+    Double_t *data_x{data_x_4};
+    Double_t y0{min_default};
+    Double_t x_high;
+    Double_t x_low;
+    Double_t x_high_simple;
+    Double_t x_low_simple;
+    for(Int_t ix{x0_index}; ix < data_size - 1; ++ ix)
+    {
+        if(data_y[ix] - y0 >= 1.0)
+        {
+            //std::cout << "found delta >= 1 sigma: delta=" << data_y[ix] - y0 << std::endl;
+            x_high_simple = data_x[ix];
+            Double_t y_max_1sigma{y0 + 1.0};
+            Double_t y_minus{data_y[ix - 1]};
+            Double_t y_plus{data_y[ix]};
+            Double_t x_minus{data_x[ix - 1]};
+            Double_t x_plus{data_x[ix]};
+            x_high = x_minus + (x_plus - x_minus) * ((y_max_1sigma - y_minus) / (y_plus - y_minus));
+            std::cout << "1 sigma interpolate, high: " << x_minus << " " << x_high << " " << x_plus << " simple=" << x_high_simple << std::endl;
+            sigma_1_high = x_high;
+            sigma_1_high_ix = ix; // somewhere in the middle, due to interpolation
+            break;
+        }
+    }
+    for(Int_t ix{x0_index}; ix >= 0; -- ix)
+    {
+        if(data_y[ix] - y0 >= 1.0)
+        {
+            //std::cout << "found delta >= 1 sigma: delta=" << data_y[ix] - y0 << std::endl;
+            x_low_simple = data_x[ix];
+            Double_t y_max_1sigma{y0 + 1.0};
+            Double_t y_minus{data_y[ix + 1]};
+            Double_t y_plus{data_y[ix]};
+            Double_t x_minus{data_x[ix + 1]};
+            Double_t x_plus{data_x[ix]};
+            x_low = x_minus + (x_plus - x_minus) * ((y_max_1sigma - y_minus) / (y_plus - y_minus));
+            std::cout << "1 sigma interpolate, low: " << x_minus << " " << x_low << " " << x_plus << " simple=" << x_low_simple << std::endl;
+            sigma_1_low = x_low;
+            sigma_1_low_ix = ix;
+            break;
+        }
+    }
+    
+    std::cout << "width is: " << x_high - x_low << std::endl;
+    std::cout << "systematics width is: " << data_x_6[min_low_ix] << " - " << data_x_5[min_high_ix] << " = " << data_x_6[min_low_ix] - data_x_5[min_high_ix] << std::endl;
 
 }
 

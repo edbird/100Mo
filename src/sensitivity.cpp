@@ -162,9 +162,9 @@ int main(int argc, char* argv[])
                 //std::cout << "found delta >= 1 sigma: delta=" << data_y[ix] - y0 << std::endl;
                 x_low_simple = data_x[ix];
                 Double_t y_max_1sigma{y0 + 1.0};
-                Double_t y_minus{data_y[ix - 1]};
+                Double_t y_minus{data_y[ix + 1]};
                 Double_t y_plus{data_y[ix]};
-                Double_t x_minus{data_x[ix - 1]};
+                Double_t x_minus{data_x[ix + 1]};
                 Double_t x_plus{data_x[ix]};
                 x_low = x_minus + (x_plus - x_minus) * ((y_max_1sigma - y_minus) / (y_plus - y_minus));
                 //std::cout << "interpolate: " << x_minus << " " << x_low << " " << x_plus << std::endl;
