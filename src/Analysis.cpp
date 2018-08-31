@@ -259,6 +259,7 @@ void Analysis::MakeChiSquareType1()
             Double_t x_plus{data_x[ix]};
             x_high = x_minus + (x_plus - x_minus) * ((y_max_1sigma - y_minus) / (y_plus - y_minus));
             std::cout << "1 sigma interpolate, high: " << x_minus << " " << x_high << " " << x_plus << " simple=" << x_high_simple << std::endl;
+            std::cout << "the index is: " << ix << ", the initial index is: " << x0_index << std::endl;
             sigma_1_high = x_high;
             sigma_1_high_ix = ix; // somewhere in the middle, due to interpolation
             break;
@@ -271,12 +272,13 @@ void Analysis::MakeChiSquareType1()
             //std::cout << "found delta >= 1 sigma: delta=" << data_y[ix] - y0 << std::endl;
             x_low_simple = data_x[ix];
             Double_t y_max_1sigma{y0 + 1.0};
-            Double_t y_minus{data_y[ix + 1]};
-            Double_t y_plus{data_y[ix]};
-            Double_t x_minus{data_x[ix + 1]};
-            Double_t x_plus{data_x[ix]};
+            Double_t y_minus{data_y[ix]};
+            Double_t y_plus{data_y[ix + 1]};
+            Double_t x_minus{data_x[ix]};
+            Double_t x_plus{data_x[ix + 1]};
             x_low = x_minus + (x_plus - x_minus) * ((y_max_1sigma - y_minus) / (y_plus - y_minus));
             std::cout << "1 sigma interpolate, low: " << x_minus << " " << x_low << " " << x_plus << " simple=" << x_low_simple << std::endl;
+            std::cout << "the index is: " << ix << ", the initial index is: " << x0_index << std::endl;
             sigma_1_low = x_low;
             sigma_1_low_ix = ix;
             break;
@@ -285,6 +287,8 @@ void Analysis::MakeChiSquareType1()
     
     std::cout << "width is: " << x_high - x_low << std::endl;
     std::cout << "systematics width is: " << data_x_6[min_low_ix] << " - " << data_x_5[min_high_ix] << " = " << data_x_6[min_low_ix] - data_x_5[min_high_ix] << std::endl;
+    // TODO: NEED TO CHECK INTERPOLATION ALGORITHM
+    // SEE ALSO: int main() of sensitivity.cpp
 
 }
 
