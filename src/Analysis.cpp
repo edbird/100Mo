@@ -18,6 +18,10 @@ Analysis::Analysis(const std::string& filename, const std::string& output_filena
     , systematic_energy_mult{1.0}
     , systematic_energy_mult_high{1.0}
     , systematic_energy_mult_low{1.0}
+    , systematic_energy_mult_enabled{true}
+    , systematic_energy_offset{0.0}
+    , systematic_energy_offset_high{0.0}
+    , systematic_energy_offset_low{0.0}
     , f{nullptr}
     , t{nullptr}
     , num_bins{40}
@@ -183,14 +187,15 @@ void Analysis::MakeChiSquareType1()
     g_6_tgaxis->SetMaxDigits(3);
     g_6->SetLineColor(6);
 
-    TLegend *l_systematic = new TLegend(0.35, 0.70, 0.65, 0.85);
+    TLegend *l_systematic = new TLegend(0.40, 0.70, 0.60, 0.85);
     l_systematic->AddEntry(g_4, "Default", "l"); // FULL RANGE NO CUT DEFAULT
     l_systematic->AddEntry(g_5, "High", "l"); // HIGH
     l_systematic->AddEntry(g_6, "Low", "l"); // LOW
 
     TCanvas *c_systematic = new TCanvas("c_systematic", "", 804, 628);
     c_systematic->GetPad(0)->SetTicks(1, 2);
-    g_4->GetYaxis()->SetRangeUser(0.0, 6.0e1);
+    //g_4->GetYaxis()->SetRangeUser(0.0, 6.0e1); // energy systematic m
+    g_4->GetYaxis()->SetRangeUser(0.0, 1.5e3); // energy systematic c
     g_4->Draw("AL");
     g_5->Draw("same");
     g_6->Draw("same");
@@ -318,6 +323,20 @@ void Analysis::SetSystematicEnergyMultiplierHighLow(const Double_t high, const D
     systematic_energy_mult_low = low;
     systematic_energy_mult_high = high;
 }
+
+void Analysis::SetSystematicEnergyMultiplierEnabled(const bool enabled)
+{
+    systematic_energy_mult_enabled = enabled;
+}
+
+void Analysis::SetSystematicEnergyOffset(const Double_t high, const Double_t low)
+{
+    systematic_energy_offset_low = low;
+    systematic_energy_offset_high = high;
+}
+
+// TODO: add new functions here, for systematics
+
 
 void Analysis::SetEpsilon31(const Double_t epsilon)
 {

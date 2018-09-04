@@ -50,6 +50,11 @@ class Analysis
 
     void SetSystematicEnergyMultiplier(const Double_t);
     void SetSystematicEnergyMultiplierHighLow(const Double_t, const Double_t);
+    void SetSystematicEnergyMultiplierEnabled(const bool);
+
+    void SetSystematicEnergyOffset(const Double_t, const Double_t);
+
+
     void SetEpsilon31(const Double_t);
     void AddEpsilonValue(const Double_t epsilon);
     void RunOverEpsilonVector();
@@ -152,7 +157,13 @@ class Analysis
     Double_t systematic_energy_mult_low;
     // systematic energy shift, high level
     Double_t systematic_energy_mult_high;
-    // TODO: need systematic_energy_mult_default ?
+    // enable / disable switch, this is explained in comment in main.cpp
+    bool systematic_energy_mult_enabled;
+
+    // systematic energy offset
+    Double_t systematic_energy_offset;
+    Double_t systematic_energy_offset_low;
+    Double_t systematic_energy_offset_high;
 
     TFile *f;
     TTree *t;

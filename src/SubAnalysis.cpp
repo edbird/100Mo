@@ -12,7 +12,9 @@ SubAnalysis::SubAnalysis
         const std::string& h_name_append,
         const std::string& output_filename,
         std::map<Double_t, std::map<Double_t, SensitivityRecord>> *sensitivity_record_map,
-        Double_t epsilon_31, Double_t systematic_energy_mult,
+        Double_t epsilon_31,
+        Double_t systematic_energy_mult, bool systematic_energy_mult_enable,
+        Double_t systematic_energy_offset,
         TH2D *h_nEqNull, TH2D *h_nEqTwo, Double_t psiN0, Double_t psiN2,
         Int_t *nElectrons, Double_t *trueT1, Double_t *trueT2, Double_t *el_energy_, Double_t *gen_weight,
         TRandom3 *gen
@@ -21,6 +23,8 @@ SubAnalysis::SubAnalysis
     , _sensitivity_record_map_{sensitivity_record_map}
     , epsilon_31{epsilon_31}
     , systematic_energy_mult{systematic_energy_mult}
+    , systematic_energy_mult_enable{systematic_energy_mult_enable}
+    , systematic_energy_offset{systematic_energy_offset}
 
     , nElectrons{nElectrons}
     , trueT1{trueT1}

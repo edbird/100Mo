@@ -215,6 +215,8 @@ void SubAnalysis::PrintOutputToFile()
     SensitivityRecord r;
     r.epsilon_31 = epsilon_31;
     r.systematic_energy_mult = systematic_energy_mult;
+    if(systematic_energy_mult_enable == true) r.systematic_energy_mult_enable = 1; else r.systematic_energy_mult_enable = 0;
+    r.systematic_energy_offset = systematic_energy_offset;
     r.fit_chisquare = f_el_energy_sum_original->GetChisquare();
     r.fit_chisquare_bin_count = non_empty_bins_fit;
     r.sensitivity_chisquare_1d = sensitivity_chisquare;

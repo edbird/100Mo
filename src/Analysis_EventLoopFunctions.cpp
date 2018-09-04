@@ -71,11 +71,13 @@ void Analysis::InitEventLoopHistogram()
     // INIT SUBCLASS
     ////////////////////////////////////////////////////////////////////////////
  
+
      _subanalysis_systematic_default_ = new SubAnalysis("_default",
                                                         output_filename,
                                                         &_sensitivity_record_map_,
                                                         epsilon_31,
-                                                        systematic_energy_mult,
+                                                        systematic_energy_mult, systematic_energy_mult_enabled,
+                                                        systematic_energy_offset,
                                                         h_nEqNull, h_nEqTwo, psiN0, psiN2,
                                                         &nElectrons, &trueT1, &trueT2, el_energy_, &gen_weight,
                                                         &gen);
@@ -84,7 +86,8 @@ void Analysis::InitEventLoopHistogram()
                                                    output_filename,
                                                    &_sensitivity_record_map_,
                                                    epsilon_31,
-                                                   systematic_energy_mult_low,
+                                                   systematic_energy_mult_low, systematic_energy_mult_enabled,
+                                                   systematic_energy_offset_low,
                                                    h_nEqNull, h_nEqTwo, psiN0, psiN2,
                                                    &nElectrons, &trueT1, &trueT2, el_energy_, &gen_weight,
                                                    &gen);
@@ -93,7 +96,8 @@ void Analysis::InitEventLoopHistogram()
                                                     output_filename,
                                                     &_sensitivity_record_map_,
                                                     epsilon_31,
-                                                    systematic_energy_mult_high,
+                                                    systematic_energy_mult_high, systematic_energy_mult_enabled,
+                                                    systematic_energy_offset_high,
                                                     h_nEqNull, h_nEqTwo, psiN0, psiN2,
                                                     &nElectrons, &trueT1, &trueT2, el_energy_, &gen_weight,
                                                     &gen);
@@ -139,6 +143,7 @@ void Analysis::EventLoop()
             (*it)->EventLoop();
         }
 
+        // note: no systematic energy shift in this class
         //Double_t el_energy_0{el_energy_[0] * systematic_energy_mult};
         //Double_t el_energy_1{el_energy_[1] * systematic_energy_mult};
         Double_t el_energy_0{el_energy_[0]};

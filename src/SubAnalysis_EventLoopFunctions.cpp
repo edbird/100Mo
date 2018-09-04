@@ -86,8 +86,27 @@ void SubAnalysis::InitEventLoopHistogram()
 void SubAnalysis::EventLoop()
 {
 
-    Double_t el_energy_0{el_energy_[0] * systematic_energy_mult};
-    Double_t el_energy_1{el_energy_[1] * systematic_energy_mult};
+    Double_t el_energy_0{el_energy_[0]};
+    Double_t el_energy_1{el_energy_[1]}; // * systematic_energy_mult
+
+    // this if statement sorts out the logical problem of having different
+    // high/low sysematic energy multipliers for the purpose of using them
+    // as labels to address the SubAnalysis entries in the map inside Analysis,
+    // and simultaniously allowing the systematic energy mult systematic to be
+    // turned off while another systematic is on
+    if(systematic_energy_mult_enable == true)
+    {
+        el_energy_0 = el_energy_0 * systematic_energy_mult;
+        el_energy_1 = el_energy_1 * systematic_energy_mult;
+    }
+        
+    el_energy_0 = el_energy_0 + systematic_energy_offset;
+    el_energy_1 = el_energy_1 + systematic_energy_offset;
+    
+    // TODO; what happens if the energy shift / systematics move the energy
+    // out of a valid range
+    // answer: nothing, reweight function depends only on T1 T2
+    // TODO: should T1 and T2 be shifted by systematic?
 
     // TODO: not required
     if(*nElectrons != 2) return;

@@ -38,7 +38,7 @@ class SubAnalysis
 
     SubAnalysis(const std::string&, const std::string&, std::map<Double_t,
                 std::map<Double_t, SensitivityRecord>>*,
-                Double_t, Double_t, TH2D*, TH2D*, Double_t, Double_t,
+                Double_t, Double_t, bool, Double_t, TH2D*, TH2D*, Double_t, Double_t,
                 Int_t*, Double_t*, Double_t*, Double_t*, Double_t*, TRandom3*);
     ~SubAnalysis();
     
@@ -137,6 +137,8 @@ class SubAnalysis
     
     // systematic energy shift
     Double_t systematic_energy_mult; // (this is the current value for this class)
+    bool systematic_energy_mult_enable;
+    Double_t systematic_energy_offset; 
     
     // 0.0 MeV to 4.0 MeV = 4.0 MeV range
     // num_bins keV bin width: 4.0 MeV / 0.1 MeV = 40 bins

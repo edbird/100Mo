@@ -160,7 +160,27 @@ int main(int argc, char* argv[])
     // note: could have multiple energy calibration points, hence linear
     // calibration between these points
     //analysis.SetSystematicEnergyMultiplier(systematic_energy_mult);
-    analysis.SetSystematicEnergyMultiplierHighLow(1.0 + 0.002, 1.0 - 0.002);
+    analysis.SetSystematicEnergyMultiplierHighLow(1.0 + 0.002, 1.0 - 0.002); // 0.2% energy mult
+    analysis.SetSystematicEnergyMultiplierEnabled(false);
+    analysis.SetSystematicEnergyOffset(0.003, -0.003); // 0.003 MeV = 3 keV
+    // Notes: to avoid problem described below, use energy mulitplier variable
+    // for all systematics
+    // problem: number of "histograms" to create (data sets) goes as 3^m where
+    // m is the number of systematics
+    // Further Notes: change of plan: going to implement something half way
+    // between these 2 options
+    // need to eventually use code to fix systematic parameters, therefore they
+    // should all be included in the code simultaniously
+    // however tracking 3^m datasets is not convenient/trivial
+    // instead, track only datasets for high/low/default systematic energy
+    // multiplier
+    // but include all other systmatics, although there will still only be
+    // 3 tracked datasets, and they will be indexed using the systematic energy
+    // multiplier
+    // NEW PROBLEM: when systematic energy multiplier is the same, we can't
+    // track all 3 datasets!
+    // SOLUTION: introduce a flag to enable/disable the systematic energy
+    // multiplier
 
     if(arg_fit_subrange == std::string("true"))
     {
