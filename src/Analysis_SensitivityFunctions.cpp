@@ -234,7 +234,7 @@ void Analysis::MakeSensitivityCanvas()
     l_ratio_sensitivity->SetBorderSize(0);
     l_ratio_sensitivity->Draw();
 
-    std::string c_ratio_sensitivity_name(std::string("c_ratio_sensitivity") + std::string("_") + eps_string);
+    std::string c_ratio_sensitivity_name(std::string("c_ratio_sensitivity") + std::string("/") + std::string("c_ratio_sensitivity") + std::string("_") + eps_string);
     c_ratio_sensitivity->SaveAs((c_ratio_sensitivity_name + std::string(".png")).c_str());
     c_ratio_sensitivity->SaveAs((c_ratio_sensitivity_name + std::string(".pdf")).c_str());
     c_ratio_sensitivity->SaveAs((c_ratio_sensitivity_name + std::string(".eps")).c_str());

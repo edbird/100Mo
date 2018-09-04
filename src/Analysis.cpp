@@ -183,14 +183,14 @@ void Analysis::MakeChiSquareType1()
     g_6_tgaxis->SetMaxDigits(3);
     g_6->SetLineColor(6);
 
-    TLegend *l_systematic = new TLegend(0.45, 0.70, 0.65, 0.85);
+    TLegend *l_systematic = new TLegend(0.35, 0.70, 0.65, 0.85);
     l_systematic->AddEntry(g_4, "Default", "l"); // FULL RANGE NO CUT DEFAULT
     l_systematic->AddEntry(g_5, "High", "l"); // HIGH
     l_systematic->AddEntry(g_6, "Low", "l"); // LOW
 
     TCanvas *c_systematic = new TCanvas("c_systematic", "", 804, 628);
     c_systematic->GetPad(0)->SetTicks(1, 2);
-    g_4->GetYaxis()->SetRangeUser(0.0, 1.6e3);
+    g_4->GetYaxis()->SetRangeUser(0.0, 6.0e1);
     g_4->Draw("AL");
     g_5->Draw("same");
     g_6->Draw("same");
@@ -199,6 +199,17 @@ void Analysis::MakeChiSquareType1()
     c_systematic->SaveAs("c_systematic_out.pdf");
     c_systematic->SaveAs("c_systematic_out.eps");
     c_systematic->SaveAs("c_systematic_out.C");
+
+    TFile *c_systematic_out = new TFile("c_systematic_out.root", "RECREATE");
+    g_4->SetName("g_systematic_default");
+    g_5->SetName("g_systematic_high");
+    g_6->SetName("g_systematic_low");
+    g_4->Write();
+    g_5->Write();
+    g_6->Write();
+    c_systematic_out->Close();
+    delete c_systematic_out;
+    c_systematic_out = nullptr;
 
     // get minimum, low, high
     Double_t min_low{data_y_6[0]};

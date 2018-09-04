@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
     // note: could have multiple energy calibration points, hence linear
     // calibration between these points
     //analysis.SetSystematicEnergyMultiplier(systematic_energy_mult);
-    analysis.SetSystematicEnergyMultiplierHighLow(1.01, 0.99);
+    analysis.SetSystematicEnergyMultiplierHighLow(1.0 + 0.002, 1.0 - 0.002);
 
     if(arg_fit_subrange == std::string("true"))
     {
