@@ -162,7 +162,12 @@ int main(int argc, char* argv[])
     //analysis.SetSystematicEnergyMultiplier(systematic_energy_mult);
     analysis.SetSystematicEnergyMultiplierHighLow(1.0 + 0.002, 1.0 - 0.002); // 0.2% energy mult
     analysis.SetSystematicEnergyMultiplierEnabled(false);
-    analysis.SetSystematicEnergyOffset(0.003, -0.003); // 0.003 MeV = 3 keV
+    #if 0
+        analysis.SetSystematicEnergyOffset(0.003, -0.003); // 0.003 MeV = 3 keV
+    #endif
+    #if 1
+        analysis.SetSystematicEfficiency(1.0 + 0.05, 1.0 - 0.05);
+    #endif
     // Notes: to avoid problem described below, use energy mulitplier variable
     // for all systematics
     // problem: number of "histograms" to create (data sets) goes as 3^m where

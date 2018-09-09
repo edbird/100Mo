@@ -22,6 +22,9 @@ Analysis::Analysis(const std::string& filename, const std::string& output_filena
     , systematic_energy_offset{0.0}
     , systematic_energy_offset_high{0.0}
     , systematic_energy_offset_low{0.0}
+    , systematic_efficiency{1.0}
+    , systematic_efficiency_high{1.0}
+    , systematic_efficiency_low{1.0}
     , f{nullptr}
     , t{nullptr}
     , num_bins{40}
@@ -195,7 +198,8 @@ void Analysis::MakeChiSquareType1()
     TCanvas *c_systematic = new TCanvas("c_systematic", "", 804, 628);
     c_systematic->GetPad(0)->SetTicks(1, 2);
     //g_4->GetYaxis()->SetRangeUser(0.0, 6.0e1); // energy systematic m
-    g_4->GetYaxis()->SetRangeUser(0.0, 1.5e3); // energy systematic c
+    //g_4->GetYaxis()->SetRangeUser(0.0, 1.5e3); // energy systematic c
+    g_4->GetYaxis()->SetRangeUser(0.0, 8.0e3); // efficiency systematic k
     g_4->Draw("AL");
     g_5->Draw("same");
     g_6->Draw("same");
@@ -333,6 +337,12 @@ void Analysis::SetSystematicEnergyOffset(const Double_t high, const Double_t low
 {
     systematic_energy_offset_low = low;
     systematic_energy_offset_high = high;
+}
+
+void Analysis::SetSystematicEfficiency(const Double_t high, const Double_t low)
+{
+    systematic_efficiency_low = low;
+    systematic_efficiency_high = high;
 }
 
 // TODO: add new functions here, for systematics

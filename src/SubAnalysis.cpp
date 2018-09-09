@@ -15,6 +15,7 @@ SubAnalysis::SubAnalysis
         Double_t epsilon_31,
         Double_t systematic_energy_mult, bool systematic_energy_mult_enable,
         Double_t systematic_energy_offset,
+        Double_t systematic_efficiency,
         TH2D *h_nEqNull, TH2D *h_nEqTwo, Double_t psiN0, Double_t psiN2,
         Int_t *nElectrons, Double_t *trueT1, Double_t *trueT2, Double_t *el_energy_, Double_t *gen_weight,
         TRandom3 *gen
@@ -25,6 +26,7 @@ SubAnalysis::SubAnalysis
     , systematic_energy_mult{systematic_energy_mult}
     , systematic_energy_mult_enable{systematic_energy_mult_enable}
     , systematic_energy_offset{systematic_energy_offset}
+    , systematic_efficiency{systematic_efficiency}
 
     , nElectrons{nElectrons}
     , trueT1{trueT1}

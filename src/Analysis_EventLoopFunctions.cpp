@@ -78,6 +78,7 @@ void Analysis::InitEventLoopHistogram()
                                                         epsilon_31,
                                                         systematic_energy_mult, systematic_energy_mult_enabled,
                                                         systematic_energy_offset,
+                                                        systematic_efficiency,
                                                         h_nEqNull, h_nEqTwo, psiN0, psiN2,
                                                         &nElectrons, &trueT1, &trueT2, el_energy_, &gen_weight,
                                                         &gen);
@@ -88,6 +89,7 @@ void Analysis::InitEventLoopHistogram()
                                                    epsilon_31,
                                                    systematic_energy_mult_low, systematic_energy_mult_enabled,
                                                    systematic_energy_offset_low,
+                                                   systematic_efficiency_low,
                                                    h_nEqNull, h_nEqTwo, psiN0, psiN2,
                                                    &nElectrons, &trueT1, &trueT2, el_energy_, &gen_weight,
                                                    &gen);
@@ -98,6 +100,7 @@ void Analysis::InitEventLoopHistogram()
                                                     epsilon_31,
                                                     systematic_energy_mult_high, systematic_energy_mult_enabled,
                                                     systematic_energy_offset_high,
+                                                    systematic_efficiency_high,
                                                     h_nEqNull, h_nEqTwo, psiN0, psiN2,
                                                     &nElectrons, &trueT1, &trueT2, el_energy_, &gen_weight,
                                                     &gen);

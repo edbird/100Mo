@@ -53,6 +53,7 @@ class Analysis
     void SetSystematicEnergyMultiplierEnabled(const bool);
 
     void SetSystematicEnergyOffset(const Double_t, const Double_t);
+    void SetSystematicEfficiency(const Double_t, const Double_t);
 
 
     void SetEpsilon31(const Double_t);
@@ -164,6 +165,11 @@ class Analysis
     Double_t systematic_energy_offset;
     Double_t systematic_energy_offset_low;
     Double_t systematic_energy_offset_high;
+
+    // systematic efficiency
+    Double_t systematic_efficiency;
+    Double_t systematic_efficiency_low;
+    Double_t systematic_efficiency_high;
 
     TFile *f;
     TTree *t;

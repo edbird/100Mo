@@ -100,8 +100,18 @@ void SubAnalysis::EventLoop()
         el_energy_1 = el_energy_1 * systematic_energy_mult;
     }
         
+    // linear energy offset systematic
     el_energy_0 = el_energy_0 + systematic_energy_offset;
     el_energy_1 = el_energy_1 + systematic_energy_offset;
+
+    // efficiency systematic
+    // TODO: can remove, as weight_efficiency = systematic_efficiency
+    Double_t weight_efficiency = 1.0;
+    weight_efficiency = weight_efficiency * systematic_efficiency;
+
+    // generator weight (MC weight) multiplied by weight efficiency
+    Double_t aux_weight{*gen_weight};
+    aux_weight = aux_weight * weight_efficiency;
     
     // TODO; what happens if the energy shift / systematics move the energy
     // out of a valid range
@@ -126,33 +136,33 @@ void SubAnalysis::EventLoop()
     //Double_t weight{ReWeight(T1, T2, epsilon_31, h_nEqNull, h_nEqTwo, psiN0, psiN2, "true")};
 
     // original
-    h_el_energy_original->Fill(el_energy_0, 1.0 * *gen_weight);
-    h_el_energy_original->Fill(el_energy_1, 1.0 * *gen_weight);
+    h_el_energy_original->Fill(el_energy_0, 1.0 * aux_weight);
+    h_el_energy_original->Fill(el_energy_1, 1.0 * aux_weight);
     
-    h_el_energy_sum_original->Fill(el_energy_0 + el_energy_1, 1.0 * *gen_weight);
+    h_el_energy_sum_original->Fill(el_energy_0 + el_energy_1, 1.0 * aux_weight);
     
     if(el_energy_0 <= el_energy_1)
     {
-        h_el_energy_2d_original->Fill(el_energy_0, el_energy_1, 1.0 * *gen_weight);
+        h_el_energy_2d_original->Fill(el_energy_0, el_energy_1, 1.0 * aux_weight);
     }
     else
     {
-        h_el_energy_2d_original->Fill(el_energy_1, el_energy_0, 1.0 * *gen_weight);
+        h_el_energy_2d_original->Fill(el_energy_1, el_energy_0, 1.0 * aux_weight);
     }
 
     // reweight
-    h_el_energy_reweight->Fill(el_energy_0, weight * *gen_weight);
-    h_el_energy_reweight->Fill(el_energy_1, weight * *gen_weight);
+    h_el_energy_reweight->Fill(el_energy_0, weight * aux_weight);
+    h_el_energy_reweight->Fill(el_energy_1, weight * aux_weight);
 
-    h_el_energy_sum_reweight->Fill(el_energy_0 + el_energy_1, weight * *gen_weight);
+    h_el_energy_sum_reweight->Fill(el_energy_0 + el_energy_1, weight * aux_weight);
 
     if(el_energy_0 <= el_energy_1)
     {
-        h_el_energy_2d_reweight->Fill(el_energy_0, el_energy_1, weight * *gen_weight);
+        h_el_energy_2d_reweight->Fill(el_energy_0, el_energy_1, weight * aux_weight);
     }
     else
     {
-        h_el_energy_2d_reweight->Fill(el_energy_1, el_energy_0, weight * *gen_weight);
+        h_el_energy_2d_reweight->Fill(el_energy_1, el_energy_0, weight * aux_weight);
     }
 
 }
