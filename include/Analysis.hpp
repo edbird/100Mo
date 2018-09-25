@@ -5,12 +5,14 @@
 #include "SensitivityRecord.hpp"
 #include "CanvasFactory.hpp"
 #include "SubAnalysis.hpp"
+#include "Flag.hpp"
 
 
 #include "TMath.h"
 #include "TRandom3.h"
 #include "TCanvas.h"
 #include "TGraph.h"
+#include "TGraphErrors.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TF1.h"
@@ -20,8 +22,6 @@
 
 #include <iostream>
 #include <map>
-
-
 
 
 class Analysis
@@ -78,7 +78,46 @@ class Analysis
     void PrintOutputToFile();
     void MakeSensitivityCanvas();
 
+
+    ////////////////////////////////////////////////////////////////////////////
+    // CALIBRATION FUNCTIONS
+    ////////////////////////////////////////////////////////////////////////////
     
+    void SetEnergyCalibrationPoints(const Double_t expected_Bi207_EC_1 = 481.7, const Double_t expected_Bi207_EC_2 = 975.7)
+    {
+        // reference: https://www.ezag.com/fileadmin/ezag/user-uploads/isotopes/isotopes/Isotrak/isotrak-pdf/Decay_Schema_Data/Bi-207.pdf
+
+        // set the calibration points
+        energy_calibration_Bi207_EC_1 = expected_Bi207_EC_1; // expected Electron Capture peak 1 (keV)
+        energy_calibration_Bi207_EC_2 = expected_Bi207_EC_2; // expected Electron Capture peak 2 (keV)
+    }
+
+    void RunEnergyCalibration(const Double_t measured_Bi207_EC_1, const Double_t measured_Bi207_EC_2)
+    {
+        // set the calibration points
+        energy_calibration_Bi207_EC_measured_1 = measured_Bi207_EC_1; // measured EC peak 1 (keV)
+        energy_calibration_Bi207_EC_measured_2 = measured_Bi207_EC_2; // measured EC peak 2 (keV)
+
+        // assume energy calibration points are set
+
+        Double_t E1{energy_calibration_Bi207_EC_1};
+        Double_t E2{energy_calibration_Bi207_EC_2};
+        Double_t X1{energy_calibration_Bi207_EC_measured_1};
+        Double_t X2{energy_calibration_Bi207_EC_measured_2};
+
+        Double_t a{(E1 - E2) / (X1 - X2)};
+        Double_t b{E1 - a * X1};
+        if(std::abs((E2 - a * X2) - b) > 1e-4)
+        {
+            std::cout << "WARNING: CALIBRATION FAILED" << std::endl;
+        }
+
+        energy_calibration_a = a;
+        energy_calibration_b = b;
+
+        std::cout << "Energy Calibration Values: a = " << a << ", b = " << b << std::endl;
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////
     // FLAG FUNCTIONS
@@ -170,6 +209,23 @@ class Analysis
     Double_t systematic_efficiency;
     Double_t systematic_efficiency_low;
     Double_t systematic_efficiency_high;
+
+    // energy calibration, Bi 207
+    Double_t energy_calibration_a;
+    Double_t energy_calibration_b;
+    // TODO: systematics
+
+    Double_t energy_calibration_Bi207_EC_1; // expected Electron Capture peak 1 (keV)
+    Double_t energy_calibration_Bi207_EC_2; // expected Electron Capture peak 2 (keV)
+    Double_t energy_calibration_Bi207_EC_measured_1; // measured EC peak 1 (keV)
+    Double_t energy_calibration_Bi207_EC_measured_2; // measured EC peak 2 (keV)
+    // TODO: uncertainties (systematics?)
+
+    // energy correction file
+    // NOTE: FOR MC ONLY, DO NOT APPLY TO DATA
+    TFile *f_energy_correction;
+    TGraphErrors *g_energy_correction;
+    MODE_FLAG m_mode; // simulation (MC) or real (DATA)
 
     TFile *f;
     TTree *t;

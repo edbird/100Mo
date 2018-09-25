@@ -110,7 +110,27 @@ void Analysis::InitEventLoopHistogram()
     _subanalysis_.push_back(_subanalysis_systematic_low_);
     _subanalysis_.push_back(_subanalysis_systematic_high_);
  
-    
+
+    // set mode
+    for(std::vector<SubAnalysis*>::iterator it{_subanalysis_.begin()}; it != _subanalysis_.end(); ++ it)
+    {
+        (*it)->SetMode(m_mode);
+
+        // set g_energy_correction, regardless if used
+        (*it)->Set_g_energy_correction(g_energy_correction);
+    }
+
+
+    // set energy calibration
+    // call: RunEnergyCalibration() before this function
+    for(std::vector<SubAnalysis*>::iterator it{_subanalysis_.begin()}; it != _subanalysis_.end(); ++ it)
+    {
+        Double_t a{energy_calibration_a};
+        Double_t b{energy_calibration_b};
+        (*it)->SetEnergyCalibrationConstants(a, b);
+    }
+
+
     for(std::vector<SubAnalysis*>::iterator it{_subanalysis_.begin()}; it != _subanalysis_.end(); ++ it)
     {
         (*it)->InitEventLoopHistogram();
@@ -152,8 +172,28 @@ void Analysis::EventLoop()
         Double_t el_energy_0{el_energy_[0]};
         Double_t el_energy_1{el_energy_[1]};
 
-        if(nElectrons != 2) continue;
 
+        // analysis only valid for 2 electron events
+        if(nElectrons != 2) continue;
+        
+
+        // true energy
+        // TODO: presumably this does not exist for data so need to search for
+        // all instances of the trueT1, trueT2 variable and remove/replace
+        Double_t T1{trueT1 / bb_Q};
+        Double_t T2{trueT2 / bb_Q};
+
+        // if MC apply energy degradation (correction)
+        if(m_mode == MODE_FLAG::MODE_MC)
+        {
+            Double_t visible_true_ratio_1{g_energy_correction->Eval(T1)};
+            Double_t visible_true_ratio_2{g_energy_correction->Eval(T2)};
+
+            el_energy_0 = el_energy_0 * visible_true_ratio_1;
+            el_energy_1 = el_energy_0 * visible_true_ratio_2;
+        }
+
+        // TODO: not sure if this should be removed
         // cut both electrons > 300 keV
         if(_energy_cut_enable_)
         {
@@ -161,8 +201,6 @@ void Analysis::EventLoop()
             if(el_energy_1 < 0.3) continue;
         }
 
-        Double_t T1{trueT1 / bb_Q};
-        Double_t T2{trueT2 / bb_Q};
 
         // ReWeight = baseline 0.0, ReWeight2 = baseline = 0.382
         Double_t weight{ReWeight2(T1, T2, epsilon_31, h_nEqNull, h_nEqTwo, psiN0, psiN2, "true")};

@@ -187,6 +187,17 @@ int main(int argc, char* argv[])
     // SOLUTION: introduce a flag to enable/disable the systematic energy
     // multiplier
 
+    // set energy calibration constants
+    analysis.SetEnergyCalibrationPoints(482.0, 976.0);
+    analysis.RunEnergyCalibration(0.96684263 * 482.0, 0.99919739 * 976.0);
+    // TODO ^
+    
+    // switch to enable data mode
+    // defaut is MC
+    #if 0
+        analysis.SetModeFlag(MODE_FLAG::MODE_DATA);
+    #endif
+
     if(arg_fit_subrange == std::string("true"))
     {
         analysis.SetFitSubrange(true);

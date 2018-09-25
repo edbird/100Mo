@@ -89,6 +89,30 @@ void SubAnalysis::EventLoop()
     Double_t el_energy_0{el_energy_[0]};
     Double_t el_energy_1{el_energy_[1]}; // * systematic_energy_mult
 
+
+    // TODO: not required
+    if(*nElectrons != 2) return;
+
+    
+    // true energy
+    // TODO: presumably this does not exist for data so need to search for
+    // all instances of the trueT1, trueT2 variable and remove/replace
+    Double_t T1{*trueT1 / bb_Q};
+    Double_t T2{*trueT2 / bb_Q};
+
+    // if MC apply energy degradation (correction)
+    if(m_mode == MODE_FLAG::MODE_MC)
+    {
+        Double_t visible_true_ratio_1{g_energy_correction->Eval(T1)};
+        Double_t visible_true_ratio_2{g_energy_correction->Eval(T2)};
+
+        el_energy_0 = el_energy_0 * visible_true_ratio_1;
+        el_energy_1 = el_energy_0 * visible_true_ratio_2;
+    }
+
+    
+    /*** SYSTEMATICS **********************************************************/
+
     // this if statement sorts out the logical problem of having different
     // high/low sysematic energy multipliers for the purpose of using them
     // as labels to address the SubAnalysis entries in the map inside Analysis,
@@ -118,8 +142,8 @@ void SubAnalysis::EventLoop()
     // answer: nothing, reweight function depends only on T1 T2
     // TODO: should T1 and T2 be shifted by systematic?
 
-    // TODO: not required
-    if(*nElectrons != 2) return;
+
+    // TODO: energy degratation systematic
 
     // cut both electrons > 300 keV
     if(_energy_cut_enable_)
@@ -128,8 +152,6 @@ void SubAnalysis::EventLoop()
         if(el_energy_1 < 0.3) return;
     }
 
-    Double_t T1{*trueT1 / bb_Q};
-    Double_t T2{*trueT2 / bb_Q};
 
     // ReWeight = baseline 0.0, ReWeight2 = baseline = 0.382
     Double_t weight{ReWeight2(T1, T2, epsilon_31, h_nEqNull, h_nEqTwo, psiN0, psiN2, "true")};

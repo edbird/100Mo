@@ -27,6 +27,12 @@ SubAnalysis::SubAnalysis
     , systematic_energy_mult_enable{systematic_energy_mult_enable}
     , systematic_energy_offset{systematic_energy_offset}
     , systematic_efficiency{systematic_efficiency}
+    
+    , energy_calibration_a{1.0}
+    , energy_calibration_b{0.0}
+
+    , g_energy_correction{nullptr}
+    , m_mode{MODE_FLAG::MODE_UNDEFINED}
 
     , nElectrons{nElectrons}
     , trueT1{trueT1}
@@ -154,6 +160,16 @@ SubAnalysis::~SubAnalysis()
 
 }
 
+
+void SubAnalysis::SetMode(const MODE_FLAG mode)
+{
+    m_mode = mode;
+}
+
+void SubAnalysis::Set_g_energy_correction(TGraphErrors* const g_energy_correction)
+{
+    this->g_energy_correction = g_energy_correction;
+}
 
 void SubAnalysis::SetBaselineHistoPointer(TH1D* const histo_p)
 {

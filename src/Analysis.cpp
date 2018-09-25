@@ -25,6 +25,18 @@ Analysis::Analysis(const std::string& filename, const std::string& output_filena
     , systematic_efficiency{1.0}
     , systematic_efficiency_high{1.0}
     , systematic_efficiency_low{1.0}
+
+    , energy_calibration_a{1.0}
+    , energy_calibration_b{0.0}
+    , energy_calibration_Bi207_EC_1{481.7}
+    , energy_calibration_Bi207_EC_2{975.7}
+    , energy_calibration_Bi207_EC_measured_1{481.7}
+    , energy_calibration_Bi207_EC_measured_2{975.7}
+
+    , f_energy_correction{nullptr}
+    , g_energy_correction{nullptr}
+    , m_mode{MODE_FLAG::MODE_UNDEFINED}
+
     , f{nullptr}
     , t{nullptr}
     , num_bins{40}
@@ -87,6 +99,22 @@ Analysis::Analysis(const std::string& filename, const std::string& output_filena
     , _subanalysis_systematic_high_{nullptr}
 {
 
+    // load energy correction data
+    // NOTE: Only to degrade MC to match data
+    //       DO NOT USE ON DATA
+    f_energy_correction = new TFile("Correction_Birks_Cerenkov_avec_systematiques.root");
+    if(f_energy_correction->IsOpen())
+    {
+        g_energy_correction = (TGraphErrors*)f_energy_correction->Get("Graph");
+    }
+    else
+    {
+        std::cerr << "Error: Could not open Correction_Birks_Cerenkov_avec_systematiques.root" << std::endl;
+        throw "Correction_Birks_Cerenkov_avec_systematiques.root";
+    }
+
+    // default to MC mode
+    m_mode = MODE_FLAG::MODE_MC;
 }
 
 

@@ -5,12 +5,14 @@
 #include "SensitivityRecord.hpp"
 #include "CanvasFactory.hpp"
 #include "SubAnalysis.hpp"
+#include "Flag.hpp"
 
 
 #include "TMath.h"
 #include "TRandom3.h"
 #include "TCanvas.h"
 #include "TGraph.h"
+#include "TGraphErrors.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TF1.h"
@@ -65,7 +67,21 @@ class SubAnalysis
 
     void ChiSquare_BaselineNoSystematic();
     
+
+    ////////////////////////////////////////////////////////////////////////////
+    // CALIBRATION FUNCTIONS
+    ////////////////////////////////////////////////////////////////////////////
     
+    void SetEnergyCalibrationConstants(const Double_t a, const Double_t b)
+    {
+        energy_calibration_a = a;
+        energy_calibration_b = b;
+    }
+
+    void Set_g_energy_correction(TGraphErrors* const);
+    void SetMode(const MODE_FLAG);
+
+
     ////////////////////////////////////////////////////////////////////////////
     // FLAG FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////
@@ -141,6 +157,23 @@ class SubAnalysis
     bool systematic_energy_mult_enable;
     Double_t systematic_energy_offset; 
     Double_t systematic_efficiency; 
+
+    // optical correction
+    
+    // energy calibration, Bi 207
+    Double_t energy_calibration_a;
+    Double_t energy_calibration_b;
+
+    // moved to Analysis
+    //Double_t energy_calibration_Bi207_EC_1; // expected Electron Capture peak 1 (keV)
+    //Double_t energy_calibration_Bi207_EC_2; // expected Electron Capture peak 2 (keV)
+    //Double_t energy_calibration_Bi207_EC_measured_1; // measured EC peak 1 (keV)
+    //Double_t energy_calibration_Bi207_EC_measured_2; // measured EC peak 2 (keV)
+
+    // energy correction
+    // NOTE: FOR MC ONLY, DO NOT APPLY TO DATA
+    TGraphErrors *g_energy_correction;
+    MODE_FLAG m_mode;
     
     // 0.0 MeV to 4.0 MeV = 4.0 MeV range
     // num_bins keV bin width: 4.0 MeV / 0.1 MeV = 40 bins
