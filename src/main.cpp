@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
     #if 0
         analysis.SetSystematicEnergyOffset(0.003, -0.003); // 0.003 MeV = 3 keV
     #endif
-    #if 1
+    #if 0
         analysis.SetSystematicEfficiency(1.0 + 0.05, 1.0 - 0.05);
     #endif
     // Notes: to avoid problem described below, use energy mulitplier variable
@@ -186,6 +186,13 @@ int main(int argc, char* argv[])
     // track all 3 datasets!
     // SOLUTION: introduce a flag to enable/disable the systematic energy
     // multiplier
+    // NOTE: added a new enable/disable flag for energy correction systematic
+    // because this is not a numerical value, values used in systematic shift
+    // are taken from TGraph constructed from TGraphErrors
+
+    #if 1
+        analysis.SetEnergyCorrectionSystematicEnabled(true);
+    #endif
 
     // set energy calibration constants
     analysis.SetEnergyCalibrationPoints(482.0, 976.0);

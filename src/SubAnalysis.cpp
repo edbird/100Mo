@@ -27,11 +27,14 @@ SubAnalysis::SubAnalysis
     , systematic_energy_mult_enable{systematic_energy_mult_enable}
     , systematic_energy_offset{systematic_energy_offset}
     , systematic_efficiency{systematic_efficiency}
+    , b_energy_correction_systematic_enabled{false}
     
     , energy_calibration_a{1.0}
     , energy_calibration_b{0.0}
 
     , g_energy_correction{nullptr}
+    , g_energy_correction_systematic_high{nullptr}
+    , g_energy_correction_systematic_low{nullptr}
     , m_mode{MODE_FLAG::MODE_UNDEFINED}
 
     , nElectrons{nElectrons}
@@ -161,15 +164,59 @@ SubAnalysis::~SubAnalysis()
 }
 
 
+
+void SubAnalysis::Set_g_energy_correction(TGraphErrors* const g_energy_correction)
+{
+    this->g_energy_correction = g_energy_correction;
+
+    // TODO: move to analysis class
+    Int_t count{g_energy_correction->GetN()};
+    Double_t *p_x{new Double_t[count]};
+    Double_t *p_y_1{new Double_t[count]};
+    Double_t *p_y_2{new Double_t[count]};
+
+    // construct the systematic shifted graphs
+    for(Int_t ix{0}; ix < count; ++ ix)
+    {
+        Double_t x, y;
+        g_energy_correction->GetPoint(ix, x, y);
+        Double_t ye{g_energy_correction->GetErrorY(ix)};
+        p_x[ix] = x;
+        p_y_1[ix] = y + ye;
+        p_y_2[ix] = y - ye;
+    }
+
+    g_energy_correction_systematic_high = new TGraph(count, p_x, p_y_1);
+    g_energy_correction_systematic_low = new TGraph(count, p_x, p_y_2);
+
+    delete p_x;
+    delete p_y_1;
+    delete p_y_2;
+}
+
 void SubAnalysis::SetMode(const MODE_FLAG mode)
 {
     m_mode = mode;
 }
 
-void SubAnalysis::Set_g_energy_correction(TGraphErrors* const g_energy_correction)
+void SubAnalysis::SetEnergyCorrectionSystematicMode(const Int_t mode)
 {
-    this->g_energy_correction = g_energy_correction;
+    if(mode == 0 || mode == 1 || mode == -1)
+    {
+        m_energy_correction_systematic_mode = mode;
+    }
+    else
+    {
+        std::cerr << "Error: Invalid mode in SetEnergyCorrectionSystematicMode()" << std::endl;
+        throw "SetEnergyCorrectionSystematicMode()";
+    }
 }
+
+void SubAnalysis::SetEnergyCorrectionSystematicEnabled(const bool flag)
+{
+    b_energy_correction_systematic_enabled = flag;
+}
+
 
 void SubAnalysis::SetBaselineHistoPointer(TH1D* const histo_p)
 {

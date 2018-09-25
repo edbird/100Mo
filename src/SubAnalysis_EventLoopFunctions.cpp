@@ -103,9 +103,42 @@ void SubAnalysis::EventLoop()
     // if MC apply energy degradation (correction)
     if(m_mode == MODE_FLAG::MODE_MC)
     {
-        Double_t visible_true_ratio_1{g_energy_correction->Eval(T1)};
-        Double_t visible_true_ratio_2{g_energy_correction->Eval(T2)};
 
+        Double_t visible_true_ratio_1{1.0};
+        Double_t visible_true_ratio_2{1.0};
+        
+        if(b_energy_correction_systematic_enabled == true)
+        {
+            // if energy correction systematic is enabled, choose
+            // energy correction value depending on which subanalysis
+            // class this is
+            // 0 is default
+            // 1 is high systematic
+            // -1 is low systematic
+            if(m_energy_correction_systematic_mode == 0)
+            {
+                visible_true_ratio_1 = g_energy_correction->Eval(T1);
+                visible_true_ratio_2 = g_energy_correction->Eval(T2);
+            }
+            else if(m_energy_correction_systematic_mode == 1)
+            {
+                visible_true_ratio_1 = g_energy_correction_systematic_high->Eval(T1);
+                visible_true_ratio_2 = g_energy_correction_systematic_high->Eval(T2);
+            }
+            else if(m_energy_correction_systematic_mode == -1)
+            {
+                visible_true_ratio_1 = g_energy_correction_systematic_low->Eval(T1);
+                visible_true_ratio_2 = g_energy_correction_systematic_low->Eval(T2);
+            }
+        }
+        else
+        {
+            // if systematics for energy correction are disabled...
+            visible_true_ratio_1 = g_energy_correction->Eval(T1);
+            visible_true_ratio_2 = g_energy_correction->Eval(T2);
+        }
+
+        // apply energy correction with systematics if enabled
         el_energy_0 = el_energy_0 * visible_true_ratio_1;
         el_energy_1 = el_energy_0 * visible_true_ratio_2;
     }

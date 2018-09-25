@@ -25,6 +25,7 @@ Analysis::Analysis(const std::string& filename, const std::string& output_filena
     , systematic_efficiency{1.0}
     , systematic_efficiency_high{1.0}
     , systematic_efficiency_low{1.0}
+    , b_energy_correction_systematic_enabled{false}
 
     , energy_calibration_a{1.0}
     , energy_calibration_b{0.0}
@@ -371,6 +372,11 @@ void Analysis::SetSystematicEfficiency(const Double_t high, const Double_t low)
 {
     systematic_efficiency_low = low;
     systematic_efficiency_high = high;
+}
+
+void Analysis::SetEnergyCorrectionSystematicEnabled(const bool flag)
+{
+    b_energy_correction_systematic_enabled = flag;
 }
 
 // TODO: add new functions here, for systematics

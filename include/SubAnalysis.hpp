@@ -81,6 +81,9 @@ class SubAnalysis
     void Set_g_energy_correction(TGraphErrors* const);
     void SetMode(const MODE_FLAG);
 
+    void SetEnergyCorrectionSystematicMode(const Int_t);
+    void SetEnergyCorrectionSystematicEnabled(const bool);
+
 
     ////////////////////////////////////////////////////////////////////////////
     // FLAG FUNCTIONS
@@ -158,8 +161,6 @@ class SubAnalysis
     Double_t systematic_energy_offset; 
     Double_t systematic_efficiency; 
 
-    // optical correction
-    
     // energy calibration, Bi 207
     Double_t energy_calibration_a;
     Double_t energy_calibration_b;
@@ -173,7 +174,14 @@ class SubAnalysis
     // energy correction
     // NOTE: FOR MC ONLY, DO NOT APPLY TO DATA
     TGraphErrors *g_energy_correction;
+    TGraph *g_energy_correction_systematic_high;
+    TGraph *g_energy_correction_systematic_low;
     MODE_FLAG m_mode;
+    Int_t m_energy_correction_systematic_mode;
+    //  0 = none,
+    //  1 = systematic positive (add uncertainties)
+    // -1 = systematic negative (subtract uncertainties)
+    bool b_energy_correction_systematic_enabled;
     
     // 0.0 MeV to 4.0 MeV = 4.0 MeV range
     // num_bins keV bin width: 4.0 MeV / 0.1 MeV = 40 bins

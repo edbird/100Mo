@@ -110,14 +110,25 @@ void Analysis::InitEventLoopHistogram()
     _subanalysis_.push_back(_subanalysis_systematic_low_);
     _subanalysis_.push_back(_subanalysis_systematic_high_);
  
+    // set mode for energy correction systematic 
+    _subanalysis_systematic_default_->SetEnergyCorrectionSystematicMode(0);
+    _subanalysis_systematic_low_->SetEnergyCorrectionSystematicMode(-1);
+    _subanalysis_systematic_high_->SetEnergyCorrectionSystematicMode(1);
 
     // set mode
     for(std::vector<SubAnalysis*>::iterator it{_subanalysis_.begin()}; it != _subanalysis_.end(); ++ it)
     {
+        // MC / DATA flag
         (*it)->SetMode(m_mode);
 
         // set g_energy_correction, regardless if used
+        // data for energy degradation
         (*it)->Set_g_energy_correction(g_energy_correction);
+        // TODO: move g_energy_correction_[high/low] (systematic graph data) to here
+        // do not need copies of them for each sub analysis class
+
+        // enable/disable energy correction systematic
+        (*it)->SetEnergyCorrectionSystematicEnabled(b_energy_correction_systematic_enabled);
     }
 
 

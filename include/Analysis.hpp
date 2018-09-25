@@ -55,6 +55,7 @@ class Analysis
     void SetSystematicEnergyOffset(const Double_t, const Double_t);
     void SetSystematicEfficiency(const Double_t, const Double_t);
 
+    void SetEnergyCorrectionSystematicEnabled(const bool);
 
     void SetEpsilon31(const Double_t);
     void AddEpsilonValue(const Double_t epsilon);
@@ -226,6 +227,7 @@ class Analysis
     TFile *f_energy_correction;
     TGraphErrors *g_energy_correction;
     MODE_FLAG m_mode; // simulation (MC) or real (DATA)
+    bool b_energy_correction_systematic_enabled;
 
     TFile *f;
     TTree *t;
