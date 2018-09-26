@@ -109,6 +109,8 @@ void SubAnalysis::EventLoop()
         
         if(b_energy_correction_systematic_enabled == true)
         {
+            //std::cout << "energy correction systematic is enabled" << std::endl;
+
             // if energy correction systematic is enabled, choose
             // energy correction value depending on which subanalysis
             // class this is
@@ -117,26 +119,30 @@ void SubAnalysis::EventLoop()
             // -1 is low systematic
             if(m_energy_correction_systematic_mode == 0)
             {
-                visible_true_ratio_1 = g_energy_correction->Eval(T1);
-                visible_true_ratio_2 = g_energy_correction->Eval(T2);
+                visible_true_ratio_1 = g_energy_correction->Eval(1000.0 * T1);
+                visible_true_ratio_2 = g_energy_correction->Eval(1000.0 * T2);
             }
             else if(m_energy_correction_systematic_mode == 1)
             {
-                visible_true_ratio_1 = g_energy_correction_systematic_high->Eval(T1);
-                visible_true_ratio_2 = g_energy_correction_systematic_high->Eval(T2);
+                visible_true_ratio_1 = g_energy_correction_systematic_high->Eval(1000.0 * T1);
+                visible_true_ratio_2 = g_energy_correction_systematic_high->Eval(1000.0 * T2);
             }
             else if(m_energy_correction_systematic_mode == -1)
             {
-                visible_true_ratio_1 = g_energy_correction_systematic_low->Eval(T1);
-                visible_true_ratio_2 = g_energy_correction_systematic_low->Eval(T2);
+                visible_true_ratio_1 = g_energy_correction_systematic_low->Eval(1000.0 * T1);
+                visible_true_ratio_2 = g_energy_correction_systematic_low->Eval(1000.0 * T2);
             }
         }
         else
         {
+            //std::cout << "energy correction systematic is disabled" << std::endl;
+
             // if systematics for energy correction are disabled...
-            visible_true_ratio_1 = g_energy_correction->Eval(T1);
-            visible_true_ratio_2 = g_energy_correction->Eval(T2);
+            visible_true_ratio_1 = g_energy_correction->Eval(1000.0 * T1);
+            visible_true_ratio_2 = g_energy_correction->Eval(1000.0 * T2);
         }
+
+        //std::cout << "visible_true_ratio = " << visible_true_ratio_1 << ", " << visible_true_ratio_2 << std::endl;
 
         // apply energy correction with systematics if enabled
         el_energy_0 = el_energy_0 * visible_true_ratio_1;
@@ -185,6 +191,14 @@ void SubAnalysis::EventLoop()
         if(el_energy_1 < 0.3) return;
     }
 
+
+    // NOTE: more logical to set variables
+    // weight_1, weight_2
+    // for baseline and reweighted (now "baseline" and "test" / "universe")
+    // then fill each histogram with each different weight
+    // ?
+    // NOTE: why would we reweight at all, why not use the decay rates from the
+    // theorists directly?
 
     // ReWeight = baseline 0.0, ReWeight2 = baseline = 0.382
     Double_t weight{ReWeight2(T1, T2, epsilon_31, h_nEqNull, h_nEqTwo, psiN0, psiN2, "true")};

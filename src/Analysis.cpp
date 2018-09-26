@@ -228,7 +228,7 @@ void Analysis::MakeChiSquareType1()
     c_systematic->GetPad(0)->SetTicks(1, 2);
     //g_4->GetYaxis()->SetRangeUser(0.0, 6.0e1); // energy systematic m
     //g_4->GetYaxis()->SetRangeUser(0.0, 1.5e3); // energy systematic c
-    g_4->GetYaxis()->SetRangeUser(0.0, 8.0e3); // efficiency systematic k
+    g_4->GetYaxis()->SetRangeUser(0.0, 4.0e3); // efficiency systematic k
     g_4->Draw("AL");
     g_5->Draw("same");
     g_6->Draw("same");
