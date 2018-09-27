@@ -105,8 +105,9 @@ Double_t ReWeight2(const Double_t T1, const Double_t T2, const Double_t epsilon,
 {
 
     // baseline epsilon value
-    Double_t epsilon_baseline{0.368};
+    //Double_t epsilon_baseline{0.368};
     //Double_t epsilon_baseline{0.1};
+    Double_t epsilon_baseline{1.0};
 
     // TODO: NO INTERPOLATION DONE YET
 
